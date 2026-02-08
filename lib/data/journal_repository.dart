@@ -1,0 +1,102 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'journal_entry.dart';
+
+/// Fetches and mutates journal entries via Supabase.
+class JournalRepository {
+  JournalRepository([SupabaseClient? client])
+      : _client = client ?? Supabase.instance.client;
+
+  final SupabaseClient _client;
+
+  String? get _userId => _client.auth.currentUser?.id;
+
+  Future<List<JournalEntry>> getEntries({
+    int limit = 50,
+    int offset = 0,
+    DateTime? from,
+    DateTime? to,
+  }) async {
+    final uid = _userId;
+    if (uid == null) return [];
+    var query = _client
+        .from('journal_entries')
+        .select()
+        .eq('user_id', uid);
+    if (from != null) {
+      query = query.gte('date', from.toIso8601String().split('T').first);
+    }
+    if (to != null) {
+      query = query.lte('date', to.toIso8601String().split('T').first);
+    }
+    final res = await query
+        .order('date', ascending: false)
+        .range(offset, offset + limit - 1);
+    return (res as List).map((e) => JournalEntry.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<JournalEntry?> getEntry(String id) async {
+    final uid = _userId;
+    if (uid == null) return null;
+    final res = await _client
+        .from('journal_entries')
+        .select()
+        .eq('id', id)
+        .eq('user_id', uid)
+        .maybeSingle();
+    if (res == null) return null;
+    return JournalEntry.fromJson(res as Map<String, dynamic>);
+  }
+
+  Future<JournalEntry?> createEntry({
+    required DateTime date,
+    required String text,
+    required List<JournalEntryAsset> assets,
+    String? childId,
+  }) async {
+    final uid = _userId;
+    if (uid == null) return null;
+    final payload = {
+      'user_id': uid,
+      'date': date.toIso8601String().split('T').first,
+      'text': text,
+      'assets': assets.map((a) => a.toJson()).toList(),
+      if (childId != null) 'child_id': childId,
+    };
+    final res = await _client.from('journal_entries').insert(payload).select().single();
+    return JournalEntry.fromJson(res as Map<String, dynamic>);
+  }
+
+  Future<JournalEntry?> updateEntry(
+    String id, {
+    required DateTime date,
+    required String text,
+    required List<JournalEntryAsset> assets,
+    String? childId,
+  }) async {
+    final uid = _userId;
+    if (uid == null) return null;
+    final payload = {
+      'date': date.toIso8601String().split('T').first,
+      'text': text,
+      'assets': assets.map((a) => a.toJson()).toList(),
+      'child_id': childId,
+    };
+    final res = await _client
+        .from('journal_entries')
+        .update(payload)
+        .eq('id', id)
+        .eq('user_id', uid)
+        .select()
+        .maybeSingle();
+    if (res == null) return null;
+    return JournalEntry.fromJson(res as Map<String, dynamic>);
+  }
+
+  Future<bool> deleteEntry(String id) async {
+    final uid = _userId;
+    if (uid == null) return false;
+    await _client.from('journal_entries').delete().eq('id', id).eq('user_id', uid);
+    return true;
+  }
+}
