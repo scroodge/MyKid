@@ -32,13 +32,42 @@ dependencies:
   uuid: ^4.5.1
   flutter_dotenv: ^5.2.1
   share_plus: ^10.0.0
+  shared_preferences: ^2.3.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
   assets:
     - .env
+    - assets/brand/app_icon/
+    - assets/brand/logo/
+    - assets/brand/illustrations/
+    - assets/fonts/Manrope/
+    - assets/fonts/Inter/
+  fonts:
+    - family: Manrope
+      fonts:
+        - asset: assets/fonts/Manrope/Manrope-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Manrope/Manrope-Bold.ttf
+          weight: 700
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter/Inter-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Inter/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter/Inter-SemiBold.ttf
+          weight: 600
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/brand/app_icon/app_icon.png"
+  adaptive_icon_foreground: "assets/brand/app_icon/adaptive_foreground.png"
+  adaptive_icon_background: "#F4EFEA"

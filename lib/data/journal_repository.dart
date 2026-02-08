@@ -16,6 +16,7 @@ class JournalRepository {
     int offset = 0,
     DateTime? from,
     DateTime? to,
+    String? childId,
   }) async {
     final uid = _userId;
     if (uid == null) return [];
@@ -23,6 +24,9 @@ class JournalRepository {
         .from('journal_entries')
         .select()
         .eq('user_id', uid);
+    if (childId != null) {
+      query = query.eq('child_id', childId);
+    }
     if (from != null) {
       query = query.gte('date', from.toIso8601String().split('T').first);
     }

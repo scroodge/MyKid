@@ -28,6 +28,33 @@ class Child {
         'updated_at': updatedAt.toIso8601String(),
       };
 
+  /// Age as "X лет Y мес Z дн" or "Y мес Z дн" for under 1 year. "—" if no dateOfBirth.
+  String get ageDescription {
+    final dob = dateOfBirth;
+    if (dob == null) return '—';
+    final now = DateTime.now();
+    if (now.isBefore(dob)) return '—';
+    int years = now.year - dob.year;
+    int months = now.month - dob.month;
+    int days = now.day - dob.day;
+    if (days < 0) {
+      months--;
+      final daysInPrevMonth = DateTime(now.year, now.month, 0).day;
+      days += daysInPrevMonth - dob.day + now.day;
+    }
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+    if (years > 0) {
+      return '$years лет $months мес $days дн';
+    }
+    if (months > 0) {
+      return '$months мес $days дн';
+    }
+    return '$days дн';
+  }
+
   static Child fromJson(Map<String, dynamic> json) {
     return Child(
       id: json['id'] as String? ?? '',
