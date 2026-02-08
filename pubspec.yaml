@@ -23,7 +23,7 @@ dependencies:
   flutter_secure_storage: ^9.2.2
   # Media & EXIF
   image_picker: ^1.1.2
-  file_picker: ^8.1.4
+  file_picker: ^10.3.10
   exif: ^3.1.1
   geocoding: ^3.0.0
   # UI
@@ -46,7 +46,6 @@ flutter:
     - .env
     - assets/brand/app_icon/
     - assets/brand/logo/
-    - assets/brand/illustrations/
     - assets/fonts/Manrope/
     - assets/fonts/Inter/
   fonts:
