@@ -1,9 +1,13 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:cross_file/cross_file.dart';
 
 import '../../core/immich_client.dart';
 import '../../core/immich_service.dart';
@@ -42,8 +46,10 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   bool _saving = false;
   bool _uploading = false;
   String? _error;
-  /// True = full-screen view with overlay; false = edit form. New entries start in edit mode.
+  /// True = view mode (preview or fullscreen); false = edit form.
   bool _viewMode = false;
+  /// In view mode: 'preview' = large preview + overlay; 'fullscreen' = original + Share/Back.
+  String _viewModeSubState = 'preview';
   int _viewModePageIndex = 0;
   final PageController _viewModePageController = PageController();
   /// In-memory bytes for just-added photos (preview before Immich thumbnail is ready; iOS temp files disappear)
@@ -259,18 +265,24 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   }
 
   Widget _buildViewMode(BuildContext context) {
+    if (_viewModeSubState == 'fullscreen') return _buildFullscreenView(context);
+    return _buildPreviewView(context);
+  }
+
+  /// Большое превью + подпись снизу. Тап по фото → открыть оригинал.
+  Widget _buildPreviewView(BuildContext context) {
     final hasPhotos = _assets.isNotEmpty;
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Entry', style: TextStyle(color: Colors.white)),
+        title: const Text('Запись', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
-            tooltip: 'Edit',
+            tooltip: 'Редактировать',
             onPressed: () => setState(() => _viewMode = false),
           ),
         ],
@@ -290,40 +302,18 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                   itemBuilder: (context, index) {
                     final a = _assets[index];
                     final localBytes = _localPreviewBytes[a.immichAssetId];
-                    if (localBytes != null) {
-                      return Image.memory(localBytes, fit: BoxFit.cover);
-                    }
-                    // Загружаем полное фото через наш HTTP-клиент (с ключом) — так гарантированно работает
-                    return FutureBuilder<List<int>?>(
-                      future: client.downloadAsset(a.immichAssetId),
-                      builder: (context, snap) {
-                        if (snap.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
-                        }
-                        final bytes = snap.data;
-                        if (bytes != null && bytes.isNotEmpty) {
-                          return Image.memory(Uint8List.fromList(bytes), fit: BoxFit.cover);
-                        }
-                        return Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.broken_image, size: 64, color: Colors.white54),
-                              const SizedBox(height: 8),
-                              const Text('Не загрузилось', style: TextStyle(color: Colors.white70, fontSize: 14)),
-                              if (snap.hasError)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
-                                  child: SelectableText(
-                                    snap.error.toString(),
-                                    style: const TextStyle(color: Colors.white38, fontSize: 10),
-                                    maxLines: 2,
-                                  ),
-                                ),
-                            ],
-                          ),
-                        );
-                      },
+                    final imageUrl = client.getAssetThumbnailUrl(a.immichAssetId, size: 'preview');
+                    return GestureDetector(
+                      onTap: () => setState(() => _viewModeSubState = 'fullscreen'),
+                      child: localBytes != null
+                          ? Image.memory(localBytes, fit: BoxFit.cover)
+                          : CachedNetworkImage(
+                              imageUrl: imageUrl,
+                              httpHeaders: {'x-api-key': client.apiKey},
+                              fit: BoxFit.cover,
+                              placeholder: (_, __) => const Center(child: CircularProgressIndicator()),
+                              errorWidget: (_, __, ___) => const Icon(Icons.broken_image, size: 64, color: Colors.white54),
+                            ),
                     );
                   },
                 )
@@ -354,25 +344,9 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                           const SizedBox(height: 8),
                           Text(_textController.text.trim(), style: const TextStyle(color: Colors.white, fontSize: 16)),
                         ],
-                        if (hasPhotos && client != null && _assets.isNotEmpty) ...[
-                          const SizedBox(height: 12),
-                          TextButton.icon(
-                            icon: const Icon(Icons.copy, size: 18, color: Colors.white70),
-                            label: const Text('Скопировать путь', style: TextStyle(color: Colors.white70)),
-                            onPressed: () {
-                              final index = _viewModePageIndex.clamp(0, _assets.length - 1);
-                              final path = client.getAssetDownloadUrl(_assets[index].immichAssetId);
-                              Clipboard.setData(ClipboardData(text: path));
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Путь скопирован. Открыть по ссылке без логина обычно нельзя — Immich требует API-ключ.'),
-                                    duration: Duration(seconds: 4),
-                                  ),
-                                );
-                              }
-                            },
-                          ),
+                        if (hasPhotos) ...[
+                          const SizedBox(height: 8),
+                          Text('Нажмите на фото для просмотра в полном размере', style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12)),
                         ],
                       ],
                     ),
@@ -384,6 +358,94 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
         },
       ),
     );
+  }
+
+  /// Оригинал фото + кнопки Поделиться и Назад (назад — к превью).
+  Widget _buildFullscreenView(BuildContext context) {
+    final hasPhotos = _assets.isNotEmpty;
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: const Text('Фото', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => setState(() => _viewModeSubState = 'preview'),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share),
+            tooltip: 'Поделиться',
+            onPressed: hasPhotos ? () => _shareCurrentPhoto() : null,
+          ),
+        ],
+      ),
+      body: hasPhotos
+          ? FutureBuilder<ImmichClient?>(
+              future: _immich.getClient(),
+              builder: (context, snapshot) {
+                final client = snapshot.data;
+                if (client == null) return const Center(child: CircularProgressIndicator());
+                return PageView.builder(
+                  controller: _viewModePageController,
+                  onPageChanged: (index) => setState(() => _viewModePageIndex = index),
+                  itemCount: _assets.length,
+                  itemBuilder: (context, index) {
+                    final a = _assets[index];
+                    final localBytes = _localPreviewBytes[a.immichAssetId];
+                    if (localBytes != null) {
+                      return Image.memory(localBytes, fit: BoxFit.contain);
+                    }
+                    return FutureBuilder<List<int>?>(
+                      future: client.downloadAsset(a.immichAssetId),
+                      builder: (context, snap) {
+                        if (snap.connectionState == ConnectionState.waiting) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+                        final bytes = snap.data;
+                        if (bytes != null && bytes.isNotEmpty) {
+                          return Image.memory(Uint8List.fromList(bytes), fit: BoxFit.contain);
+                        }
+                        return Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.broken_image, size: 64, color: Colors.white54),
+                              const SizedBox(height: 8),
+                              const Text('Не загрузилось', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            )
+          : const SizedBox.shrink(),
+    );
+  }
+
+  Future<void> _shareCurrentPhoto() async {
+    if (_assets.isEmpty) return;
+    final client = await _immich.getClient();
+    if (client == null) return;
+    final index = _viewModePageIndex.clamp(0, _assets.length - 1);
+    final assetId = _assets[index].immichAssetId;
+    final bytes = await client.downloadAsset(assetId);
+    if (bytes == null || bytes.isEmpty || !mounted) return;
+    final dir = await getTemporaryDirectory();
+    final file = File('${dir.path}/share_${assetId.substring(0, 8)}.jpg');
+    await file.writeAsBytes(bytes);
+    try {
+      await Share.shareXFiles([XFile(file.path)]);
+    } finally {
+      try {
+        await file.delete();
+      } catch (_) {}
+    }
   }
 
   Widget _buildEditMode(BuildContext context) {
