@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -110,7 +112,15 @@ class _JournalListScreenState extends State<JournalListScreen> {
         setState(() => _creating = false);
         return;
       }
-      final result = await _immich.uploadFromXFile(x);
+      Uint8List? bytes;
+      try { bytes = await x.readAsBytes(); } catch (_) {}
+      if (bytes == null || bytes.isEmpty) {
+        setState(() => _creating = false);
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not read image')));
+        return;
+      }
+      final filename = x.name.isEmpty ? 'image.jpg' : x.name;
+      final result = await _immich.uploadFromBytes(bytes, filename);
       if (!mounted) {
         setState(() => _creating = false);
         return;
@@ -121,6 +131,7 @@ class _JournalListScreenState extends State<JournalListScreen> {
           date: DateTime.now(),
           assets: [JournalEntryAsset(immichAssetId: result.id!)],
           location: null,
+          previewBytes: {result.id!: bytes},
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -130,17 +141,24 @@ class _JournalListScreenState extends State<JournalListScreen> {
       return;
     }
 
-    // Gallery: pick image(s), read EXIF from first, upload all, open with date & location from first
+    // Gallery: pick image(s), read EXIF from first, read bytes, upload, open with date & location from first
     final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 95);
     if (picked == null || !mounted) {
       setState(() => _creating = false);
       return;
     }
+    Uint8List? bytes;
+    try { bytes = await picked.readAsBytes(); } catch (_) {}
+    if (bytes == null || bytes.isEmpty) {
+      setState(() => _creating = false);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not read image')));
+      return;
+    }
     final meta = await readPhotoMetadata(picked.path);
     final date = meta.date ?? DateTime.now();
     final location = meta.location;
-
-    final result = await _immich.uploadFromXFile(picked);
+    final filename = picked.name.isEmpty ? 'image.jpg' : picked.name;
+    final result = await _immich.uploadFromBytes(bytes, filename);
     if (!mounted) {
       setState(() => _creating = false);
       return;
@@ -151,6 +169,7 @@ class _JournalListScreenState extends State<JournalListScreen> {
         date: date,
         assets: [JournalEntryAsset(immichAssetId: result.id!)],
         location: location,
+        previewBytes: {result.id!: bytes},
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -163,6 +182,7 @@ class _JournalListScreenState extends State<JournalListScreen> {
     required DateTime date,
     required List<JournalEntryAsset> assets,
     String? location,
+    Map<String, Uint8List>? previewBytes,
   }) async {
     final entry = JournalEntry(
       id: '',
@@ -176,7 +196,7 @@ class _JournalListScreenState extends State<JournalListScreen> {
     );
     final result = await Navigator.of(context).push<Object?>(
       MaterialPageRoute(
-        builder: (context) => JournalEntryScreen(entry: entry, isNew: true),
+        builder: (context) => JournalEntryScreen(entry: entry, isNew: true, initialPreviewBytes: previewBytes),
       ),
     );
     if (result != null) _load();

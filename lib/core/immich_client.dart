@@ -143,6 +143,11 @@ class ImmichClient {
     return '$baseUrl/api/assets/$assetId/thumbnail?${q.query}';
   }
 
+  /// Full-size asset URL (for viewing, not thumbnail). Use with same httpHeaders (x-api-key).
+  String getAssetDownloadUrl(String assetId) {
+    return '$baseUrl/api/assets/$assetId/download';
+  }
+
   /// Thumbnail URL with API key for authenticated request (if server requires key in query).
   String getAssetThumbnailUrlWithKey(String assetId, {String format = 'JPEG'}) {
     final q = Uri(queryParameters: {'format': format, 'key': apiKey});

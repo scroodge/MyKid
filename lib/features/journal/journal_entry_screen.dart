@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
@@ -14,10 +16,13 @@ class JournalEntryScreen extends StatefulWidget {
     super.key,
     required this.entry,
     this.isNew = false,
+    this.initialPreviewBytes,
   });
 
   final JournalEntry entry;
   final bool isNew;
+  /// Preview bytes for assets (e.g. when opening after "From camera" from list)
+  final Map<String, Uint8List>? initialPreviewBytes;
 
   @override
   State<JournalEntryScreen> createState() => _JournalEntryScreenState();
@@ -36,6 +41,10 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   bool _saving = false;
   bool _uploading = false;
   String? _error;
+  /// True = full-screen view with overlay; false = edit form. New entries start in edit mode.
+  bool _viewMode = false;
+  /// In-memory bytes for just-added photos (preview before Immich thumbnail is ready; iOS temp files disappear)
+  final Map<String, Uint8List> _localPreviewBytes = {};
 
   @override
   void initState() {
@@ -45,6 +54,8 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
     _date = widget.entry.date;
     _assets = List.from(widget.entry.assets);
     _selectedChildId = widget.entry.childId;
+    if (widget.initialPreviewBytes != null) _localPreviewBytes.addAll(widget.initialPreviewBytes!);
+    _viewMode = !widget.isNew;
     _loadChildren();
   }
 
@@ -55,7 +66,30 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
     setState(() {
       _children = list;
       if (_selectedChildId != null && !selectedExists) _selectedChildId = null;
+      if (list.length == 1 && _selectedChildId == null) _selectedChildId = list.first.id;
     });
+    // When opening from gallery/camera (list): add current assets to selected child's album immediately
+    if (!mounted) return;
+    if (_selectedChildId != null && _assets.isNotEmpty) {
+      Child? child;
+      for (final c in _children) {
+        if (c.id == _selectedChildId) { child = c; break; }
+      }
+      for (final a in _assets) {
+        if (child == null) break;
+        await _immich.addAssetToChildAlbum(
+          child,
+          a.immichAssetId,
+          onAlbumCreated: (albumId) async {
+            await _childrenRepo.update(child!.id, immichAlbumId: albumId);
+            if (mounted) await _loadChildren();
+          },
+        );
+        for (final c in _children) {
+          if (c.id == _selectedChildId) { child = c; break; }
+        }
+      }
+    }
   }
 
   @override
@@ -99,12 +133,27 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
     final picker = ImagePicker();
     final x = await picker.pickImage(source: source, imageQuality: 95);
     if (x == null || !mounted) return;
+    // Read bytes once while iOS temp file is still valid; use for both upload and preview
+    Uint8List? bytes;
+    try {
+      bytes = await x.readAsBytes();
+    } catch (_) {}
+    if (bytes == null || bytes.isEmpty) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not read image')));
+      return;
+    }
+    final filename = x.name.isEmpty ? 'image.jpg' : x.name;
     setState(() => _uploading = true);
-    final result = await _immich.uploadFromXFile(x);
+    final result = await _immich.uploadFromBytes(bytes, filename);
     if (mounted) {
-      setState(() => _uploading = false);
+      setState(() {
+        _uploading = false;
+        if (result.id != null) {
+          _assets = [..._assets, JournalEntryAsset(immichAssetId: result.id!)];
+          _localPreviewBytes[result.id!] = bytes!;
+        }
+      });
       if (result.id != null) {
-        setState(() => _assets = [..._assets, JournalEntryAsset(immichAssetId: result.id!)]);
         final childId = _selectedChildId;
         if (childId != null) {
           Child? child;
@@ -132,11 +181,37 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   }
 
   Future<void> _save() async {
+    if (_children.isNotEmpty && _selectedChildId == null) {
+      setState(() => _error = 'Select a child');
+      return;
+    }
     setState(() {
       _saving = true;
       _error = null;
     });
     try {
+      // Ensure all assets are in the selected child's Immich album (e.g. photo from gallery on list)
+      if (_selectedChildId != null && _assets.isNotEmpty) {
+        Child? child;
+        for (final c in _children) {
+          if (c.id == _selectedChildId) { child = c; break; }
+        }
+        for (final a in _assets) {
+          if (child == null) break;
+          await _immich.addAssetToChildAlbum(
+            child,
+            a.immichAssetId,
+            onAlbumCreated: (albumId) async {
+              await _childrenRepo.update(child!.id, immichAlbumId: albumId);
+              if (mounted) await _loadChildren();
+            },
+          );
+          // Refresh child ref after possibly creating album (so next iteration sees immichAlbumId)
+          for (final c in _children) {
+            if (c.id == _selectedChildId) { child = c; break; }
+          }
+        }
+      }
       final location = _locationController.text.trim().isEmpty ? null : _locationController.text.trim();
       if (widget.isNew) {
         final created = await _repo.createEntry(
@@ -166,11 +241,148 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   }
 
   void _removeAsset(int index) {
-    setState(() => _assets = List.from(_assets)..removeAt(index));
+    final assetId = _assets[index].immichAssetId;
+    setState(() {
+      _assets = List.from(_assets)..removeAt(index);
+      _localPreviewBytes.remove(assetId);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_viewMode) return _buildViewMode(context);
+    return _buildEditMode(context);
+  }
+
+  Widget _buildViewMode(BuildContext context) {
+    final hasPhotos = _assets.isNotEmpty;
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: const Text('Entry', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            tooltip: 'Edit',
+            onPressed: () => setState(() => _viewMode = false),
+          ),
+        ],
+      ),
+      body: FutureBuilder<ImmichClient?>(
+        future: _immich.getClient(),
+        builder: (context, snapshot) {
+          final client = snapshot.data;
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              if (hasPhotos && client != null)
+                PageView.builder(
+                  itemCount: _assets.length,
+                  itemBuilder: (context, index) {
+                    final a = _assets[index];
+                    final localBytes = _localPreviewBytes[a.immichAssetId];
+                    final imageUrl = client.getAssetDownloadUrl(a.immichAssetId);
+                    return localBytes != null
+                        ? Image.memory(localBytes, fit: BoxFit.cover)
+                        : Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              CachedNetworkImage(
+                                imageUrl: imageUrl,
+                                httpHeaders: {'x-api-key': client.apiKey},
+                                fit: BoxFit.cover,
+                                placeholder: (_, __) => const Center(child: CircularProgressIndicator()),
+                                errorWidget: (_, url, error) => Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.broken_image, size: 64, color: Colors.white54),
+                                      const SizedBox(height: 8),
+                                      Text('Не загрузилось', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                                      const SizedBox(height: 4),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                                        child: SelectableText(
+                                          url ?? imageUrl,
+                                          style: const TextStyle(color: Colors.white54, fontSize: 10),
+                                          maxLines: 3,
+                                        ),
+                                      ),
+                                      if (error != null)
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 4, left: 16, right: 16),
+                                          child: SelectableText(
+                                            error.toString(),
+                                            style: const TextStyle(color: Colors.white38, fontSize: 10),
+                                            maxLines: 2,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              // Debug: путь запроса (без ключа)
+                              Positioned(
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                child: Container(
+                                  color: Colors.black54,
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  child: SelectableText(
+                                    'DEBUG: $imageUrl',
+                                    style: const TextStyle(color: Colors.white70, fontSize: 10),
+                                    maxLines: 2,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                  },
+                )
+              else if (hasPhotos)
+                const Center(child: CircularProgressIndicator())
+              else
+                Container(color: Colors.grey.shade800, child: const Center(child: Icon(Icons.photo_library, size: 80, color: Colors.white54))),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 32),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Colors.black.withValues(alpha: 0.85)]),
+                  ),
+                  child: SafeArea(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('${_date.day}.${_date.month}.${_date.year}', style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                        if (_locationController.text.trim().isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(_locationController.text.trim(), style: const TextStyle(color: Colors.white, fontSize: 16)),
+                        ],
+                        if (_textController.text.trim().isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Text(_textController.text.trim(), style: const TextStyle(color: Colors.white, fontSize: 16)),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildEditMode(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.isNew ? 'New entry' : 'Entry'),
@@ -263,17 +475,28 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          const Text('Child (optional)', style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
-          DropdownButtonFormField<String?>(
-            value: _children.any((c) => c.id == _selectedChildId) ? _selectedChildId : null,
-            decoration: const InputDecoration(border: OutlineInputBorder()),
-            items: [
-              const DropdownMenuItem<String?>(value: null, child: Text('— None —')),
-              ..._children.map((c) => DropdownMenuItem<String?>(value: c.id, child: Text(c.name))),
-            ],
-            onChanged: (v) => setState(() => _selectedChildId = v),
-          ),
+          const Text('Child', style: TextStyle(fontWeight: FontWeight.bold)),
+          if (_children.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text('Add a child in Settings → Manage children', style: TextStyle(color: Theme.of(context).colorScheme.outline, fontSize: 13)),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _children.map((c) {
+                  final selected = _selectedChildId == c.id;
+                  return ChoiceChip(
+                    label: Text(c.name),
+                    selected: selected,
+                    onSelected: (v) => setState(() => _selectedChildId = v == true ? c.id : null),
+                  );
+                }).toList(),
+              ),
+            ),
           const SizedBox(height: 16),
           const Text('Place (optional)', style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
@@ -344,26 +567,44 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                   crossAxisCount: 3,
                   mainAxisSpacing: 8,
                   crossAxisSpacing: 8,
-                  childAspectRatio: 1,
+                  childAspectRatio: 0.85,
                   children: _assets.asMap().entries.map((e) {
-                    final url = client.getAssetThumbnailUrl(e.value.immichAssetId);
-                    return Stack(
-                      fit: StackFit.expand,
+                    final assetId = e.value.immichAssetId;
+                    final localBytes = _localPreviewBytes[assetId];
+                    final debugLabel = localBytes != null
+                        ? 'local: ${localBytes.length} bytes'
+                        : 'immich: ${assetId.length > 8 ? "${assetId.substring(0, 8)}..." : assetId}';
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        CachedNetworkImage(
-                          imageUrl: url,
-                          httpHeaders: {'x-api-key': client.apiKey},
-                          fit: BoxFit.cover,
-                          placeholder: (_, __) => const Center(child: CircularProgressIndicator()),
-                          errorWidget: (_, __, ___) => const Icon(Icons.broken_image),
-                        ),
-                        Positioned(
-                          top: 4,
-                          right: 4,
-                          child: IconButton(
-                            icon: const Icon(Icons.close, color: Colors.white, size: 20),
-                            onPressed: () => _removeAsset(e.key),
+                        Expanded(
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              localBytes != null
+                                  ? Image.memory(localBytes, fit: BoxFit.cover)
+                                  : CachedNetworkImage(
+                                      imageUrl: client.getAssetThumbnailUrl(assetId),
+                                      httpHeaders: {'x-api-key': client.apiKey},
+                                      fit: BoxFit.cover,
+                                      placeholder: (_, __) => const Center(child: CircularProgressIndicator()),
+                                      errorWidget: (_, __, ___) => const Icon(Icons.broken_image),
+                                    ),
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: IconButton(
+                                  icon: const Icon(Icons.close, color: Colors.white, size: 20),
+                                  onPressed: () => _removeAsset(e.key),
+                                ),
+                              ),
+                            ],
                           ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(debugLabel, style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.outline), maxLines: 1, overflow: TextOverflow.ellipsis),
                         ),
                       ],
                     );
