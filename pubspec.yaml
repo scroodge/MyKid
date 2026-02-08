@@ -23,6 +23,7 @@ dependencies:
   flutter_secure_storage: ^9.2.2
   # Media & EXIF
   image_picker: ^1.1.2
+  image_cropper: ^8.0.2
   file_picker: ^10.3.10
   exif: ^3.1.1
   geocoding: ^3.0.0
@@ -66,9 +67,12 @@ flutter:
         - asset: assets/fonts/Inter/Inter-SemiBold.ttf
           weight: 600
 
+# Тёмный фон — чтобы силуэт на иконке был читаемым на домашнем экране
 flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/brand/app_icon/mykid_icon_1024.png"
   adaptive_icon_foreground: "assets/brand/app_icon/mykid_icon_1024.png"
-  adaptive_icon_background: "#7A9BBE"
+  adaptive_icon_background: "#3D5A7A"
+  remove_alpha_ios: true
+  background_color_ios: "#3D5A7A"

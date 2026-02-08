@@ -232,6 +232,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     setState(() => _creating = true);
     final picker = ImagePicker();
     if (source == CreateEntrySource.camera) {
+      await ensureLocationPermissionRequested();
       final x = await picker.pickImage(source: ImageSource.camera, imageQuality: 95);
       if (x == null || !mounted) {
         setState(() => _creating = false);
@@ -248,6 +249,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         }
         return;
       }
+      String? location;
+      final meta = await readPhotoMetadataFromBytes(bytes);
+      location = meta.location;
+      if (location == null || location.isEmpty) location = await getCurrentPlaceName();
       final filename = x.name.isEmpty ? 'image.jpg' : x.name;
       final result = await _immich.uploadFromBytes(bytes, filename);
       if (!mounted) {
@@ -259,7 +264,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         await _openNewEntry(
           date: DateTime.now(),
           assets: [JournalEntryAsset(immichAssetId: result.id!)],
-          location: null,
+          location: location,
           previewBytes: {result.id!: bytes},
         );
       } else {
@@ -286,9 +291,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       }
       return;
     }
-    final meta = await readPhotoMetadata(picked.path);
+    final meta = await readPhotoMetadataFromBytes(bytes);
     final date = meta.date ?? DateTime.now();
-    final location = meta.location;
+    String? location = meta.location;
+    if (location == null || location.isEmpty) location = await getCurrentPlaceName();
     final filename = picked.name.isEmpty ? 'image.jpg' : picked.name;
     final result = await _immich.uploadFromBytes(bytes, filename);
     if (!mounted) {

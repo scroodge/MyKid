@@ -107,6 +107,8 @@ class _JournalListScreenState extends State<JournalListScreen> {
     setState(() => _creating = true);
     final picker = ImagePicker();
     if (source == CreateEntrySource.camera) {
+      // Запрашиваем геолокацию до камеры (на симуляторе диалог может не появиться)
+      await ensureLocationPermissionRequested();
       final x = await picker.pickImage(source: ImageSource.camera, imageQuality: 95);
       if (x == null || !mounted) {
         setState(() => _creating = false);
@@ -119,15 +121,11 @@ class _JournalListScreenState extends State<JournalListScreen> {
         if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not read image')));
         return;
       }
-      // Place: из EXIF снимка (если камера записала GPS) или текущая геопозиция
+      // Place: из EXIF снимка (байты — путь на iOS может быть невалидным) или текущая геопозиция
       String? location;
-      try {
-        final meta = await readPhotoMetadata(x.path);
-        location = meta.location;
-        if (location == null || location.isEmpty) location = await getCurrentPlaceName();
-      } catch (_) {
-        location = await getCurrentPlaceName();
-      }
+      final meta = await readPhotoMetadataFromBytes(bytes);
+      location = meta.location;
+      if (location == null || location.isEmpty) location = await getCurrentPlaceName();
       final filename = x.name.isEmpty ? 'image.jpg' : x.name;
       final result = await _immich.uploadFromBytes(bytes, filename);
       if (!mounted) {
@@ -163,9 +161,10 @@ class _JournalListScreenState extends State<JournalListScreen> {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not read image')));
       return;
     }
-    final meta = await readPhotoMetadata(picked.path);
+    final meta = await readPhotoMetadataFromBytes(bytes);
     final date = meta.date ?? DateTime.now();
-    final location = meta.location;
+    String? location = meta.location;
+    if (location == null || location.isEmpty) location = await getCurrentPlaceName();
     final filename = picked.name.isEmpty ? 'image.jpg' : picked.name;
     final result = await _immich.uploadFromBytes(bytes, filename);
     if (!mounted) {

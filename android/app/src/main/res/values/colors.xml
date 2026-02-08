@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#F4EFEA</color>
+    <!-- Тёмный фон, чтобы светлый силуэт на иконке был читаемым -->
+	<color name="ic_launcher_background">#3D5A7A</color>
 </resources>
