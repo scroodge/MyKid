@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -43,6 +44,8 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   String? _error;
   /// True = full-screen view with overlay; false = edit form. New entries start in edit mode.
   bool _viewMode = false;
+  int _viewModePageIndex = 0;
+  final PageController _viewModePageController = PageController();
   /// In-memory bytes for just-added photos (preview before Immich thumbnail is ready; iOS temp files disappear)
   final Map<String, Uint8List> _localPreviewBytes = {};
 
@@ -96,6 +99,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   void dispose() {
     _textController.dispose();
     _locationController.dispose();
+    _viewModePageController.dispose();
     super.dispose();
   }
 
@@ -280,67 +284,47 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
             children: [
               if (hasPhotos && client != null)
                 PageView.builder(
+                  controller: _viewModePageController,
+                  onPageChanged: (index) => setState(() => _viewModePageIndex = index),
                   itemCount: _assets.length,
                   itemBuilder: (context, index) {
                     final a = _assets[index];
                     final localBytes = _localPreviewBytes[a.immichAssetId];
-                    final imageUrl = client.getAssetDownloadUrl(a.immichAssetId);
-                    return localBytes != null
-                        ? Image.memory(localBytes, fit: BoxFit.cover)
-                        : Stack(
-                            fit: StackFit.expand,
+                    if (localBytes != null) {
+                      return Image.memory(localBytes, fit: BoxFit.cover);
+                    }
+                    // Загружаем полное фото через наш HTTP-клиент (с ключом) — так гарантированно работает
+                    return FutureBuilder<List<int>?>(
+                      future: client.downloadAsset(a.immichAssetId),
+                      builder: (context, snap) {
+                        if (snap.connectionState == ConnectionState.waiting) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+                        final bytes = snap.data;
+                        if (bytes != null && bytes.isNotEmpty) {
+                          return Image.memory(Uint8List.fromList(bytes), fit: BoxFit.cover);
+                        }
+                        return Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              CachedNetworkImage(
-                                imageUrl: imageUrl,
-                                httpHeaders: {'x-api-key': client.apiKey},
-                                fit: BoxFit.cover,
-                                placeholder: (_, __) => const Center(child: CircularProgressIndicator()),
-                                errorWidget: (_, url, error) => Center(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(Icons.broken_image, size: 64, color: Colors.white54),
-                                      const SizedBox(height: 8),
-                                      Text('Не загрузилось', style: TextStyle(color: Colors.white70, fontSize: 14)),
-                                      const SizedBox(height: 4),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                                        child: SelectableText(
-                                          url ?? imageUrl,
-                                          style: const TextStyle(color: Colors.white54, fontSize: 10),
-                                          maxLines: 3,
-                                        ),
-                                      ),
-                                      if (error != null)
-                                        Padding(
-                                          padding: const EdgeInsets.only(top: 4, left: 16, right: 16),
-                                          child: SelectableText(
-                                            error.toString(),
-                                            style: const TextStyle(color: Colors.white38, fontSize: 10),
-                                            maxLines: 2,
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              // Debug: путь запроса (без ключа)
-                              Positioned(
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                child: Container(
-                                  color: Colors.black54,
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              const Icon(Icons.broken_image, size: 64, color: Colors.white54),
+                              const SizedBox(height: 8),
+                              const Text('Не загрузилось', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                              if (snap.hasError)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
                                   child: SelectableText(
-                                    'DEBUG: $imageUrl',
-                                    style: const TextStyle(color: Colors.white70, fontSize: 10),
+                                    snap.error.toString(),
+                                    style: const TextStyle(color: Colors.white38, fontSize: 10),
                                     maxLines: 2,
                                   ),
                                 ),
-                              ),
                             ],
-                          );
+                          ),
+                        );
+                      },
+                    );
                   },
                 )
               else if (hasPhotos)
@@ -369,6 +353,26 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                         if (_textController.text.trim().isNotEmpty) ...[
                           const SizedBox(height: 8),
                           Text(_textController.text.trim(), style: const TextStyle(color: Colors.white, fontSize: 16)),
+                        ],
+                        if (hasPhotos && client != null && _assets.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          TextButton.icon(
+                            icon: const Icon(Icons.copy, size: 18, color: Colors.white70),
+                            label: const Text('Скопировать путь', style: TextStyle(color: Colors.white70)),
+                            onPressed: () {
+                              final index = _viewModePageIndex.clamp(0, _assets.length - 1);
+                              final path = client.getAssetDownloadUrl(_assets[index].immichAssetId);
+                              Clipboard.setData(ClipboardData(text: path));
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Путь скопирован. Открыть по ссылке без логина обычно нельзя — Immich требует API-ключ.'),
+                                    duration: Duration(seconds: 4),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
                         ],
                       ],
                     ),
@@ -585,7 +589,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                               localBytes != null
                                   ? Image.memory(localBytes, fit: BoxFit.cover)
                                   : CachedNetworkImage(
-                                      imageUrl: client.getAssetThumbnailUrl(assetId),
+                                      imageUrl: client.getAssetThumbnailUrl(assetId, size: 'preview'),
                                       httpHeaders: {'x-api-key': client.apiKey},
                                       fit: BoxFit.cover,
                                       placeholder: (_, __) => const Center(child: CircularProgressIndicator()),

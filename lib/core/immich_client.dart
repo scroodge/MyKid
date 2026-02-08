@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 /// Client for Immich API. Base URL should not end with slash.
 /// Auth: x-api-key header.
+/// Tested with Immich server 2.5.5.
 class ImmichClient {
   ImmichClient({
     required this.baseUrl,
@@ -136,30 +138,50 @@ class ImmichClient {
     return res.statusCode == 200;
   }
 
-  /// Thumbnail URL for an asset (use in Image.network or cached_network_image).
-  /// Format: JPEG or WEBP.
-  String getAssetThumbnailUrl(String assetId, {String format = 'JPEG'}) {
-    final q = Uri(queryParameters: {'format': format});
+  /// Thumbnail/preview URL for an asset. [size]: thumbnail (small), preview (larger), fullsize.
+  /// Use with httpHeaders: {'x-api-key': apiKey}. For full-screen use downloadAsset (original) instead.
+  String getAssetThumbnailUrl(String assetId, {String format = 'JPEG', String? size}) {
+    final params = <String, String>{'format': format};
+    if (size != null && size.isNotEmpty) params['size'] = size;
+    final q = Uri(queryParameters: params);
     return '$baseUrl/api/assets/$assetId/thumbnail?${q.query}';
   }
 
-  /// Full-size asset URL (for viewing, not thumbnail). Use with same httpHeaders (x-api-key).
+  /// Full-size asset URL (for viewing, not thumbnail). Immich v2 API uses /original.
   String getAssetDownloadUrl(String assetId) {
-    return '$baseUrl/api/assets/$assetId/download';
+    return '$baseUrl/api/assets/$assetId/original';
   }
 
-  /// Thumbnail URL with API key for authenticated request (if server requires key in query).
-  String getAssetThumbnailUrlWithKey(String assetId, {String format = 'JPEG'}) {
-    final q = Uri(queryParameters: {'format': format, 'key': apiKey});
+  /// Full-size download URL with API key in query (for image widgets that may not send headers).
+  String getAssetDownloadUrlWithKey(String assetId) {
+    return '$baseUrl/api/assets/$assetId/original?key=${Uri.encodeComponent(apiKey)}';
+  }
+
+  /// Thumbnail/preview URL with API key in query. [size]: thumbnail, preview, fullsize.
+  String getAssetThumbnailUrlWithKey(String assetId, {String format = 'JPEG', String? size}) {
+    final params = <String, String>{'format': format, 'key': apiKey};
+    if (size != null && size.isNotEmpty) params['size'] = size;
+    final q = Uri(queryParameters: params);
     return '$baseUrl/api/assets/$assetId/thumbnail?${q.query}';
   }
 
-  /// Download full asset bytes (for fullscreen view). Returns null on failure.
+  /// Download full asset bytes (for fullscreen view). Immich v2 API: GET /api/assets/:id/original.
   Future<List<int>?> downloadAsset(String assetId) async {
-    final url = '$baseUrl/api/assets/$assetId/download?key=${Uri.encodeComponent(apiKey)}';
-    final res = await http.get(Uri.parse(url), headers: _headers);
-    if (res.statusCode != 200) return null;
-    return res.bodyBytes;
+    final url = '$baseUrl/api/assets/$assetId/original';
+    try {
+      final res = await http.get(Uri.parse(url), headers: _headers);
+      if (res.statusCode == 200) return res.bodyBytes;
+      debugPrint('[Immich] downloadAsset $assetId → ${res.statusCode} ${res.reasonPhrase}');
+      if (res.body.isNotEmpty) {
+        final preview = res.body.length > 400 ? '${res.body.substring(0, 400)}...' : res.body;
+        debugPrint('[Immich] response: $preview');
+      }
+      return null;
+    } catch (e, st) {
+      debugPrint('[Immich] downloadAsset $assetId error: $e');
+      debugPrint('[Immich] $st');
+      return null;
+    }
   }
 }
 
