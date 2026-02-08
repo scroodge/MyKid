@@ -125,6 +125,17 @@ class ImmichClient {
     return res.statusCode == 200;
   }
 
+  /// Remove assets from an album. Requires albumAsset.delete permission.
+  Future<bool> removeAssetsFromAlbum(String albumId, List<String> assetIds) async {
+    if (assetIds.isEmpty) return true;
+    final res = await http.delete(
+      Uri.parse('$baseUrl/api/albums/$albumId/assets'),
+      headers: {..._headers, 'Content-Type': 'application/json'},
+      body: jsonEncode({'ids': assetIds}),
+    );
+    return res.statusCode == 200;
+  }
+
   /// Thumbnail URL for an asset (use in Image.network or cached_network_image).
   /// Format: JPEG or WEBP.
   String getAssetThumbnailUrl(String assetId, {String format = 'JPEG'}) {

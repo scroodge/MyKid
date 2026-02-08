@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/immich_service.dart';
+import '../../core/photo_metadata.dart';
 import '../../data/journal_entry.dart';
 import '../../data/journal_repository.dart';
 import '../../data/local/journal_cache.dart';
@@ -16,8 +19,10 @@ class JournalListScreen extends StatefulWidget {
 
 class _JournalListScreenState extends State<JournalListScreen> {
   final _repo = JournalRepository();
+  final _immich = ImmichService();
   List<JournalEntry> _entries = [];
   bool _loading = true;
+  bool _creating = false;
   String? _error;
 
   @override
@@ -59,14 +64,115 @@ class _JournalListScreenState extends State<JournalListScreen> {
   }
 
   Future<void> _createEntry() async {
+    final source = await showModalBottomSheet<CreateEntrySource>(
+      context: context,
+      builder: (c) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('From camera'),
+              subtitle: const Text('Take a photo now, date = today'),
+              onTap: () => Navigator.pop(c, CreateEntrySource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('From gallery'),
+              subtitle: const Text('Pick a photo, date & place from photo'),
+              onTap: () => Navigator.pop(c, CreateEntrySource.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.edit_note),
+              title: const Text('Empty entry'),
+              onTap: () => Navigator.pop(c, CreateEntrySource.empty),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source == null || !mounted) return;
+
+    if (source == CreateEntrySource.empty) {
+      await _openNewEntry(
+        date: DateTime.now(),
+        assets: [],
+        location: null,
+      );
+      return;
+    }
+
+    setState(() => _creating = true);
+    final picker = ImagePicker();
+    if (source == CreateEntrySource.camera) {
+      final x = await picker.pickImage(source: ImageSource.camera, imageQuality: 95);
+      if (x == null || !mounted) {
+        setState(() => _creating = false);
+        return;
+      }
+      final result = await _immich.uploadFromXFile(x);
+      if (!mounted) {
+        setState(() => _creating = false);
+        return;
+      }
+      setState(() => _creating = false);
+      if (result.id != null) {
+        await _openNewEntry(
+          date: DateTime.now(),
+          assets: [JournalEntryAsset(immichAssetId: result.id!)],
+          location: null,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Upload failed: ${result.error ?? "Unknown"}')),
+        );
+      }
+      return;
+    }
+
+    // Gallery: pick image(s), read EXIF from first, upload all, open with date & location from first
+    final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 95);
+    if (picked == null || !mounted) {
+      setState(() => _creating = false);
+      return;
+    }
+    final meta = await readPhotoMetadata(picked.path);
+    final date = meta.date ?? DateTime.now();
+    final location = meta.location;
+
+    final result = await _immich.uploadFromXFile(picked);
+    if (!mounted) {
+      setState(() => _creating = false);
+      return;
+    }
+    setState(() => _creating = false);
+    if (result.id != null) {
+      await _openNewEntry(
+        date: date,
+        assets: [JournalEntryAsset(immichAssetId: result.id!)],
+        location: location,
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Upload failed: ${result.error ?? "Unknown"}')),
+      );
+    }
+  }
+
+  Future<void> _openNewEntry({
+    required DateTime date,
+    required List<JournalEntryAsset> assets,
+    String? location,
+  }) async {
     final entry = JournalEntry(
       id: '',
       userId: Supabase.instance.client.auth.currentUser!.id,
-      date: DateTime.now(),
+      date: date,
       text: '',
-      assets: [],
+      assets: assets,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
+      location: location,
     );
     final created = await Navigator.of(context).push<JournalEntry?>(
       MaterialPageRoute(
@@ -147,8 +253,8 @@ class _JournalListScreenState extends State<JournalListScreen> {
                       ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _createEntry,
-        child: const Icon(Icons.add),
+        onPressed: _creating ? null : _createEntry,
+        child: _creating ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Icon(Icons.add),
       ),
     );
   }
@@ -163,3 +269,5 @@ class _JournalListScreenState extends State<JournalListScreen> {
     return '${d.day}.${d.month}.${d.year}';
   }
 }
+
+enum CreateEntrySource { camera, gallery, empty }

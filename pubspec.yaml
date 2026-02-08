@@ -21,9 +21,11 @@ dependencies:
   path: ^1.9.0
   # Secure storage for Immich API key
   flutter_secure_storage: ^9.2.2
-  # Media
+  # Media & EXIF
   image_picker: ^1.1.2
   file_picker: ^8.1.4
+  exif: ^3.1.1
+  geocoding: ^3.0.0
   # UI
   intl: ^0.19.0
   cached_network_image: ^3.4.1

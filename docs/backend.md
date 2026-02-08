@@ -28,6 +28,7 @@ RLS: users can manage only their own rows. See migration `20250208100000_add_chi
 | `text`      | `text`    | Free-form description |
 | `assets`    | `jsonb`   | Array of `{ "immichAssetId": "uuid", "caption": "optional" }` |
 | `child_id`  | `uuid`    | Optional; references `children(id)` |
+| `location`  | `text`    | Optional; place (e.g. from photo EXIF) |
 | `created_at`| `timestamptz` | Set on insert |
 | `updated_at`| `timestamptz` | Set on insert/update, used for sync conflict resolution |
 

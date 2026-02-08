@@ -53,6 +53,7 @@ class JournalRepository {
     required String text,
     required List<JournalEntryAsset> assets,
     String? childId,
+    String? location,
   }) async {
     final uid = _userId;
     if (uid == null) return null;
@@ -62,6 +63,7 @@ class JournalRepository {
       'text': text,
       'assets': assets.map((a) => a.toJson()).toList(),
       if (childId != null) 'child_id': childId,
+      if (location != null && location.isNotEmpty) 'location': location,
     };
     final res = await _client.from('journal_entries').insert(payload).select().single();
     return JournalEntry.fromJson(res as Map<String, dynamic>);
@@ -73,6 +75,7 @@ class JournalRepository {
     required String text,
     required List<JournalEntryAsset> assets,
     String? childId,
+    String? location,
   }) async {
     final uid = _userId;
     if (uid == null) return null;
@@ -81,6 +84,7 @@ class JournalRepository {
       'text': text,
       'assets': assets.map((a) => a.toJson()).toList(),
       'child_id': childId,
+      if (location != null) 'location': location,
     };
     final res = await _client
         .from('journal_entries')

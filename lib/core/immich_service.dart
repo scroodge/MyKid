@@ -58,6 +58,16 @@ class ImmichService {
     return uploadFromBytes(bytes, name);
   }
 
+  /// Remove [assetIds] from the child's Immich album. No-op if child has no album.
+  Future<bool> removeAssetsFromChildAlbum(Child child, List<String> assetIds) async {
+    if (assetIds.isEmpty) return true;
+    final albumId = child.immichAlbumId;
+    if (albumId == null || albumId.isEmpty) return true;
+    final client = await getClient();
+    if (client == null) return false;
+    return client.removeAssetsFromAlbum(albumId, assetIds);
+  }
+
   /// Ensure child has an Immich album (create if needed), add [assetId] to it.
   /// Call [onAlbumCreated] with the new album id when an album is created (so caller can save to child).
   Future<bool> addAssetToChildAlbum(

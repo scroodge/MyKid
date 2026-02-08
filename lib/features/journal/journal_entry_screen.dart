@@ -25,6 +25,7 @@ class JournalEntryScreen extends StatefulWidget {
 
 class _JournalEntryScreenState extends State<JournalEntryScreen> {
   late TextEditingController _textController;
+  late TextEditingController _locationController;
   late DateTime _date;
   late List<JournalEntryAsset> _assets;
   String? _selectedChildId;
@@ -40,6 +41,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   void initState() {
     super.initState();
     _textController = TextEditingController(text: widget.entry.text);
+    _locationController = TextEditingController(text: widget.entry.location ?? '');
     _date = widget.entry.date;
     _assets = List.from(widget.entry.assets);
     _selectedChildId = widget.entry.childId;
@@ -48,12 +50,18 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
 
   Future<void> _loadChildren() async {
     final list = await _childrenRepo.getAll();
-    if (mounted) setState(() => _children = list);
+    if (!mounted) return;
+    final selectedExists = _selectedChildId != null && list.any((c) => c.id == _selectedChildId);
+    setState(() {
+      _children = list;
+      if (_selectedChildId != null && !selectedExists) _selectedChildId = null;
+    });
   }
 
   @override
   void dispose() {
     _textController.dispose();
+    _locationController.dispose();
     super.dispose();
   }
 
@@ -129,12 +137,14 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
       _error = null;
     });
     try {
+      final location = _locationController.text.trim().isEmpty ? null : _locationController.text.trim();
       if (widget.isNew) {
         final created = await _repo.createEntry(
           date: _date,
           text: _textController.text.trim(),
           assets: _assets,
           childId: _selectedChildId,
+          location: location,
         );
         if (mounted && created != null) Navigator.of(context).pop(created);
       } else {
@@ -144,6 +154,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
           text: _textController.text.trim(),
           assets: _assets,
           childId: _selectedChildId,
+          location: location,
         );
         if (mounted && updated != null) Navigator.of(context).pop(updated);
       }
@@ -168,20 +179,61 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
             IconButton(
               icon: const Icon(Icons.delete_outline),
               onPressed: () async {
-                final confirm = await showDialog<bool>(
+                Child? child;
+                if (widget.entry.childId != null) {
+                  for (final c in _children) {
+                    if (c.id == widget.entry.childId) {
+                      child = c;
+                      break;
+                    }
+                  }
+                }
+                final canRemoveFromAlbum = child != null &&
+                    child.immichAlbumId != null &&
+                    child.immichAlbumId!.isNotEmpty &&
+                    widget.entry.assets.isNotEmpty;
+
+                bool removeFromAlbum = false;
+                final result = await showDialog<(bool, bool)>(
                   context: context,
-                  builder: (c) => AlertDialog(
-                    title: const Text('Delete entry?'),
-                    actions: [
-                      TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancel')),
-                      FilledButton(onPressed: () => Navigator.pop(c, true), child: const Text('Delete')),
-                    ],
+                  builder: (c) => StatefulBuilder(
+                    builder: (context, setDialogState) => AlertDialog(
+                      title: const Text('Delete entry?'),
+                      content: canRemoveFromAlbum
+                          ? CheckboxListTile(
+                              value: removeFromAlbum,
+                              onChanged: (v) =>
+                                  setDialogState(() => removeFromAlbum = v ?? false),
+                              title: const Text('Also remove photos from child\'s album'),
+                              controlAffinity: ListTileControlAffinity.leading,
+                              contentPadding: EdgeInsets.zero,
+                            )
+                          : null,
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(c, (false, false)),
+                          child: const Text('Cancel'),
+                        ),
+                        FilledButton(
+                          onPressed: () => Navigator.pop(c, (true, removeFromAlbum)),
+                          child: const Text('Delete'),
+                        ),
+                      ],
+                    ),
                   ),
                 );
-                if (confirm == true) {
-                  await _repo.deleteEntry(widget.entry.id);
-                  if (mounted) Navigator.of(context).pop(true);
+
+                if (result == null) return;
+                final (confirmed, doRemoveFromAlbum) = result;
+                if (!confirmed) return;
+
+                if (doRemoveFromAlbum && child != null && widget.entry.assets.isNotEmpty) {
+                  final assetIds =
+                      widget.entry.assets.map((a) => a.immichAssetId).toList();
+                  await _immich.removeAssetsFromChildAlbum(child, assetIds);
                 }
+                await _repo.deleteEntry(widget.entry.id);
+                if (mounted) Navigator.of(context).pop(true);
               },
             ),
           TextButton(
@@ -214,13 +266,23 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
           const Text('Child (optional)', style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
           DropdownButtonFormField<String?>(
-            value: _selectedChildId,
+            value: _children.any((c) => c.id == _selectedChildId) ? _selectedChildId : null,
             decoration: const InputDecoration(border: OutlineInputBorder()),
             items: [
               const DropdownMenuItem<String?>(value: null, child: Text('— None —')),
               ..._children.map((c) => DropdownMenuItem<String?>(value: c.id, child: Text(c.name))),
             ],
             onChanged: (v) => setState(() => _selectedChildId = v),
+          ),
+          const SizedBox(height: 16),
+          const Text('Place (optional)', style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 4),
+          TextField(
+            controller: _locationController,
+            decoration: const InputDecoration(
+              hintText: 'e.g. from photo or type here',
+              border: OutlineInputBorder(),
+            ),
           ),
           const SizedBox(height: 16),
           const Text('Description', style: TextStyle(fontWeight: FontWeight.bold)),

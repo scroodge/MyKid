@@ -9,6 +9,7 @@ class JournalEntry {
     required this.createdAt,
     required this.updatedAt,
     this.childId,
+    this.location,
   });
 
   final String id;
@@ -19,6 +20,7 @@ class JournalEntry {
   final DateTime createdAt;
   final DateTime updatedAt;
   final String? childId;
+  final String? location;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -29,6 +31,7 @@ class JournalEntry {
         'created_at': createdAt.toIso8601String(),
         'updated_at': updatedAt.toIso8601String(),
         if (childId != null) 'child_id': childId,
+        if (location != null && location!.isNotEmpty) 'location': location,
       };
 
   static JournalEntry fromJson(Map<String, dynamic> json) {
@@ -50,6 +53,7 @@ class JournalEntry {
       createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? '') ?? DateTime.now(),
       childId: json['child_id'] as String?,
+      location: json['location'] as String?,
     );
   }
 }
