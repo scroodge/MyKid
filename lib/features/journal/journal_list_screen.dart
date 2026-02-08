@@ -55,12 +55,12 @@ class _JournalListScreenState extends State<JournalListScreen> {
   }
 
   Future<void> _openEntry(JournalEntry entry) async {
-    final updated = await Navigator.of(context).push<JournalEntry?>(
+    final result = await Navigator.of(context).push<Object?>(
       MaterialPageRoute(
         builder: (context) => JournalEntryScreen(entry: entry),
       ),
     );
-    if (updated != null) _load();
+    if (result != null) _load();
   }
 
   Future<void> _createEntry() async {
@@ -174,12 +174,12 @@ class _JournalListScreenState extends State<JournalListScreen> {
       updatedAt: DateTime.now(),
       location: location,
     );
-    final created = await Navigator.of(context).push<JournalEntry?>(
+    final result = await Navigator.of(context).push<Object?>(
       MaterialPageRoute(
         builder: (context) => JournalEntryScreen(entry: entry, isNew: true),
       ),
     );
-    if (created != null) _load();
+    if (result != null) _load();
   }
 
   @override

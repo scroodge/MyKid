@@ -233,7 +233,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                   await _immich.removeAssetsFromChildAlbum(child, assetIds);
                 }
                 await _repo.deleteEntry(widget.entry.id);
-                if (mounted) Navigator.of(context).pop(true);
+                if (mounted) Navigator.of(context).pop<Object?>(true);
               },
             ),
           TextButton(
