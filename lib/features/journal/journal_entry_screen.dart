@@ -275,10 +275,10 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Запись', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.transparent,
+        title: const Text('Запись', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+        backgroundColor: Colors.black54,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white, size: 26),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
@@ -366,10 +366,10 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Фото', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.transparent,
+        title: const Text('Фото', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+        backgroundColor: Colors.black54,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white, size: 26),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => setState(() => _viewModeSubState = 'preview'),
@@ -378,7 +378,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
           IconButton(
             icon: const Icon(Icons.share),
             tooltip: 'Поделиться',
-            onPressed: hasPhotos ? () => _shareCurrentPhoto() : null,
+            onPressed: hasPhotos ? () => _shareCurrentPhoto(context) : null,
           ),
         ],
       ),
@@ -428,7 +428,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
     );
   }
 
-  Future<void> _shareCurrentPhoto() async {
+  Future<void> _shareCurrentPhoto(BuildContext context) async {
     if (_assets.isEmpty) return;
     final client = await _immich.getClient();
     if (client == null) return;
@@ -440,7 +440,13 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
     final file = File('${dir.path}/share_${assetId.substring(0, 8)}.jpg');
     await file.writeAsBytes(bytes);
     try {
-      await Share.shareXFiles([XFile(file.path)]);
+      // iOS/iPad требует sharePositionOrigin в координатах source view; rect должен быть строго внутри.
+      final size = MediaQuery.sizeOf(context);
+      const rectSize = 80.0;
+      final left = (size.width - rectSize).clamp(0.0, size.width - rectSize);
+      final top = (size.height - rectSize).clamp(0.0, size.height - rectSize) * 0.5; // по центру по вертикали
+      final rect = Rect.fromLTWH(left, top, rectSize, rectSize);
+      await Share.shareXFiles([XFile(file.path)], sharePositionOrigin: rect);
     } finally {
       try {
         await file.delete();
