@@ -3,6 +3,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 
+import '../../l10n/app_localizations.dart';
+
 String _displayNameFromUser(User? user) {
   if (user == null) return '';
   final meta = user.userMetadata;
@@ -39,7 +41,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(AppLocalizations.of(context)!.settings),
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -91,7 +93,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            displayName.isEmpty ? 'Profile' : displayName,
+                            displayName.isEmpty ? AppLocalizations.of(context)!.profile : displayName,
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -109,7 +111,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                     Text(
-                      'Edit',
+                      AppLocalizations.of(context)!.edit,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Theme.of(context).colorScheme.primary,
                           ),
@@ -130,7 +132,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Padding(
             padding: const EdgeInsets.only(left: 4, bottom: 8),
             child: Text(
-              'Family',
+              AppLocalizations.of(context)!.family,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.w600,
@@ -143,10 +145,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 ListTile(
                   leading: Icon(Icons.child_care, color: Theme.of(context).colorScheme.tertiary),
-                  title: const Text('Manage children'),
-                  subtitle: const Text(
-                    'Name, date of birth. Photos can be saved to a child\'s Immich album.',
-                  ),
+                  title: Text(AppLocalizations.of(context)!.manageChildren),
+                  subtitle: Text(AppLocalizations.of(context)!.manageChildrenSubtitle),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => Navigator.of(context).pushNamed('/children'),
                 ),
@@ -159,7 +159,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Padding(
             padding: const EdgeInsets.only(left: 4, bottom: 8),
             child: Text(
-              'Sync',
+              AppLocalizations.of(context)!.sync,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.w600,
@@ -172,8 +172,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 ListTile(
                   leading: Icon(Icons.cloud_outlined, color: Theme.of(context).colorScheme.secondary),
-                  title: const Text('Immich'),
-                  subtitle: const Text('Server URL and API key'),
+                  title: Text(AppLocalizations.of(context)!.immich),
+                  subtitle: Text(AppLocalizations.of(context)!.immichSubtitle),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => Navigator.of(context).pushNamed('/settings-immich'),
                 ),
@@ -186,7 +186,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Padding(
             padding: const EdgeInsets.only(left: 4, bottom: 8),
             child: Text(
-              'Account',
+              AppLocalizations.of(context)!.account,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.w600,
@@ -199,7 +199,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 ListTile(
                   leading: Icon(Icons.logout, color: Theme.of(context).colorScheme.error),
-                  title: const Text('Sign out'),
+                  title: Text(AppLocalizations.of(context)!.signOut),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () async {
                     await Supabase.instance.client.auth.signOut();
@@ -234,14 +234,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'MyKid Journal',
+                    AppLocalizations.of(context)!.appTitle,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Version ${SettingsScreen.appVersion}',
+                    AppLocalizations.of(context)!.version(SettingsScreen.appVersion),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),

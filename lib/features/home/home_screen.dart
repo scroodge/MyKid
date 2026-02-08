@@ -13,7 +13,9 @@ import '../../data/child.dart';
 import '../../data/children_repository.dart';
 import '../../data/journal_entry.dart';
 import '../../data/journal_repository.dart';
+import '../../core/format_age.dart';
 import '../../data/local/journal_cache.dart';
+import '../../l10n/app_localizations.dart';
 import '../journal/journal_entry_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -154,9 +156,28 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 final selected = _selectedChild?.id == child.id;
                 return ListTile(
                   leading: CircleAvatar(
-                    child: Text(
-                      child.name.isNotEmpty ? child.name[0].toUpperCase() : '?',
-                    ),
+                    backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    child: child.avatarUrl != null && child.avatarUrl!.isNotEmpty
+                        ? ClipOval(
+                            child: CachedNetworkImage(
+                              imageUrl: child.avatarUrl!,
+                              width: 40,
+                              height: 40,
+                              fit: BoxFit.cover,
+                              placeholder: (_, __) => Text(
+                                child.name.isNotEmpty ? child.name[0].toUpperCase() : '?',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              errorWidget: (_, __, ___) => Text(
+                                child.name.isNotEmpty ? child.name[0].toUpperCase() : '?',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                            ),
+                          )
+                        : Text(
+                            child.name.isNotEmpty ? child.name[0].toUpperCase() : '?',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
                   ),
                   title: Text(child.name),
                   subtitle: Text(child.ageDescription),
@@ -197,19 +218,19 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('From camera'),
-              subtitle: const Text('Take a photo now, date = today'),
+              title: Text(AppLocalizations.of(context)!.fromCamera),
+              subtitle: Text(AppLocalizations.of(context)!.fromCameraSubtitle),
               onTap: () => Navigator.pop(c, CreateEntrySource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('From gallery'),
-              subtitle: const Text('Pick a photo, date & place from photo'),
+              title: Text(AppLocalizations.of(context)!.fromGallery),
+              subtitle: Text(AppLocalizations.of(context)!.fromGallerySubtitle),
               onTap: () => Navigator.pop(c, CreateEntrySource.gallery),
             ),
             ListTile(
               leading: const Icon(Icons.edit_note),
-              title: const Text('Empty entry'),
+              title: Text(AppLocalizations.of(context)!.emptyEntry),
               onTap: () => Navigator.pop(c, CreateEntrySource.empty),
             ),
           ],
@@ -245,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       if (bytes == null || bytes.isEmpty) {
         setState(() => _creating = false);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not read image')));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.couldNotReadImage)));
         }
         return;
       }
@@ -254,24 +275,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       location = meta.location;
       if (location == null || location.isEmpty) location = await getCurrentPlaceName();
       final filename = x.name.isEmpty ? 'image.jpg' : x.name;
-      final result = await _immich.uploadFromBytes(bytes, filename);
       if (!mounted) {
         setState(() => _creating = false);
         return;
       }
       setState(() => _creating = false);
-      if (result.id != null) {
-        await _openNewEntry(
-          date: DateTime.now(),
-          assets: [JournalEntryAsset(immichAssetId: result.id!)],
-          location: location,
-          previewBytes: {result.id!: bytes},
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload failed: ${result.error ?? "Unknown"}')),
-        );
-      }
+      await _openNewEntry(
+        date: DateTime.now(),
+        assets: [],
+        location: location,
+        initialPendingAttachments: [(bytes: bytes!, filename: filename)],
+      );
       return;
     }
 
@@ -287,7 +301,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     if (bytes == null || bytes.isEmpty) {
       setState(() => _creating = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not read image')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.couldNotReadImage)));
       }
       return;
     }
@@ -296,24 +310,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     String? location = meta.location;
     if (location == null || location.isEmpty) location = await getCurrentPlaceName();
     final filename = picked.name.isEmpty ? 'image.jpg' : picked.name;
-    final result = await _immich.uploadFromBytes(bytes, filename);
     if (!mounted) {
       setState(() => _creating = false);
       return;
     }
     setState(() => _creating = false);
-    if (result.id != null) {
-      await _openNewEntry(
-        date: date,
-        assets: [JournalEntryAsset(immichAssetId: result.id!)],
-        location: location,
-        previewBytes: {result.id!: bytes},
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Upload failed: ${result.error ?? "Unknown"}')),
-      );
-    }
+    await _openNewEntry(
+      date: date,
+      assets: [],
+      location: location,
+      initialPendingAttachments: [(bytes: bytes!, filename: filename)],
+    );
   }
 
   Future<void> _openNewEntry({
@@ -321,6 +328,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     required List<JournalEntryAsset> assets,
     String? location,
     Map<String, Uint8List>? previewBytes,
+    List<({Uint8List bytes, String filename})>? initialPendingAttachments,
   }) async {
     final entry = JournalEntry(
       id: '',
@@ -339,6 +347,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           entry: entry,
           isNew: true,
           initialPreviewBytes: previewBytes,
+          initialPendingAttachments: initialPendingAttachments,
         ),
       ),
     );
@@ -349,11 +358,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('MyKid Journal'),
+        title: Text(AppLocalizations.of(context)!.appTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.photo_library),
-            tooltip: 'Batch import',
+            tooltip: AppLocalizations.of(context)!.batchImportTooltip,
             onPressed: () => Navigator.of(context).pushNamed('/import'),
           ),
           IconButton(
@@ -363,8 +372,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         ],
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Timeline'),
+          tabs: [
+            Tab(text: AppLocalizations.of(context)!.timeline),
           ],
         ),
       ),
@@ -421,11 +430,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Добавить ребёнка',
+                            AppLocalizations.of(context)!.addChildPrompt,
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                           Text(
-                            'Нажмите, чтобы создать профиль',
+                            AppLocalizations.of(context)!.addChildPromptSubtitle,
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
@@ -437,12 +446,34 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   children: [
                     CircleAvatar(
                       radius: 32,
-                      child: Text(
-                        _selectedChild!.name.isNotEmpty
-                            ? _selectedChild!.name[0].toUpperCase()
-                            : '?',
-                        style: Theme.of(context).textTheme.headlineMedium,
-                      ),
+                      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+                      child: _selectedChild!.avatarUrl != null && _selectedChild!.avatarUrl!.isNotEmpty
+                          ? ClipOval(
+                              child: CachedNetworkImage(
+                                imageUrl: _selectedChild!.avatarUrl!,
+                                width: 64,
+                                height: 64,
+                                fit: BoxFit.cover,
+                                placeholder: (_, __) => Text(
+                                  _selectedChild!.name.isNotEmpty
+                                      ? _selectedChild!.name[0].toUpperCase()
+                                      : '?',
+                                  style: Theme.of(context).textTheme.headlineMedium,
+                                ),
+                                errorWidget: (_, __, ___) => Text(
+                                  _selectedChild!.name.isNotEmpty
+                                      ? _selectedChild!.name[0].toUpperCase()
+                                      : '?',
+                                  style: Theme.of(context).textTheme.headlineMedium,
+                                ),
+                              ),
+                            )
+                          : Text(
+                              _selectedChild!.name.isNotEmpty
+                                  ? _selectedChild!.name[0].toUpperCase()
+                                  : '?',
+                              style: Theme.of(context).textTheme.headlineMedium,
+                            ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -455,7 +486,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                           Text(
-                            _selectedChild!.ageDescription,
+                            formatAge(context, _selectedChild!.dateOfBirth),
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                                 ),
@@ -479,7 +510,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           children: [
             Icon(Icons.child_care, size: 64, color: Theme.of(context).colorScheme.outline),
             const SizedBox(height: 16),
-            const Text('Выберите ребёнка выше'),
+            Text(AppLocalizations.of(context)!.selectChildAbove),
           ],
         ),
       );
@@ -496,7 +527,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             children: [
               Text(_error!, textAlign: TextAlign.center),
               const SizedBox(height: 16),
-              FilledButton(onPressed: _loadEntries, child: const Text('Retry')),
+              FilledButton(onPressed: _loadEntries, child: Text(AppLocalizations.of(context)!.retry)),
             ],
           ),
         ),
@@ -515,12 +546,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 children: [
                   Icon(Icons.photo_library, size: 64, color: Theme.of(context).colorScheme.outline),
                   const SizedBox(height: 16),
-                  const Text('Нет записей'),
+                  Text(AppLocalizations.of(context)!.noEntriesYet),
                   const SizedBox(height: 8),
                   FilledButton.icon(
                     onPressed: _createEntry,
                     icon: const Icon(Icons.add),
-                    label: const Text('Добавить запись'),
+                    label: Text(AppLocalizations.of(context)!.addEntry),
                   ),
                 ],
               ),
@@ -564,13 +595,14 @@ class _TimelineThumbnail extends StatelessWidget {
   final ImmichClient? immichClient;
   final VoidCallback onTap;
 
-  String _formatDate(DateTime d) {
+  String _formatDate(BuildContext context, DateTime d) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final entryDay = DateTime(d.year, d.month, d.day);
-    if (entryDay == today) return 'Сегодня';
+    final l10n = AppLocalizations.of(context)!;
+    if (entryDay == today) return l10n.today;
     final yesterday = today.subtract(const Duration(days: 1));
-    if (entryDay == yesterday) return 'Вчера';
+    if (entryDay == yesterday) return l10n.yesterday;
     return '${d.day}.${d.month}.${d.year}';
   }
 
@@ -614,7 +646,7 @@ class _TimelineThumbnail extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    _formatDate(entry.date),
+                    _formatDate(context, entry.date),
                     style: const TextStyle(color: Colors.white, fontSize: 12),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

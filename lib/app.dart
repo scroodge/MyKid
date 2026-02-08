@@ -10,6 +10,7 @@ import 'features/import/batch_import_screen.dart';
 import 'features/settings/immich_settings_screen.dart';
 import 'features/settings/profile_screen.dart';
 import 'features/settings/settings_screen.dart';
+import 'l10n/app_localizations.dart';
 
 class MyKidApp extends StatelessWidget {
   const MyKidApp({super.key});
@@ -20,6 +21,8 @@ class MyKidApp extends StatelessWidget {
       title: 'MyKid Journal',
       theme: MyKidTheme.lightTheme,
       darkTheme: MyKidTheme.darkTheme,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       initialRoute: '/',
       routes: {
         '/': (context) => const AuthGuard(child: HomeScreen()),

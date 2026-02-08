@@ -15,6 +15,10 @@ import '../../data/child.dart';
 import '../../data/children_repository.dart';
 import '../../data/journal_entry.dart';
 import '../../data/journal_repository.dart';
+import '../../l10n/app_localizations.dart';
+
+/// Single pending attachment (bytes + filename) before upload to Immich.
+typedef PendingAttachment = ({Uint8List bytes, String filename});
 
 class JournalEntryScreen extends StatefulWidget {
   const JournalEntryScreen({
@@ -22,12 +26,15 @@ class JournalEntryScreen extends StatefulWidget {
     required this.entry,
     this.isNew = false,
     this.initialPreviewBytes,
+    this.initialPendingAttachments,
   });
 
   final JournalEntry entry;
   final bool isNew;
   /// Preview bytes for assets (e.g. when opening after "From camera" from list)
   final Map<String, Uint8List>? initialPreviewBytes;
+  /// Photos passed from list/home when creating from camera/gallery — uploaded to Immich only on Save.
+  final List<PendingAttachment>? initialPendingAttachments;
 
   @override
   State<JournalEntryScreen> createState() => _JournalEntryScreenState();
@@ -54,6 +61,8 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   final PageController _viewModePageController = PageController();
   /// In-memory bytes for just-added photos (preview before Immich thumbnail is ready; iOS temp files disappear)
   final Map<String, Uint8List> _localPreviewBytes = {};
+  /// Photos picked in this screen (or passed from list/home) not yet uploaded to Immich (upload on Save).
+  List<PendingAttachment> _pendingAssets = [];
 
   @override
   void initState() {
@@ -64,6 +73,9 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
     _assets = List.from(widget.entry.assets);
     _selectedChildId = widget.entry.childId;
     if (widget.initialPreviewBytes != null) _localPreviewBytes.addAll(widget.initialPreviewBytes!);
+    if (widget.initialPendingAttachments != null && widget.initialPendingAttachments!.isNotEmpty) {
+      _pendingAssets = List.from(widget.initialPendingAttachments!);
+    }
     _viewMode = !widget.isNew;
     _loadChildren();
   }
@@ -114,7 +126,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
     if (client == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Configure Immich in Settings first')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.configureImmichFirst)),
         );
       }
       return;
@@ -127,12 +139,12 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_camera),
-              title: const Text('Camera'),
+              title: Text(AppLocalizations.of(context)!.camera),
               onTap: () => Navigator.pop(c, ImageSource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Gallery'),
+              title: Text(AppLocalizations.of(context)!.gallery),
               onTap: () => Navigator.pop(c, ImageSource.gallery),
             ),
           ],
@@ -149,50 +161,19 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
       bytes = await x.readAsBytes();
     } catch (_) {}
     if (bytes == null || bytes.isEmpty) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not read image')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.couldNotReadImage)));
       return;
     }
     final filename = x.name.isEmpty ? 'image.jpg' : x.name;
-    setState(() => _uploading = true);
-    final result = await _immich.uploadFromBytes(bytes, filename);
-    if (mounted) {
-      setState(() {
-        _uploading = false;
-        if (result.id != null) {
-          _assets = [..._assets, JournalEntryAsset(immichAssetId: result.id!)];
-          _localPreviewBytes[result.id!] = bytes!;
-        }
-      });
-      if (result.id != null) {
-        final childId = _selectedChildId;
-        if (childId != null) {
-          Child? child;
-          for (final c in _children) {
-            if (c.id == childId) { child = c; break; }
-          }
-          if (child != null) {
-            final childToUpdate = child;
-            await _immich.addAssetToChildAlbum(
-              childToUpdate,
-              result.id!,
-              onAlbumCreated: (albumId) async {
-                await _childrenRepo.update(childToUpdate.id, immichAlbumId: albumId);
-                if (mounted) _loadChildren();
-              },
-            );
-          }
-        }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload failed: ${result.error ?? "Unknown"}')),
-        );
-      }
-    }
+    if (!mounted) return;
+    setState(() {
+      _pendingAssets = [..._pendingAssets, (bytes: bytes!, filename: filename)];
+    });
   }
 
   Future<void> _save() async {
     if (_children.isNotEmpty && _selectedChildId == null) {
-      setState(() => _error = 'Select a child');
+      setState(() => _error = AppLocalizations.of(context)!.selectAChild);
       return;
     }
     setState(() {
@@ -200,6 +181,31 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
       _error = null;
     });
     try {
+      // Upload pending photos to Immich only when user saves (not when they just pick)
+      for (var i = 0; i < _pendingAssets.length; i++) {
+        if (mounted) setState(() => _uploading = true);
+        final pending = _pendingAssets[i];
+        final result = await _immich.uploadFromBytes(pending.bytes, pending.filename);
+        if (!mounted) return;
+        if (result.id != null) {
+          _assets = [..._assets, JournalEntryAsset(immichAssetId: result.id!)];
+          _localPreviewBytes[result.id!] = pending.bytes;
+        } else {
+          setState(() {
+            _saving = false;
+            _uploading = false;
+            _error = AppLocalizations.of(context)!.uploadFailedWithError(result.error ?? 'Unknown');
+          });
+          return;
+        }
+      }
+      if (_pendingAssets.isNotEmpty && mounted) {
+        setState(() {
+          _pendingAssets = [];
+          _uploading = false;
+        });
+      }
+
       // Ensure all assets are in the selected child's Immich album (e.g. photo from gallery on list)
       if (_selectedChildId != null && _assets.isNotEmpty) {
         Child? child;
@@ -251,10 +257,17 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   }
 
   void _removeAsset(int index) {
-    final assetId = _assets[index].immichAssetId;
     setState(() {
-      _assets = List.from(_assets)..removeAt(index);
-      _localPreviewBytes.remove(assetId);
+      if (index < _assets.length) {
+        final assetId = _assets[index].immichAssetId;
+        _assets = List.from(_assets)..removeAt(index);
+        _localPreviewBytes.remove(assetId);
+      } else {
+        final pendingIndex = index - _assets.length;
+        if (pendingIndex >= 0 && pendingIndex < _pendingAssets.length) {
+          _pendingAssets = List.from(_pendingAssets)..removeAt(pendingIndex);
+        }
+      }
     });
   }
 
@@ -457,7 +470,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   Widget _buildEditMode(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isNew ? 'New entry' : 'Entry'),
+        title: Text(widget.isNew ? AppLocalizations.of(context)!.newEntry : AppLocalizations.of(context)!.entry),
         actions: [
           if (!widget.isNew)
             IconButton(
@@ -482,13 +495,13 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                   context: context,
                   builder: (c) => StatefulBuilder(
                     builder: (context, setDialogState) => AlertDialog(
-                      title: const Text('Delete entry?'),
+                      title: Text(AppLocalizations.of(context)!.deleteEntry),
                       content: canRemoveFromAlbum
                           ? CheckboxListTile(
                               value: removeFromAlbum,
                               onChanged: (v) =>
                                   setDialogState(() => removeFromAlbum = v ?? false),
-                              title: const Text('Also remove photos from child\'s album'),
+                              title: Text(AppLocalizations.of(context)!.alsoRemoveFromAlbum),
                               controlAffinity: ListTileControlAffinity.leading,
                               contentPadding: EdgeInsets.zero,
                             )
@@ -496,11 +509,11 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(c, (false, false)),
-                          child: const Text('Cancel'),
+                          child: Text(AppLocalizations.of(context)!.cancel),
                         ),
                         FilledButton(
                           onPressed: () => Navigator.pop(c, (true, removeFromAlbum)),
-                          child: const Text('Delete'),
+                          child: Text(AppLocalizations.of(context)!.delete),
                         ),
                       ],
                     ),
@@ -522,14 +535,14 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
             ),
           TextButton(
             onPressed: _saving ? null : _save,
-            child: _saving ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Save'),
+            child: _saving ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)) : Text(AppLocalizations.of(context)!.save),
           ),
         ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text('Date', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(AppLocalizations.of(context)!.date, style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
           InkWell(
             onTap: () async {
@@ -547,11 +560,11 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          const Text('Child', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(AppLocalizations.of(context)!.child, style: const TextStyle(fontWeight: FontWeight.bold)),
           if (_children.isEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 8),
-              child: Text('Add a child in Settings → Manage children', style: TextStyle(color: Theme.of(context).colorScheme.outline, fontSize: 13)),
+              child: Text(AppLocalizations.of(context)!.addChildInSettings, style: TextStyle(color: Theme.of(context).colorScheme.outline, fontSize: 13)),
             )
           else
             Padding(
@@ -570,24 +583,24 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
               ),
             ),
           const SizedBox(height: 16),
-          const Text('Place (optional)', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(AppLocalizations.of(context)!.placeOptional, style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
           TextField(
             controller: _locationController,
-            decoration: const InputDecoration(
-              hintText: 'e.g. from photo or type here',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.placeHint,
+              border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 16),
-          const Text('Description', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(AppLocalizations.of(context)!.description, style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
           TextField(
             controller: _textController,
             maxLines: 5,
-            decoration: const InputDecoration(
-              hintText: 'What happened today?',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.descriptionHint,
+              border: const OutlineInputBorder(),
             ),
           ),
           if (_uploading)
@@ -600,20 +613,20 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Photos / videos', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(AppLocalizations.of(context)!.photosVideos, style: const TextStyle(fontWeight: FontWeight.bold)),
               TextButton.icon(
                 onPressed: _pickAndUpload,
                 icon: const Icon(Icons.add_photo_alternate),
-                label: const Text('Add'),
+                label: Text(AppLocalizations.of(context)!.add),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          if (_assets.isEmpty)
-            const Card(
+          if (_assets.isEmpty && _pendingAssets.isEmpty)
+            Card(
               child: Padding(
-                padding: EdgeInsets.all(24),
-                child: Center(child: Text('No media attached. Add via "Add" or batch import.')),
+                padding: const EdgeInsets.all(24),
+                child: Center(child: Text(AppLocalizations.of(context)!.noMediaAttached)),
               ),
             )
           else
@@ -621,16 +634,20 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
               future: _immich.getClient(),
               builder: (context, snapshot) {
                 final client = snapshot.data;
+                final totalCount = _assets.length + _pendingAssets.length;
                 if (client == null) {
                   return Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: _assets.asMap().entries.map((e) {
+                    children: List.generate(totalCount, (i) {
+                      final label = i < _assets.length
+                          ? 'Asset ${_assets[i].immichAssetId.substring(0, 8)}...'
+                          : 'Pending ${i - _assets.length + 1}';
                       return Chip(
-                        label: Text('Asset ${e.value.immichAssetId.substring(0, 8)}...'),
-                        onDeleted: () => _removeAsset(e.key),
+                        label: Text(label),
+                        onDeleted: () => _removeAsset(i),
                       );
-                    }).toList(),
+                    }),
                   );
                 }
                 return GridView.count(
@@ -640,12 +657,50 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                   mainAxisSpacing: 8,
                   crossAxisSpacing: 8,
                   childAspectRatio: 0.85,
-                  children: _assets.asMap().entries.map((e) {
-                    final assetId = e.value.immichAssetId;
-                    final localBytes = _localPreviewBytes[assetId];
-                    final debugLabel = localBytes != null
-                        ? 'local: ${localBytes.length} bytes'
-                        : 'immich: ${assetId.length > 8 ? "${assetId.substring(0, 8)}..." : assetId}';
+                  children: List.generate(totalCount, (i) {
+                    if (i < _assets.length) {
+                      final assetId = _assets[i].immichAssetId;
+                      final localBytes = _localPreviewBytes[assetId];
+                      final debugLabel = localBytes != null
+                          ? 'local: ${localBytes.length} bytes'
+                          : 'immich: ${assetId.length > 8 ? "${assetId.substring(0, 8)}..." : assetId}';
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                localBytes != null
+                                    ? Image.memory(localBytes, fit: BoxFit.cover)
+                                    : CachedNetworkImage(
+                                        imageUrl: client.getAssetThumbnailUrl(assetId, size: 'preview'),
+                                        httpHeaders: {'x-api-key': client.apiKey},
+                                        fit: BoxFit.cover,
+                                        placeholder: (_, __) => const Center(child: CircularProgressIndicator()),
+                                        errorWidget: (_, __, ___) => const Icon(Icons.broken_image),
+                                      ),
+                                Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: IconButton(
+                                    icon: const Icon(Icons.close, color: Colors.white, size: 20),
+                                    onPressed: () => _removeAsset(i),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Text(debugLabel, style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.outline), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          ),
+                        ],
+                      );
+                    }
+                    final pendingIndex = i - _assets.length;
+                    final pending = _pendingAssets[pendingIndex];
                     return Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -654,21 +709,13 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                           child: Stack(
                             fit: StackFit.expand,
                             children: [
-                              localBytes != null
-                                  ? Image.memory(localBytes, fit: BoxFit.cover)
-                                  : CachedNetworkImage(
-                                      imageUrl: client.getAssetThumbnailUrl(assetId, size: 'preview'),
-                                      httpHeaders: {'x-api-key': client.apiKey},
-                                      fit: BoxFit.cover,
-                                      placeholder: (_, __) => const Center(child: CircularProgressIndicator()),
-                                      errorWidget: (_, __, ___) => const Icon(Icons.broken_image),
-                                    ),
+                              Image.memory(pending.bytes, fit: BoxFit.cover),
                               Positioned(
                                 top: 4,
                                 right: 4,
                                 child: IconButton(
                                   icon: const Icon(Icons.close, color: Colors.white, size: 20),
-                                  onPressed: () => _removeAsset(e.key),
+                                  onPressed: () => _removeAsset(i),
                                 ),
                               ),
                             ],
@@ -676,11 +723,11 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 2),
-                          child: Text(debugLabel, style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.outline), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          child: Text(AppLocalizations.of(context)!.pendingSaveToUpload, style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.outline), maxLines: 1, overflow: TextOverflow.ellipsis),
                         ),
                       ],
                     );
-                  }).toList(),
+                  }),
                 );
               },
             ),

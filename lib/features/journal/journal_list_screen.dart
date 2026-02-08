@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../core/immich_service.dart';
 import '../../core/photo_metadata.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/journal_entry.dart';
 import '../../data/journal_repository.dart';
 import '../../data/local/journal_cache.dart';
@@ -21,7 +21,6 @@ class JournalListScreen extends StatefulWidget {
 
 class _JournalListScreenState extends State<JournalListScreen> {
   final _repo = JournalRepository();
-  final _immich = ImmichService();
   List<JournalEntry> _entries = [];
   bool _loading = true;
   bool _creating = false;
@@ -74,19 +73,19 @@ class _JournalListScreenState extends State<JournalListScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('From camera'),
-              subtitle: const Text('Take a photo now, date = today'),
+              title: Text(AppLocalizations.of(context)!.fromCamera),
+              subtitle: Text(AppLocalizations.of(context)!.fromCameraSubtitle),
               onTap: () => Navigator.pop(c, CreateEntrySource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('From gallery'),
-              subtitle: const Text('Pick a photo, date & place from photo'),
+              title: Text(AppLocalizations.of(context)!.fromGallery),
+              subtitle: Text(AppLocalizations.of(context)!.fromGallerySubtitle),
               onTap: () => Navigator.pop(c, CreateEntrySource.gallery),
             ),
             ListTile(
               leading: const Icon(Icons.edit_note),
-              title: const Text('Empty entry'),
+              title: Text(AppLocalizations.of(context)!.emptyEntry),
               onTap: () => Navigator.pop(c, CreateEntrySource.empty),
             ),
           ],
@@ -118,7 +117,7 @@ class _JournalListScreenState extends State<JournalListScreen> {
       try { bytes = await x.readAsBytes(); } catch (_) {}
       if (bytes == null || bytes.isEmpty) {
         setState(() => _creating = false);
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not read image')));
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.couldNotReadImage)));
         return;
       }
       // Place: из EXIF снимка (байты — путь на iOS может быть невалидным) или текущая геопозиция
@@ -127,24 +126,17 @@ class _JournalListScreenState extends State<JournalListScreen> {
       location = meta.location;
       if (location == null || location.isEmpty) location = await getCurrentPlaceName();
       final filename = x.name.isEmpty ? 'image.jpg' : x.name;
-      final result = await _immich.uploadFromBytes(bytes, filename);
       if (!mounted) {
         setState(() => _creating = false);
         return;
       }
       setState(() => _creating = false);
-      if (result.id != null) {
-        await _openNewEntry(
-          date: DateTime.now(),
-          assets: [JournalEntryAsset(immichAssetId: result.id!)],
-          location: location,
-          previewBytes: {result.id!: bytes},
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload failed: ${result.error ?? "Unknown"}')),
-        );
-      }
+      await _openNewEntry(
+        date: DateTime.now(),
+        assets: [],
+        location: location,
+        initialPendingAttachments: [(bytes: bytes!, filename: filename)],
+      );
       return;
     }
 
@@ -158,7 +150,7 @@ class _JournalListScreenState extends State<JournalListScreen> {
     try { bytes = await picked.readAsBytes(); } catch (_) {}
     if (bytes == null || bytes.isEmpty) {
       setState(() => _creating = false);
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not read image')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.couldNotReadImage)));
       return;
     }
     final meta = await readPhotoMetadataFromBytes(bytes);
@@ -166,24 +158,17 @@ class _JournalListScreenState extends State<JournalListScreen> {
     String? location = meta.location;
     if (location == null || location.isEmpty) location = await getCurrentPlaceName();
     final filename = picked.name.isEmpty ? 'image.jpg' : picked.name;
-    final result = await _immich.uploadFromBytes(bytes, filename);
     if (!mounted) {
       setState(() => _creating = false);
       return;
     }
     setState(() => _creating = false);
-    if (result.id != null) {
-      await _openNewEntry(
-        date: date,
-        assets: [JournalEntryAsset(immichAssetId: result.id!)],
-        location: location,
-        previewBytes: {result.id!: bytes},
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Upload failed: ${result.error ?? "Unknown"}')),
-      );
-    }
+    await _openNewEntry(
+      date: date,
+      assets: [],
+      location: location,
+      initialPendingAttachments: [(bytes: bytes!, filename: filename)],
+    );
   }
 
   Future<void> _openNewEntry({
@@ -191,6 +176,7 @@ class _JournalListScreenState extends State<JournalListScreen> {
     required List<JournalEntryAsset> assets,
     String? location,
     Map<String, Uint8List>? previewBytes,
+    List<({Uint8List bytes, String filename})>? initialPendingAttachments,
   }) async {
     final entry = JournalEntry(
       id: '',
@@ -204,7 +190,12 @@ class _JournalListScreenState extends State<JournalListScreen> {
     );
     final result = await Navigator.of(context).push<Object?>(
       MaterialPageRoute(
-        builder: (context) => JournalEntryScreen(entry: entry, isNew: true, initialPreviewBytes: previewBytes),
+        builder: (context) => JournalEntryScreen(
+          entry: entry,
+          isNew: true,
+          initialPreviewBytes: previewBytes,
+          initialPendingAttachments: initialPendingAttachments,
+        ),
       ),
     );
     if (result != null) _load();
@@ -214,11 +205,11 @@ class _JournalListScreenState extends State<JournalListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('MyKid Journal'),
+        title: Text(AppLocalizations.of(context)!.appTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.photo_library),
-            tooltip: 'Batch import',
+            tooltip: AppLocalizations.of(context)!.batchImportTooltip,
             onPressed: () => Navigator.of(context).pushNamed('/import'),
           ),
           IconButton(
@@ -240,7 +231,7 @@ class _JournalListScreenState extends State<JournalListScreen> {
                         children: [
                           Text(_error!, textAlign: TextAlign.center),
                           const SizedBox(height: 16),
-                          FilledButton(onPressed: _load, child: const Text('Retry')),
+                          FilledButton(onPressed: _load, child: Text(AppLocalizations.of(context)!.retry)),
                         ],
                       ),
                     ),
@@ -252,12 +243,12 @@ class _JournalListScreenState extends State<JournalListScreen> {
                           children: [
                             Icon(Icons.book, size: 64, color: Theme.of(context).colorScheme.outline),
                             const SizedBox(height: 16),
-                            const Text('No entries yet'),
+                            Text(AppLocalizations.of(context)!.noEntriesYet),
                             const SizedBox(height: 8),
                             FilledButton.icon(
                               onPressed: _createEntry,
                               icon: const Icon(Icons.add),
-                              label: const Text('Add first entry'),
+                              label: Text(AppLocalizations.of(context)!.addFirstEntry),
                             ),
                           ],
                         ),
@@ -269,11 +260,11 @@ class _JournalListScreenState extends State<JournalListScreen> {
                           final e = _entries[index];
                           return ListTile(
                             title: Text(
-                              e.text.isEmpty ? 'No title' : (e.text.length > 80 ? '${e.text.substring(0, 80)}...' : e.text),
+                              e.text.isEmpty ? AppLocalizations.of(context)!.noTitle : (e.text.length > 80 ? '${e.text.substring(0, 80)}...' : e.text),
                             ),
                             subtitle: Text(_formatDate(e.date)),
                             trailing: e.assets.isNotEmpty
-                                ? Text('${e.assets.length} photo(s)', style: Theme.of(context).textTheme.bodySmall)
+                                ? Text(AppLocalizations.of(context)!.photosCount(e.assets.length), style: Theme.of(context).textTheme.bodySmall)
                                 : null,
                             onTap: () => _openEntry(e),
                           );
@@ -291,9 +282,10 @@ class _JournalListScreenState extends State<JournalListScreen> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final entryDay = DateTime(d.year, d.month, d.day);
-    if (entryDay == today) return 'Today';
+    final l10n = AppLocalizations.of(context)!;
+    if (entryDay == today) return l10n.today;
     final yesterday = today.subtract(const Duration(days: 1));
-    if (entryDay == yesterday) return 'Yesterday';
+    if (entryDay == yesterday) return l10n.yesterday;
     return '${d.day}.${d.month}.${d.year}';
   }
 }

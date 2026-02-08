@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../l10n/app_localizations.dart';
+
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
@@ -30,14 +32,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Check your email to confirm your account.')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.checkEmailConfirm)),
         );
         Navigator.of(context).pushReplacementNamed('/login');
       }
     } on AuthException catch (e) {
       final msg = e.message;
       setState(() => _error = msg.contains('anonymous') || msg.contains('disabled')
-          ? 'Sign-up is disabled. In Supabase: Authentication → Providers → Email → turn on “Allow new users to sign up”.'
+          ? AppLocalizations.of(context)!.signUpDisabled
           : msg);
     } catch (e) {
       setState(() => _error = e.toString());
@@ -58,7 +60,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create account'),
+        title: Text(AppLocalizations.of(context)!.createAccount),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -69,29 +71,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 24),
-                const Text(
-                  'Sign up for MyKid Journal',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                Text(
+                  AppLocalizations.of(context)!.signUpTitle,
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Enter your email and choose a password.',
+                  AppLocalizations.of(context)!.signUpSubtitle,
                   style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 32),
                 TextFormField(
                   controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    hintText: 'you@example.com',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.email,
+                    hintText: AppLocalizations.of(context)!.hintEmail,
+                    border: const OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.emailAddress,
                   autocorrect: false,
                   validator: (v) {
                     final s = v?.trim() ?? '';
-                    if (s.isEmpty) return 'Enter your email';
-                    if (!s.contains('@') || !s.contains('.')) return 'Enter a valid email';
+                    if (s.isEmpty) return AppLocalizations.of(context)!.enterYourEmail;
+                    if (!s.contains('@') || !s.contains('.')) return AppLocalizations.of(context)!.enterValidEmail;
                     return null;
                   },
                 ),
@@ -99,7 +101,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 TextFormField(
                   controller: _passwordController,
                   decoration: InputDecoration(
-                    labelText: 'Password',
+                    labelText: AppLocalizations.of(context)!.password,
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
                       icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
@@ -108,8 +110,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   obscureText: _obscurePassword,
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'Choose a password';
-                    if (v.length < 6) return 'Password must be at least 6 characters';
+                    final l10n = AppLocalizations.of(context)!;
+                    if (v == null || v.isEmpty) return l10n.choosePassword;
+                    if (v.length < 6) return l10n.passwordMinLength;
                     return null;
                   },
                 ),
@@ -117,7 +120,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 TextFormField(
                   controller: _confirmPasswordController,
                   decoration: InputDecoration(
-                    labelText: 'Confirm password',
+                    labelText: AppLocalizations.of(context)!.confirmPassword,
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
                       icon: Icon(_obscureConfirm ? Icons.visibility_off : Icons.visibility),
@@ -126,7 +129,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   obscureText: _obscureConfirm,
                   validator: (v) {
-                    if (v != _passwordController.text) return 'Passwords do not match';
+                    if (v != _passwordController.text) return AppLocalizations.of(context)!.passwordsDoNotMatch;
                     return null;
                   },
                 ),
@@ -142,12 +145,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   onPressed: _loading ? null : _signUp,
                   child: _loading
                       ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Text('Sign up'),
+                      : Text(AppLocalizations.of(context)!.signUp),
                 ),
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: _loading ? null : () => Navigator.of(context).pushReplacementNamed('/login'),
-                  child: const Text('Already have an account? Sign in'),
+                  child: Text(AppLocalizations.of(context)!.alreadyHaveAccount),
                 ),
               ],
             ),

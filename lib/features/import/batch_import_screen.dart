@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/immich_service.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/journal_entry.dart';
 import '../journal/journal_entry_screen.dart';
 
@@ -25,7 +26,7 @@ class _BatchImportScreenState extends State<BatchImportScreen> {
   Future<void> _pickAndUpload() async {
     final client = await _immich.getClient();
     if (client == null) {
-      setState(() => _error = 'Configure Immich in Settings first');
+      setState(() => _error = AppLocalizations.of(context)!.configureImmichFirst);
       return;
     }
     setState(() {
@@ -45,7 +46,7 @@ class _BatchImportScreenState extends State<BatchImportScreen> {
     if (files.isEmpty) {
       setState(() {
         _picking = false;
-        _error = 'No valid files selected';
+        _error = AppLocalizations.of(context)!.noValidFiles;
       });
       return;
     }
@@ -88,12 +89,12 @@ class _BatchImportScreenState extends State<BatchImportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Batch import')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.batchImport)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text(
-            'Select multiple photos/videos from your device. They will be uploaded to Immich, then you can create one journal entry with all of them.',
+          Text(
+            AppLocalizations.of(context)!.batchImportDescription,
           ),
           const SizedBox(height: 24),
           if (_error != null) ...[
@@ -103,22 +104,22 @@ class _BatchImportScreenState extends State<BatchImportScreen> {
           if (_uploading) ...[
             LinearProgressIndicator(value: _totalCount > 0 ? _uploadedCount / _totalCount : null),
             const SizedBox(height: 8),
-            Text('Uploaded $_uploadedCount / $_totalCount'),
+            Text(AppLocalizations.of(context)!.uploadedCount(_uploadedCount, _totalCount)),
             const SizedBox(height: 24),
           ],
           FilledButton.icon(
             onPressed: (_picking || _uploading) ? null : _pickAndUpload,
             icon: _picking ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.photo_library),
-            label: Text(_picking ? 'Picking...' : _uploading ? 'Uploading...' : 'Pick files and upload'),
+            label: Text(_picking ? AppLocalizations.of(context)!.picking : _uploading ? AppLocalizations.of(context)!.uploading : AppLocalizations.of(context)!.pickFilesAndUpload),
           ),
           if (_uploadedAssetIds.isNotEmpty) ...[
             const Divider(height: 32),
-            Text('${_uploadedAssetIds.length} file(s) uploaded.'),
+            Text(AppLocalizations.of(context)!.filesUploadedCount(_uploadedAssetIds.length)),
             const SizedBox(height: 16),
             FilledButton.icon(
               onPressed: _createSingleEntry,
               icon: const Icon(Icons.add),
-              label: const Text('Create one journal entry with all'),
+              label: Text(AppLocalizations.of(context)!.createOneEntryWithAll),
             ),
           ],
         ],

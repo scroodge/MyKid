@@ -6,6 +6,8 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// Supabase Storage bucket for user avatars. Create in Dashboard: Storage → New bucket → name "avatars" → Public bucket.
 const String _avatarsBucket = 'avatars';
 
@@ -64,11 +66,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
       uiSettings: [
         AndroidUiSettings(
-          toolbarTitle: 'Crop photo',
+          toolbarTitle: AppLocalizations.of(context)!.cropPhoto,
           lockAspectRatio: true,
         ),
         IOSUiSettings(
-          title: 'Crop photo',
+          title: AppLocalizations.of(context)!.cropPhoto,
           aspectRatioLockEnabled: true,
         ),
       ],
@@ -113,7 +115,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _uploadingAvatar = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Photo updated')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.photoUpdated)),
         );
       }
     } on StorageException catch (e) {
@@ -122,7 +124,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _uploadingAvatar = false;
           _error = e.message.isNotEmpty
               ? e.message
-              : 'Upload failed. Create bucket "$_avatarsBucket" in Supabase Storage (public).';
+              : AppLocalizations.of(context)!.uploadFailedAvatar;
         });
       }
     } catch (e) {
@@ -144,7 +146,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('Camera'),
+              title: Text(AppLocalizations.of(context)!.camera),
               onTap: () {
                 Navigator.pop(context);
                 _pickAndCropAvatar(ImageSource.camera);
@@ -152,7 +154,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Gallery'),
+              title: Text(AppLocalizations.of(context)!.gallery),
               onTap: () {
                 Navigator.pop(context);
                 _pickAndCropAvatar(ImageSource.gallery);
@@ -199,7 +201,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(AppLocalizations.of(context)!.profile),
         actions: [
           TextButton(
             onPressed: _saving ? null : _save,
@@ -209,7 +211,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Save'),
+                : Text(AppLocalizations.of(context)!.save),
           ),
         ],
       ),
@@ -296,7 +298,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 8),
           Center(
             child: Text(
-              'Tap to add or change photo',
+              AppLocalizations.of(context)!.tapToAddOrChangePhoto,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -305,9 +307,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 24),
           TextField(
             controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: 'Name',
-              hintText: 'Your name',
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context)!.name,
+              hintText: AppLocalizations.of(context)!.yourName,
             ),
             textCapitalization: TextCapitalization.words,
             autocorrect: false,
@@ -317,7 +319,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             initialValue: email,
             readOnly: true,
             decoration: InputDecoration(
-              labelText: 'Email',
+              labelText: AppLocalizations.of(context)!.email,
               filled: true,
               fillColor: Theme.of(context)
                   .colorScheme

@@ -1,4 +1,4 @@
-/// Child profile: name, date of birth, optional Immich album id.
+/// Child profile: name, date of birth, optional Immich album id, optional avatar URL.
 class Child {
   Child({
     required this.id,
@@ -6,6 +6,7 @@ class Child {
     required this.name,
     this.dateOfBirth,
     this.immichAlbumId,
+    this.avatarUrl,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -15,6 +16,7 @@ class Child {
   final String name;
   final DateTime? dateOfBirth;
   final String? immichAlbumId;
+  final String? avatarUrl;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -24,6 +26,7 @@ class Child {
         'name': name,
         'date_of_birth': dateOfBirth?.toIso8601String().split('T').first,
         'immich_album_id': immichAlbumId,
+        'avatar_url': avatarUrl,
         'created_at': createdAt.toIso8601String(),
         'updated_at': updatedAt.toIso8601String(),
       };
@@ -64,6 +67,7 @@ class Child {
           ? DateTime.tryParse(json['date_of_birth'] as String)
           : null,
       immichAlbumId: json['immich_album_id'] as String?,
+      avatarUrl: json['avatar_url'] as String?,
       createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? '') ?? DateTime.now(),
     );

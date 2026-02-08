@@ -1,0 +1,183 @@
+{
+  "@@locale": "en",
+  "appTitle": "MyKid Journal",
+  "signInSubtitle": "Sign in to sync your journal",
+  "email": "Email",
+  "password": "Password",
+  "signIn": "Sign in",
+  "createAccount": "Create account",
+  "signUpTitle": "Sign up for MyKid Journal",
+  "signUpSubtitle": "Enter your email and choose a password.",
+  "hintEmail": "you@example.com",
+  "enterYourEmail": "Enter your email",
+  "enterValidEmail": "Enter a valid email",
+  "choosePassword": "Choose a password",
+  "passwordMinLength": "Password must be at least 6 characters",
+  "confirmPassword": "Confirm password",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "signUp": "Sign up",
+  "alreadyHaveAccount": "Already have an account? Sign in",
+  "checkEmailConfirm": "Check your email to confirm your account.",
+  "signUpDisabled": "Sign-up is disabled. In Supabase: Authentication → Providers → Email → turn on \"Allow new users to sign up\".",
+  "settings": "Settings",
+  "profile": "Profile",
+  "edit": "Edit",
+  "family": "Family",
+  "manageChildren": "Manage children",
+  "manageChildrenSubtitle": "Name, date of birth. Photos can be saved to a child's Immich album.",
+  "sync": "Sync",
+  "immich": "Immich",
+  "immichSubtitle": "Server URL and API key",
+  "account": "Account",
+  "signOut": "Sign out",
+  "version": "Version {version}",
+  "@version": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "save": "Save",
+  "immichDescription": "Your Immich server URL and API key (create key in Immich Settings → API Keys). A successful Test connection saves them.",
+  "serverUrl": "Server URL",
+  "serverUrlHint": "https://photos.example.com",
+  "apiKey": "API Key",
+  "enterUrlAndKey": "Enter URL and API key",
+  "connectedSuccessfully": "Connected successfully",
+  "connectionFailed": "Connection failed",
+  "testConnection": "Test connection",
+  "testing": "Testing...",
+  "connectedAndSaved": "Connected and saved",
+  "saved": "Saved",
+  "children": "Children",
+  "noChildrenYet": "No children yet",
+  "addChild": "Add child",
+  "deleteChild": "Delete child?",
+  "deleteChildConfirm": "Remove \"{name}\"? Journal entries will not be deleted.",
+  "@deleteChildConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "bornDate": "Born {day}.{month}.{year}",
+  "@bornDate": {
+    "placeholders": {
+      "day": {"type": "int"},
+      "month": {"type": "int"},
+      "year": {"type": "int"}
+    }
+  },
+  "editChild": "Edit child",
+  "tapToAddOrChangePhoto": "Tap to add or change photo",
+  "name": "Name",
+  "dateOfBirthOptional": "Date of birth (optional)",
+  "camera": "Camera",
+  "gallery": "Gallery",
+  "cropPhoto": "Crop photo",
+  "photoWillBeSaved": "Photo will be saved with the profile",
+  "photoUpdated": "Photo updated",
+  "uploadFailedAvatar": "Upload failed. Create bucket \"avatars\" in Supabase Storage (public).",
+  "uploadFailedChildAvatar": "Upload failed. Check Storage policies for child avatars.",
+  "configureImmichFirst": "Configure Immich in Settings first",
+  "fromCamera": "From camera",
+  "fromCameraSubtitle": "Take a photo now, date = today",
+  "fromGallery": "From gallery",
+  "fromGallerySubtitle": "Pick a photo, date & place from photo",
+  "emptyEntry": "Empty entry",
+  "batchImport": "Batch import",
+  "batchImportTooltip": "Batch import",
+  "timeline": "Timeline",
+  "addChildPrompt": "Add child",
+  "addChildPromptSubtitle": "Tap to create profile",
+  "selectChildAbove": "Select child above",
+  "noEntries": "No entries",
+  "addFirstEntry": "Add first entry",
+  "noEntriesYet": "No entries yet",
+  "addEntry": "Add entry",
+  "retry": "Retry",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "noTitle": "No title",
+  "photosCount": "{count} photo(s)",
+  "@photosCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "newEntry": "New entry",
+  "entry": "Entry",
+  "deleteEntry": "Delete entry?",
+  "alsoRemoveFromAlbum": "Also remove photos from child's album",
+  "date": "Date",
+  "child": "Child",
+  "addChildInSettings": "Add a child in Settings → Manage children",
+  "placeOptional": "Place (optional)",
+  "placeHint": "e.g. from photo or type here",
+  "description": "Description",
+  "descriptionHint": "What happened today?",
+  "photosVideos": "Photos / videos",
+  "add": "Add",
+  "noMediaAttached": "No media attached. Add via \"Add\" or batch import.",
+  "pendingSaveToUpload": "Pending (save to upload)",
+  "couldNotReadImage": "Could not read image",
+  "uploadFailedWithError": "Upload failed: {error}",
+  "@uploadFailedWithError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "selectAChild": "Select a child",
+  "pickFilesAndUpload": "Pick files and upload",
+  "picking": "Picking...",
+  "uploading": "Uploading...",
+  "uploadedCount": "Uploaded {current} / {total}",
+  "@uploadedCount": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "batchImportDescription": "Select multiple photos/videos from your device. They will be uploaded to Immich, then you can create one journal entry with all of them.",
+  "noValidFiles": "No valid files selected",
+  "filesUploadedCount": "{count} file(s) uploaded.",
+  "@filesUploadedCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "createOneEntryWithAll": "Create one journal entry with all",
+  "yourName": "Your name",
+  "profileUpdated": "Profile updated",
+  "ageYearsMonthsDays": "{years} y {months} m {days} d",
+  "@ageYearsMonthsDays": {
+    "placeholders": {
+      "years": {"type": "int"},
+      "months": {"type": "int"},
+      "days": {"type": "int"}
+    }
+  },
+  "ageMonthsDays": "{months} m {days} d",
+  "@ageMonthsDays": {
+    "placeholders": {
+      "months": {"type": "int"},
+      "days": {"type": "int"}
+    }
+  },
+  "ageDays": "{days} d",
+  "@ageDays": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "ageUnknown": "—",
+  "useFamilyImmich": "Use family's Immich",
+  "useFamilyImmichDescription": "Your family has Immich configured. Use it on this device? The server URL and API key will be saved locally.",
+  "saveToFamily": "Save to family",
+  "saveToFamilyDescription": "Store the current Immich server URL and API key for your family? Other members will be able to use the same Immich. The key is stored encrypted in the cloud.",
+  "useFamilyImmichFailed": "Could not load family Immich settings"
+}

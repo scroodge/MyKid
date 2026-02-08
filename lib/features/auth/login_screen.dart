@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../l10n/app_localizations.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -57,23 +59,23 @@ class _LoginScreenState extends State<LoginScreen> {
                     : 'assets/brand/logo/mykid_logo_text_only.png',
                 height: 72,
                 fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => const Text(
-                  'MyKid Journal',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                errorBuilder: (_, __, ___) => Text(
+                  AppLocalizations.of(context)!.appTitle,
+                  style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Sign in to sync your journal',
+              Text(
+                AppLocalizations.of(context)!.signInSubtitle,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
               TextField(
                 controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.email,
+                  border: const OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.emailAddress,
                 autocorrect: false,
@@ -81,9 +83,9 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16),
               TextField(
                 controller: _passwordController,
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.password,
+                  border: const OutlineInputBorder(),
                 ),
                 obscureText: true,
               ),
@@ -94,11 +96,11 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: _loading ? null : _signIn,
-                child: _loading ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Sign in'),
+                child: _loading ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2)) : Text(AppLocalizations.of(context)!.signIn),
               ),
               TextButton(
                 onPressed: _loading ? null : () => Navigator.of(context).pushNamed('/signup'),
-                child: const Text('Create account'),
+                child: Text(AppLocalizations.of(context)!.createAccount),
               ),
             ],
           ),

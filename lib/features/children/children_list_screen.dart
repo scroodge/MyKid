@@ -1,7 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../data/child.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/children_repository.dart';
 import 'child_edit_screen.dart';
 
@@ -38,14 +39,16 @@ class _ChildrenListScreenState extends State<ChildrenListScreen> {
         builder: (context) => ChildEditScreen(child: child),
       ),
     );
-    if (edited != null) _load();
+    if (edited != null) {
+      _load();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Children'),
+        title: Text(AppLocalizations.of(context)!.children),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -54,12 +57,12 @@ class _ChildrenListScreenState extends State<ChildrenListScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text('No children yet'),
+                      Text(AppLocalizations.of(context)!.noChildrenYet),
                       const SizedBox(height: 16),
                       FilledButton.icon(
                         onPressed: () => _openEdit(),
                         icon: const Icon(Icons.add),
-                        label: const Text('Add child'),
+                        label: Text(AppLocalizations.of(context)!.addChild),
                       ),
                     ],
                   ),
@@ -70,9 +73,33 @@ class _ChildrenListScreenState extends State<ChildrenListScreen> {
                   itemBuilder: (context, index) {
                     final c = _children[index];
                     return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+                        child: c.avatarUrl != null && c.avatarUrl!.isNotEmpty
+                            ? ClipOval(
+                                child: CachedNetworkImage(
+                                  imageUrl: c.avatarUrl!,
+                                  width: 40,
+                                  height: 40,
+                                  fit: BoxFit.cover,
+                                  placeholder: (_, __) => Icon(
+                                    Icons.child_care,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
+                                  errorWidget: (_, __, ___) => Icon(
+                                    Icons.child_care,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              )
+                            : Icon(
+                                Icons.child_care,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
+                      ),
                       title: Text(c.name),
                       subtitle: c.dateOfBirth != null
-                          ? Text('Born ${DateFormat.yMMMd().format(c.dateOfBirth!)}')
+                          ? Text(AppLocalizations.of(context)!.bornDate(c.dateOfBirth!.day, c.dateOfBirth!.month, c.dateOfBirth!.year))
                           : null,
                       trailing: IconButton(
                         icon: const Icon(Icons.delete_outline),
@@ -80,11 +107,11 @@ class _ChildrenListScreenState extends State<ChildrenListScreen> {
                           final confirm = await showDialog<bool>(
                             context: context,
                             builder: (ctx) => AlertDialog(
-                              title: const Text('Delete child?'),
-                              content: Text('Remove "${c.name}"? Journal entries will not be deleted.'),
+                              title: Text(AppLocalizations.of(context)!.deleteChild),
+                              content: Text(AppLocalizations.of(context)!.deleteChildConfirm(c.name)),
                               actions: [
-                                TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-                                FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete')),
+                                TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(AppLocalizations.of(context)!.cancel)),
+                                FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(AppLocalizations.of(context)!.delete)),
                               ],
                             ),
                           );

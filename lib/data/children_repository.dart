@@ -55,6 +55,7 @@ class ChildrenRepository {
     String? name,
     DateTime? dateOfBirth,
     String? immichAlbumId,
+    String? avatarUrl,
   }) async {
     final uid = _userId;
     if (uid == null) return null;
@@ -62,6 +63,7 @@ class ChildrenRepository {
     if (name != null) payload['name'] = name;
     if (dateOfBirth != null) payload['date_of_birth'] = dateOfBirth.toIso8601String().split('T').first;
     if (immichAlbumId != null) payload['immich_album_id'] = immichAlbumId;
+    if (avatarUrl != null) payload['avatar_url'] = avatarUrl;
     if (payload.isEmpty) return get(id);
     final res = await _client
         .from('children')

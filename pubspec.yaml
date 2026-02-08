@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   cupertino_icons: ^1.0.8
   # Backend & auth
   supabase_flutter: ^2.8.0
@@ -29,7 +31,7 @@ dependencies:
   geocoding: ^3.0.0
   geolocator: ^13.0.2
   # UI
-  intl: ^0.19.0
+  intl: ^0.20.2
   cached_network_image: ^3.4.1
   uuid: ^4.5.1
   flutter_dotenv: ^5.2.1
@@ -45,6 +47,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
   assets:
     - .env
     - assets/brand/app_icon/
