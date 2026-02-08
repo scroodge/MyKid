@@ -30,7 +30,11 @@ class _ImmichSettingsScreenState extends State<ImmichSettingsScreen> {
   void initState() {
     super.initState();
     _load();
+    _urlController.addListener(_onFieldsChanged);
+    _apiKeyController.addListener(_onFieldsChanged);
   }
+
+  void _onFieldsChanged() => setState(() {});
 
   Future<void> _load() async {
     final url = await _storage.getServerUrl();
@@ -200,6 +204,8 @@ class _ImmichSettingsScreenState extends State<ImmichSettingsScreen> {
 
   @override
   void dispose() {
+    _urlController.removeListener(_onFieldsChanged);
+    _apiKeyController.removeListener(_onFieldsChanged);
     _urlController.dispose();
     _apiKeyController.dispose();
     super.dispose();
@@ -226,6 +232,39 @@ class _ImmichSettingsScreenState extends State<ImmichSettingsScreen> {
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
           ),
+          if (_loadingFamily) ...[
+            const SizedBox(height: 16),
+            const Center(child: CircularProgressIndicator()),
+          ] else if (_familyHasImmich &&
+              (_urlController.text.trim().isEmpty || _apiKeyController.text.trim().isEmpty)) ...[
+            const SizedBox(height: 24),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.useFamilyImmich,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      onPressed: _loading ? null : _useFamilyImmich,
+                      icon: _loading
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.family_restroom, size: 20),
+                      label: Text(AppLocalizations.of(context)!.useFamilyImmich),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 24),
           TextField(
             controller: _urlController,
@@ -269,6 +308,14 @@ class _ImmichSettingsScreenState extends State<ImmichSettingsScreen> {
                 : const Icon(Icons.wifi_tethering),
             label: Text(_loading ? AppLocalizations.of(context)!.testing : AppLocalizations.of(context)!.testConnection),
           ),
+          if (_urlController.text.trim().isNotEmpty && _apiKeyController.text.trim().isNotEmpty) ...[
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: _loading ? null : _saveToFamily,
+              icon: const Icon(Icons.family_restroom, size: 20),
+              label: Text(AppLocalizations.of(context)!.saveToFamily),
+            ),
+          ],
         ],
       ),
     );

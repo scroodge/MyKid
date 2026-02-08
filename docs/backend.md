@@ -57,3 +57,23 @@ Conflict resolution: when syncing, compare `updated_at` (last write wins) or mer
 ## Auth
 
 Use Supabase Auth (e.g. email/password or OAuth). After sign-in, `Supabase.instance.client.auth.currentUser?.id` is the `user_id` for all journal_entries operations.
+
+## Households and family Immich (Vault)
+
+To allow family members to share one Immich configuration, the app uses **households** and **Supabase Vault** for storing the API key encrypted.
+
+### Tables
+
+- **households**: `id`, `owner_id` (auth.users), `name`, `created_at`, `updated_at`. RLS: only members can read/update.
+- **household_members**: `household_id`, `user_id`, `role` ('owner' | 'member'), `joined_at`. RLS: members can read; owner or self can delete; owner or household owner can insert.
+- **household_settings**: `household_id` (PK), `immich_server_url`, `immich_vault_secret_id` (uuid of secret in Vault), `updated_at`. RLS: only members can read/insert/update.
+
+### RPCs (SECURITY DEFINER, use Vault)
+
+- **get_household_immich_config(p_household_id uuid)**  
+  Returns `{ "server_url": text, "api_key": text }` for the household. Checks that `auth.uid()` is in `household_members`; reads URL from `household_settings` and decrypted API key from `vault.decrypted_secrets`. Call only after user consent (e.g. "Use family's Immich?").
+
+- **set_household_immich_config(p_household_id uuid, p_server_url text, p_api_key text)**  
+  Saves `immich_server_url` and stores `p_api_key` in Vault (create or update secret per household). Only call after user consent (e.g. "Save to family").
+
+Migrations: `20250208300000_households_and_members.sql`, `20250208300001_household_settings_immich_vault.sql`. Requires Supabase Vault extension (enabled by default on Supabase Cloud).
