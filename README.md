@@ -126,7 +126,7 @@ The app also supports loading these from a config file or build-time defines; se
 1. Create a project at [supabase.com](https://supabase.com).
 2. Run the migration in `supabase/migrations/` to create the `journal_entries` table and RLS.
 3. In Supabase Dashboard → Authentication → enable Email (or other providers you want).
-4. (Optional) Profile photos: in Dashboard → Storage create a **public** bucket named `avatars`. The app uploads user avatars there and stores the URL in auth user metadata.
+4. (Optional) Profile photos: run the storage migration so the `avatars` bucket and RLS policies exist (`supabase db push` or run `supabase/migrations/20250208100001_storage_avatars_bucket.sql` in the SQL editor). Without it, avatar upload fails with "row-level security policy".
 
 Table `journal_entries` and API are described in [docs/backend.md](docs/backend.md).
 
