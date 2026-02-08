@@ -51,10 +51,17 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'MyKid Journal',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
+              Image.asset(
+                Theme.of(context).brightness == Brightness.dark
+                    ? 'assets/brand/logo/mykid_logo_horizontal_dark.png'
+                    : 'assets/brand/logo/mykid_logo_text_only.png',
+                height: 72,
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) => const Text(
+                  'MyKid Journal',
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
               ),
               const SizedBox(height: 8),
               const Text(

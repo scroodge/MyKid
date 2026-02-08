@@ -121,6 +121,14 @@ A minimal line mark representing the parent–child bond, shaped into a heart / 
 - `assets/brand/app_icon/`
 - `assets/brand/illustrations/` (optional)
 
+### Logo graphic (lockup with text)
+- **`mykid_logo_text_only.png`** — horizontal lockup (mark + “My Kid” text). Use for:
+  - **Splash screen** (native splash; configured in `flutter_native_splash.yaml`)
+  - **Login screen** (above sign-in form)
+  - **Settings / About** (header with app name and version)
+  - **Website / landing**, **README**, **presentations**.  
+- **`mykid_logo_horizontal_dark.png`** — dark theme: splash (dark), login and settings in dark mode.
+
 ---
 
 ## Implementation notes (Flutter)

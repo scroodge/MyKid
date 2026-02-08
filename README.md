@@ -2,6 +2,8 @@
 
 A cross-platform (Android / iOS) app to keep a journal of your child's life: entries with photos/videos and text. Media is stored in **your** [Immich](https://immich.app) instance; journal entries sync via **Supabase**.
 
+For logo and branding (splash, login, README, presentations), see `assets/brand/logo/mykid_logo_text_only.png` and [docs/Brand.md](docs/Brand.md).
+
 ---
 
 ## Project Description (for AI / LLM context)

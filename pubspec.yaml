@@ -26,6 +26,7 @@ dependencies:
   file_picker: ^10.3.10
   exif: ^3.1.1
   geocoding: ^3.0.0
+  geolocator: ^13.0.2
   # UI
   intl: ^0.19.0
   cached_network_image: ^3.4.1
@@ -39,6 +40,7 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^5.0.0
   flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.7
 
 flutter:
   uses-material-design: true
@@ -67,6 +69,6 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/brand/app_icon/app_icon.png"
-  adaptive_icon_foreground: "assets/brand/app_icon/adaptive_foreground.png"
-  adaptive_icon_background: "#F4EFEA"
+  image_path: "assets/brand/app_icon/mykid_icon_1024.png"
+  adaptive_icon_foreground: "assets/brand/app_icon/mykid_icon_1024.png"
+  adaptive_icon_background: "#7A9BBE"

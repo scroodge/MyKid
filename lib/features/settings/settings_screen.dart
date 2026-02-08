@@ -1,156 +1,226 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../core/immich_client.dart';
-import '../../core/immich_storage.dart';
+String _displayNameFromUser(User? user) {
+  if (user == null) return '';
+  final meta = user.userMetadata;
+  final name = meta?['full_name'] as String?;
+  if (name != null && name.trim().isNotEmpty) return name.trim();
+  final email = user.email;
+  if (email == null || email.isEmpty) return '';
+  final prefix = email.split('@').first.trim();
+  return prefix.isNotEmpty ? prefix : email;
+}
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  static const String appVersion = '1.0.0';
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  final _storage = ImmichStorage();
-  final _urlController = TextEditingController();
-  final _apiKeyController = TextEditingController();
-  bool _loading = false;
-  String? _message;
-  bool _obscureKey = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  Future<void> _load() async {
-    final url = await _storage.getServerUrl();
-    final key = await _storage.getApiKey();
-    if (mounted) {
-      _urlController.text = url ?? '';
-      _apiKeyController.text = key ?? '';
-    }
-  }
-
-  Future<void> _testConnection() async {
-    final url = _urlController.text.trim();
-    final key = _apiKeyController.text.trim();
-    if (url.isEmpty || key.isEmpty) {
-      setState(() => _message = 'Enter URL and API key');
-      return;
-    }
-    setState(() {
-      _loading = true;
-      _message = null;
-    });
-    final baseUrl = url.endsWith('/') ? url.substring(0, url.length - 1) : url;
-    final client = ImmichClient(baseUrl: baseUrl, apiKey: key);
-    final ok = await client.checkConnection();
-    if (mounted) {
-      setState(() {
-        _loading = false;
-        _message = ok ? 'Connected successfully' : 'Connection failed';
-      });
-      if (ok) {
-        await _save(showSnackBar: false);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Connected and saved')),
-          );
-        }
-      }
-    }
-  }
-
-  Future<void> _save({bool showSnackBar = true}) async {
-    await _storage.setServerUrl(_urlController.text.trim().isEmpty ? null : _urlController.text.trim());
-    await _storage.setApiKey(_apiKeyController.text.trim().isEmpty ? null : _apiKeyController.text.trim());
-    if (mounted && showSnackBar) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Saved')));
-    }
-  }
-
-  @override
-  void dispose() {
-    _urlController.dispose();
-    _apiKeyController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
+    final user = Supabase.instance.client.auth.currentUser;
+    final displayName = _displayNameFromUser(user);
+    final email = user?.email ?? '';
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
-        actions: [
-          TextButton(
-            onPressed: _loading ? null : _save,
-            child: const Text('Save'),
-          ),
-        ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
-          const Text('Immich', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          const Text('Your Immich server URL and API key (create key in Immich Settings → API Keys). A successful Test connection saves them.'),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _urlController,
-            decoration: const InputDecoration(
-              labelText: 'Server URL',
-              hintText: 'https://photos.example.com',
-              border: OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.url,
-            autocorrect: false,
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _apiKeyController,
-            decoration: InputDecoration(
-              labelText: 'API Key',
-              border: const OutlineInputBorder(),
-              suffixIcon: IconButton(
-                icon: Icon(_obscureKey ? Icons.visibility : Icons.visibility_off),
-                onPressed: () => setState(() => _obscureKey = !_obscureKey),
+          // User block
+          Material(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            child: InkWell(
+              onTap: () async {
+                await Navigator.of(context).pushNamed('/profile');
+                if (mounted) setState(() {});
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 32,
+                      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+                      child: Icon(
+                        Icons.person,
+                        size: 32,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            displayName.isEmpty ? 'Profile' : displayName,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                          if (email.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              email,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    Text(
+                      'Edit',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.chevron_right,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ],
+                ),
               ),
             ),
-            obscureText: _obscureKey,
-            autocorrect: false,
           ),
-          const SizedBox(height: 16),
-          if (_message != null) ...[
-            Text(_message!, style: TextStyle(color: Theme.of(context).colorScheme.primary)),
-            const SizedBox(height: 8),
-          ],
-          FilledButton.icon(
-            onPressed: _loading ? null : _testConnection,
-            icon: _loading ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.wifi_tethering),
-            label: Text(_loading ? 'Testing...' : 'Test connection'),
+          const SizedBox(height: 24),
+
+          // Section: Семья / Дети
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 8),
+            child: Text(
+              'Family',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
           ),
-          const Divider(height: 32),
-          const Text('Children', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          ListTile(
-            title: const Text('Manage children'),
-            subtitle: const Text('Name, date of birth. Photos can be saved to a child\'s Immich album.'),
-            leading: const Icon(Icons.child_care),
-            onTap: () => Navigator.of(context).pushNamed('/children'),
+          Card(
+            margin: EdgeInsets.zero,
+            child: Column(
+              children: [
+                ListTile(
+                  leading: Icon(Icons.child_care, color: Theme.of(context).colorScheme.tertiary),
+                  title: const Text('Manage children'),
+                  subtitle: const Text(
+                    'Name, date of birth. Photos can be saved to a child\'s Immich album.',
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).pushNamed('/children'),
+                ),
+              ],
+            ),
           ),
-          const Divider(height: 32),
-          const Text('Account', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          ListTile(
-            title: const Text('Sign out'),
-            leading: const Icon(Icons.logout),
-            onTap: () async {
-              await Supabase.instance.client.auth.signOut();
-              if (mounted) Navigator.of(context).pushNamedAndRemoveUntil('/login', (r) => false);
-            },
+          const SizedBox(height: 24),
+
+          // Section: Синхронизация / Immich
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 8),
+            child: Text(
+              'Sync',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ),
+          Card(
+            margin: EdgeInsets.zero,
+            child: Column(
+              children: [
+                ListTile(
+                  leading: Icon(Icons.cloud_outlined, color: Theme.of(context).colorScheme.secondary),
+                  title: const Text('Immich'),
+                  subtitle: const Text('Server URL and API key'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).pushNamed('/settings-immich'),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Section: Аккаунт
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 8),
+            child: Text(
+              'Account',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ),
+          Card(
+            margin: EdgeInsets.zero,
+            child: Column(
+              children: [
+                ListTile(
+                  leading: Icon(Icons.logout, color: Theme.of(context).colorScheme.error),
+                  title: const Text('Sign out'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () async {
+                    await Supabase.instance.client.auth.signOut();
+                    if (context.mounted) {
+                      Navigator.of(context).pushNamedAndRemoveUntil('/login', (r) => false);
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+
+          // Footer: app name + version
+          const SizedBox(height: 32),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    Theme.of(context).brightness == Brightness.dark
+                        ? 'assets/brand/logo/mykid_logo_horizontal_dark.png'
+                        : 'assets/brand/logo/mykid_logo_text_only.png',
+                    height: 40,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => Icon(
+                      Icons.child_care,
+                      size: 40,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'MyKid Journal',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Version ${SettingsScreen.appVersion}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

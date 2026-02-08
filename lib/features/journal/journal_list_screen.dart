@@ -119,6 +119,15 @@ class _JournalListScreenState extends State<JournalListScreen> {
         if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not read image')));
         return;
       }
+      // Place: из EXIF снимка (если камера записала GPS) или текущая геопозиция
+      String? location;
+      try {
+        final meta = await readPhotoMetadata(x.path);
+        location = meta.location;
+        if (location == null || location.isEmpty) location = await getCurrentPlaceName();
+      } catch (_) {
+        location = await getCurrentPlaceName();
+      }
       final filename = x.name.isEmpty ? 'image.jpg' : x.name;
       final result = await _immich.uploadFromBytes(bytes, filename);
       if (!mounted) {
@@ -130,7 +139,7 @@ class _JournalListScreenState extends State<JournalListScreen> {
         await _openNewEntry(
           date: DateTime.now(),
           assets: [JournalEntryAsset(immichAssetId: result.id!)],
-          location: null,
+          location: location,
           previewBytes: {result.id!: bytes},
         );
       } else {

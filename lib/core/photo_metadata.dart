@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:exif/exif.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 
 /// Read date and location from image file (EXIF). Returns (date, location string or null).
 Future<({DateTime? date, String? location})> readPhotoMetadata(String filePath) async {
@@ -49,6 +50,32 @@ Future<({DateTime? date, String? location})> readPhotoMetadata(String filePath) 
     }
   } catch (_) {}
   return (date: date, location: location);
+}
+
+/// Get current device location as a place name (e.g. for camera photos). Returns null if permission denied or unavailable.
+Future<String?> getCurrentPlaceName() async {
+  try {
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return null;
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) return null;
+    }
+    final position = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.medium),
+    ).timeout(const Duration(seconds: 10));
+    final places = await placemarkFromCoordinates(position.latitude, position.longitude);
+    if (places.isEmpty) return null;
+    final p = places.first;
+    final parts = [p.locality, p.administrativeArea, p.country]
+        .where((e) => e != null && e.isNotEmpty)
+        .map((e) => e!)
+        .toList();
+    return parts.isEmpty ? null : parts.join(', ');
+  } catch (_) {
+    return null;
+  }
 }
 
 double? _gpsToDecimal(String value, bool negate) {

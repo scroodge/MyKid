@@ -7,6 +7,8 @@ import 'features/auth/signup_screen.dart';
 import 'features/children/children_list_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/import/batch_import_screen.dart';
+import 'features/settings/immich_settings_screen.dart';
+import 'features/settings/profile_screen.dart';
 import 'features/settings/settings_screen.dart';
 
 class MyKidApp extends StatelessWidget {
@@ -24,6 +26,8 @@ class MyKidApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignUpScreen(),
         '/settings': (context) => const SettingsScreen(),
+        '/profile': (context) => const ProfileScreen(),
+        '/settings-immich': (context) => const ImmichSettingsScreen(),
         '/children': (context) => const ChildrenListScreen(),
         '/import': (context) => const BatchImportScreen(),
       },

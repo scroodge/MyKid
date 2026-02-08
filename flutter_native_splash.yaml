@@ -1,0 +1,12 @@
+flutter_native_splash:
+  color: "#2E2E2E"
+  image: assets/brand/logo/mykid_logo_text_only.png
+  color_dark: "#2E2E2E"
+  image_dark: assets/brand/logo/mykid_logo_horizontal_dark.png
+  android_12:
+    color: "#2E2E2E"
+    image: assets/brand/logo/mykid_logo_text_only.png
+    icon_background_color: "#2E2E2E"
+    color_dark: "#2E2E2E"
+    image_dark: assets/brand/logo/mykid_logo_horizontal_dark.png
+    icon_background_color_dark: "#2E2E2E"
