@@ -52,13 +52,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _avatarUrl = _avatarUrlFromUser(user);
   }
 
-  void _refreshUserData() {
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user != null) {
-      _avatarUrl = _avatarUrlFromUser(user);
-    }
-  }
-
   Future<void> _pickAndCropAvatar(ImageSource source) async {
     final picker = ImagePicker();
     final xFile = source == ImageSource.camera
@@ -127,7 +120,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) {
         setState(() {
           _uploadingAvatar = false;
-          _error = e.message ?? 'Upload failed. Create bucket "$_avatarsBucket" in Supabase Storage (public).';
+          _error = e.message.isNotEmpty
+              ? e.message
+              : 'Upload failed. Create bucket "$_avatarsBucket" in Supabase Storage (public).';
         });
       }
     } catch (e) {
@@ -172,7 +167,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _save() async {
     _error = null;
     final name = _nameController.text.trim();
-    final user = Supabase.instance.client.auth.currentUser;
     final data = <String, dynamic>{
       'full_name': name.isEmpty ? null : name,
       if (_avatarUrl != null) 'avatar_url': _avatarUrl,

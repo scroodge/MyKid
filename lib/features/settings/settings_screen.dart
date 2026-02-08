@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:cached_network_image/cached_network_image.dart';
+
 String _displayNameFromUser(User? user) {
   if (user == null) return '';
   final meta = user.userMetadata;
@@ -10,6 +12,12 @@ String _displayNameFromUser(User? user) {
   if (email == null || email.isEmpty) return '';
   final prefix = email.split('@').first.trim();
   return prefix.isNotEmpty ? prefix : email;
+}
+
+String? _avatarUrlFromUser(User? user) {
+  if (user == null) return null;
+  final url = user.userMetadata?['avatar_url'] as String?;
+  return (url != null && url.trim().isNotEmpty) ? url.trim() : null;
 }
 
 class SettingsScreen extends StatefulWidget {
@@ -27,6 +35,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final user = Supabase.instance.client.auth.currentUser;
     final displayName = _displayNameFromUser(user);
     final email = user?.email ?? '';
+    final avatarUrl = _avatarUrlFromUser(user);
 
     return Scaffold(
       appBar: AppBar(
@@ -50,11 +59,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     CircleAvatar(
                       radius: 32,
                       backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
-                      child: Icon(
-                        Icons.person,
-                        size: 32,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                      child: avatarUrl != null && avatarUrl.isNotEmpty
+                          ? ClipOval(
+                              child: CachedNetworkImage(
+                                imageUrl: avatarUrl,
+                                width: 64,
+                                height: 64,
+                                fit: BoxFit.cover,
+                                placeholder: (_, __) => Icon(
+                                  Icons.person,
+                                  size: 32,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                                errorWidget: (_, __, ___) => Icon(
+                                  Icons.person,
+                                  size: 32,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            )
+                          : Icon(
+                              Icons.person,
+                              size: 32,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
