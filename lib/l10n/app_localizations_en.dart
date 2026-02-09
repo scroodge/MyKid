@@ -534,6 +534,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inviteAccepted => 'You\'ve joined the family';
 
   @override
+  String get alreadyMember => 'You\'re already a member of this family';
+
+  @override
   String get inviteAcceptFailed => 'Failed to accept invite';
 
   @override

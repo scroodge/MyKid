@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/household_invite_repository.dart';
@@ -22,13 +23,30 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
   String? _error;
   HouseholdInvite? _invite;
   bool _isAuthenticated = false;
+  static const String _pendingInviteTokenKey = 'pending_invite_token';
 
   @override
   void initState() {
     super.initState();
     _checkAuth();
-    if (widget.token != null) {
-      _loadInvite(widget.token!);
+    _loadInviteToken();
+  }
+
+  Future<void> _loadInviteToken() async {
+    String? token = widget.token;
+    
+    // If no token in widget, try to load from shared preferences (for email confirmation flow)
+    if (token == null) {
+      final prefs = await SharedPreferences.getInstance();
+      token = prefs.getString(_pendingInviteTokenKey);
+      if (token != null) {
+        // Clear saved token after loading
+        await prefs.remove(_pendingInviteTokenKey);
+      }
+    }
+    
+    if (token != null) {
+      _loadInvite(token);
     }
   }
 
@@ -49,6 +67,21 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
         }
       }
     });
+  }
+
+  Future<void> _checkAuthAndAccept() async {
+    // Check if user is now authenticated
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null && _invite != null && !_loading) {
+      // User is authenticated and we have invite - accept it
+      await _acceptInvite();
+    } else if (user != null && widget.token != null) {
+      // User is authenticated but invite not loaded - reload it
+      await _loadInvite(widget.token!);
+      if (_invite != null && !_loading) {
+        await _acceptInvite();
+      }
+    }
   }
 
   @override
@@ -106,17 +139,36 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
           SnackBar(content: Text(l10n.inviteAccepted)),
         );
       } else {
-        setState(() {
-          _loading = false;
-          _error = result.error ?? l10n.inviteAcceptFailed;
-        });
+        // Check if user is already a member
+        final errorMsg = result.error ?? '';
+        if (errorMsg.toLowerCase().contains('already a member') || 
+            errorMsg.toLowerCase().contains('already member')) {
+          // User is already in the family - show success message and close
+          Navigator.of(context).pop(true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.alreadyMember)),
+          );
+        } else {
+          setState(() {
+            _loading = false;
+            _error = result.error ?? l10n.inviteAcceptFailed;
+          });
+        }
       }
     } catch (e) {
       if (mounted) {
-        setState(() {
-          _loading = false;
-          _error = e.toString();
-        });
+        final errorStr = e.toString().toLowerCase();
+        if (errorStr.contains('already a member') || errorStr.contains('already member')) {
+          Navigator.of(context).pop(true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context)!.alreadyMember)),
+          );
+        } else {
+          setState(() {
+            _loading = false;
+            _error = e.toString();
+          });
+        }
       }
     }
   }
@@ -190,32 +242,44 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
                     ),
                     const SizedBox(height: 32),
                     Text(
-                      'Open the invite link you received, or enter code manually:',
-                      style: Theme.of(context).textTheme.bodySmall,
+                      'Open the invite link you received in your email or message.',
+                      style: Theme.of(context).textTheme.bodyMedium,
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _codeController,
-                      decoration: InputDecoration(
-                        labelText: l10n.inviteCode,
-                        hintText: 'Enter 8-character code (optional)',
-                        prefixIcon: const Icon(Icons.tag),
-                      ),
-                      textCapitalization: TextCapitalization.characters,
-                      maxLength: 8,
-                    ),
-                    const SizedBox(height: 16),
-                    if (_error != null) ...[
-                      Text(
-                        _error!,
-                        style: TextStyle(color: Theme.of(context).colorScheme.error),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                    FilledButton(
-                      onPressed: _loading ? null : _searchByCode,
-                      child: Text(_loading ? l10n.testing : 'Search by code'),
+                    const SizedBox(height: 24),
+                    ExpansionTile(
+                      title: Text('Or enter code manually'),
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            children: [
+                              TextField(
+                                controller: _codeController,
+                                decoration: InputDecoration(
+                                  labelText: l10n.inviteCode,
+                                  hintText: 'Enter 8-character code',
+                                  prefixIcon: const Icon(Icons.tag),
+                                ),
+                                textCapitalization: TextCapitalization.characters,
+                                maxLength: 8,
+                              ),
+                              const SizedBox(height: 16),
+                              if (_error != null) ...[
+                                Text(
+                                  _error!,
+                                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                                ),
+                                const SizedBox(height: 16),
+                              ],
+                              FilledButton(
+                                onPressed: _loading ? null : _searchByCode,
+                                child: Text(_loading ? l10n.testing : 'Search by code'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 )
@@ -271,19 +335,35 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
                       ),
                       const SizedBox(height: 16),
                       FilledButton(
-                        onPressed: _loading ? null : () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const SignUpScreen()),
+                        onPressed: _loading ? null : () async {
+                          // Navigate to signup and wait for result
+                          final result = await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const SignUpScreen(),
+                              settings: RouteSettings(arguments: widget.token), // Pass token
+                            ),
                           );
+                          // After signup/login, check auth and accept invite
+                          if (mounted && result == true) {
+                            _checkAuthAndAccept();
+                          }
                         },
                         child: Text('Sign up to accept'),
                       ),
                       const SizedBox(height: 8),
                       TextButton(
-                        onPressed: _loading ? null : () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const LoginScreen()),
+                        onPressed: _loading ? null : () async {
+                          // Navigate to login and wait for result
+                          final result = await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const LoginScreen(),
+                              settings: RouteSettings(arguments: widget.token), // Pass token
+                            ),
                           );
+                          // After login, check auth and accept invite
+                          if (mounted && result == true) {
+                            _checkAuthAndAccept();
+                          }
                         },
                         child: Text('Already have an account? Sign in'),
                       ),

@@ -536,6 +536,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get inviteAccepted => 'Вы присоединились к семье';
 
   @override
+  String get alreadyMember => 'Вы уже являетесь членом этой семьи';
+
+  @override
   String get inviteAcceptFailed => 'Не удалось принять приглашение';
 
   @override

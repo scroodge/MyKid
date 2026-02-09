@@ -26,7 +26,16 @@ class _LoginScreenState extends State<LoginScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
-      if (mounted) Navigator.of(context).pushReplacementNamed('/');
+      if (mounted) {
+        // Check if we came from invite screen (token in route arguments)
+        final token = ModalRoute.of(context)?.settings.arguments as String?;
+        if (token != null) {
+          // Return to invite screen with success
+          Navigator.of(context).pop(true);
+        } else {
+          Navigator.of(context).pushReplacementNamed('/');
+        }
+      }
     } on AuthException catch (e) {
       setState(() => _error = e.message);
     } catch (e) {

@@ -534,6 +534,9 @@ class AppLocalizationsBe extends AppLocalizations {
   String get inviteAccepted => 'Вы далучыліся да сям\'і';
 
   @override
+  String get alreadyMember => 'Вы ўжо з\'яўляецеся членам гэтай сям\'і';
+
+  @override
   String get inviteAcceptFailed => 'Не ўдалося прыняць запрашэнне';
 
   @override

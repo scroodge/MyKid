@@ -236,6 +236,7 @@
   "inviteNotFound": "Invite not found or expired",
   "inviteCodeTooShort": "Enter at least 8 characters",
   "inviteAccepted": "You've joined the family",
+  "alreadyMember": "You're already a member of this family",
   "inviteAcceptFailed": "Failed to accept invite",
   "sendInviteEmail": "Send email",
   "sendInviteEmailDescription": "Send invitation email to {email}",

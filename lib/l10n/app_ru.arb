@@ -156,6 +156,7 @@
   "inviteNotFound": "Приглашение не найдено или истекло",
   "inviteCodeTooShort": "Введите не менее 8 символов",
   "inviteAccepted": "Вы присоединились к семье",
+  "alreadyMember": "Вы уже являетесь членом этой семьи",
   "inviteAcceptFailed": "Не удалось принять приглашение",
   "sendInviteEmail": "Отправить email",
   "sendInviteEmailDescription": "Отправить приглашение на {email}",

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../l10n/app_localizations.dart';
@@ -26,15 +27,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     setState(() => _loading = true);
     try {
+      // Get invite token from route arguments
+      final inviteToken = ModalRoute.of(context)?.settings.arguments as String?;
+      
       await Supabase.instance.client.auth.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text,
+        emailRedirectTo: inviteToken != null 
+            ? 'mykid://auth/confirm?invite_token=$inviteToken'
+            : 'mykid://auth/confirm',
       );
+      
       if (mounted) {
+        if (inviteToken != null) {
+          // Save invite token for after email confirmation
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('pending_invite_token', inviteToken);
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(AppLocalizations.of(context)!.checkEmailConfirm)),
         );
-        Navigator.of(context).pushReplacementNamed('/login');
+        Navigator.of(context).pop(true);
       }
     } on AuthException catch (e) {
       final msg = e.message;

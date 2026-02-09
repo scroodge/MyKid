@@ -51,33 +51,47 @@ class _MyKidAppState extends State<MyKidApp> {
   }
 
   void _handleDeepLink(Uri uri) {
-    print('Deep link received: $uri'); // Debug
     if (uri.scheme == 'mykid') {
       // Handle mykid://invite/<token>
-      // Path can be: /invite/<token> or host can be "invite" with path /<token>
-      String? token;
-      
-      if (uri.host == 'invite' && uri.pathSegments.isNotEmpty) {
-        // Format: mykid://invite/<token>
-        token = uri.pathSegments.first;
-      } else if (uri.pathSegments.isNotEmpty && uri.pathSegments[0] == 'invite') {
-        // Format: mykid://invite/<token> (alternative parsing)
-        token = uri.pathSegments.length > 1 ? uri.pathSegments[1] : null;
-      }
-      
-      if (token != null && token.isNotEmpty) {
-        print('Navigating to accept-invite with token: $token'); // Debug
-        // Use SchedulerBinding to ensure context is available
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (_navigatorKey.currentContext != null) {
-            Navigator.of(_navigatorKey.currentContext!).pushNamed(
-              '/accept-invite',
-              arguments: token,
-            );
+      if (uri.host == 'invite' || (uri.pathSegments.isNotEmpty && uri.pathSegments[0] == 'invite')) {
+        String? token;
+        
+        if (uri.host == 'invite') {
+          if (uri.pathSegments.isNotEmpty) {
+            token = uri.pathSegments.first;
+          } else if (uri.path.isNotEmpty) {
+            token = uri.path.replaceFirst('/', '');
           }
-        });
-      } else {
-        print('No valid token found in deep link'); // Debug
+        } else if (uri.pathSegments.length > 1) {
+          token = uri.pathSegments[1];
+        }
+        
+        if (token != null && token.isNotEmpty) {
+          // Navigate to accept-invite screen with token
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_navigatorKey.currentContext != null) {
+              Navigator.of(_navigatorKey.currentContext!).pushNamed(
+                '/accept-invite',
+                arguments: token,
+              );
+            }
+          });
+        }
+      }
+      // Handle mykid://auth/confirm?token=<invite_token>
+      // This is for email confirmation redirect
+      else if (uri.host == 'auth' && uri.pathSegments.isNotEmpty && uri.pathSegments[0] == 'confirm') {
+        final inviteToken = uri.queryParameters['invite_token'];
+        if (inviteToken != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_navigatorKey.currentContext != null) {
+              Navigator.of(_navigatorKey.currentContext!).pushNamed(
+                '/accept-invite',
+                arguments: inviteToken,
+              );
+            }
+          });
+        }
       }
     }
   }

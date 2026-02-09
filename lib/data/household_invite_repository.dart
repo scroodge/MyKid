@@ -65,22 +65,36 @@ class HouseholdInviteRepository {
     // Send email via Edge Function if requested
     if (sendEmail) {
       try {
-        final inviteCode = invite.token.substring(0, 8).toUpperCase();
-        final response = await _client.functions.invoke(
-          'send-invite-email',
-          body: {
-            'email': email.trim().toLowerCase(),
-            'inviteToken': invite.token,
-            'inviteCode': inviteCode,
-            if (inviterEmail != null) 'inviterEmail': inviterEmail,
-            if (householdName != null && householdName.isNotEmpty) 'householdName': householdName,
-          },
-        );
-        // Check if email was sent successfully
-        if (response.data != null) {
-          final data = response.data as Map<String, dynamic>?;
-          if (data?['success'] == false) {
-            print('Email service not configured or failed: ${data?['message']}');
+        // Ensure session is valid before calling Edge Function
+        final session = _client.auth.currentSession;
+        if (session == null) {
+          print('No active session, skipping email send');
+        } else {
+          final inviteCode = invite.token.substring(0, 8).toUpperCase();
+          
+          // Try to invoke the function
+          try {
+            final response = await _client.functions.invoke(
+              'send-invite-email',
+              body: {
+                'email': email.trim().toLowerCase(),
+                'inviteToken': invite.token,
+                'inviteCode': inviteCode,
+                if (inviterEmail != null) 'inviterEmail': inviterEmail,
+                if (householdName != null && householdName.isNotEmpty) 'householdName': householdName,
+              },
+            );
+            
+            // Check if email was sent successfully
+            if (response.data != null) {
+              final data = response.data as Map<String, dynamic>?;
+              if (data?['success'] == false) {
+                print('Email service not configured or failed: ${data?['message']}');
+              }
+            }
+          } catch (e) {
+            // Email sending failed, but invite was created - log error but don't fail
+            print('Failed to send invite email: $e');
           }
         }
       } catch (e) {
@@ -130,7 +144,11 @@ class HouseholdInviteRepository {
     try {
       final res = await _client.rpc('get_invite_token_by_code', params: {'p_code': code8});
       
-      // RPC returns UUID - Supabase may return it as String or Map
+      if (res == null) {
+        return null;
+      }
+      
+      // RPC returns text (UUID as string)
       String token;
       if (res is String) {
         token = res;

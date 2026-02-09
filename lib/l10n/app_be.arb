@@ -156,6 +156,7 @@
   "inviteNotFound": "Запрашэнне не знойдзена або скончылася",
   "inviteCodeTooShort": "Увядзіце не менш за 8 сімвалаў",
   "inviteAccepted": "Вы далучыліся да сям'і",
+  "alreadyMember": "Вы ўжо з'яўляецеся членам гэтай сям'і",
   "inviteAcceptFailed": "Не ўдалося прыняць запрашэнне",
   "sendInviteEmail": "Адправіць email",
   "sendInviteEmailDescription": "Адправіць запрашэнне на {email}",

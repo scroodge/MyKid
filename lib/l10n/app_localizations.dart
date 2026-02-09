@@ -1072,6 +1072,12 @@ abstract class AppLocalizations {
   /// **'You\'ve joined the family'**
   String get inviteAccepted;
 
+  /// No description provided for @alreadyMember.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re already a member of this family'**
+  String get alreadyMember;
+
   /// No description provided for @inviteAcceptFailed.
   ///
   /// In en, this message translates to:
