@@ -224,6 +224,7 @@
   "deleteAccount": "Выдаліць акаўнт",
   "deleteAccountConfirm": "Выдаліць акаўнт? Усе вашы даныя будуць беззваротна выдалены. Гэта дзеянне нельга адмяніць.",
   "deleteAccountConfirmSubtitle": "Вы таксама можаце запытаць выдаленне па email.",
+  "deleteAccountFailed": "Не ўдалося выдаліць акаўнт. Паспрабуйце зноў або звярніцеся ў падтрымку.",
   "exportMyData": "Экспарт маіх даных",
   "exportMyDataSubtitle": "Запытаць копію даных (GDPR)"
 }

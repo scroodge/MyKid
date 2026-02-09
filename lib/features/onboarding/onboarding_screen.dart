@@ -135,10 +135,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         password: _passwordController.text,
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.checkEmailConfirm)),
-        );
-        Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
+        final session = Supabase.instance.client.auth.currentSession;
+        if (session != null) {
+          // Email confirmation disabled — already logged in, go to home
+          Navigator.of(context).pushNamedAndRemoveUntil('/', (_) => false);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context)!.checkEmailConfirm)),
+          );
+          Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
+        }
       }
     } on AuthException catch (e) {
       final msg = e.message;

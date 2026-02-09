@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -8,11 +9,14 @@ import '../../core/legal_urls.dart';
 import '../../l10n/app_localizations.dart';
 
 /// Opens URL: in-app WebView for http/https (Privacy, Terms), external for mailto etc.
-Future<void> _openUrl(String url, {bool inApp = false}) async {
+/// For mailto:, canLaunchUrl often returns false on simulator — we try launchUrl anyway.
+Future<bool> _openUrl(String url, {bool inApp = false}) async {
   final uri = Uri.tryParse(url);
-  if (uri == null || !await canLaunchUrl(uri)) return;
+  if (uri == null) return false;
   final useInApp = inApp && (uri.scheme == 'http' || uri.scheme == 'https');
-  await launchUrl(
+  final canLaunch = uri.scheme == 'mailto' || await canLaunchUrl(uri);
+  if (!canLaunch) return false;
+  return launchUrl(
     uri,
     mode: useInApp ? LaunchMode.inAppWebView : LaunchMode.externalApplication,
   );
@@ -235,7 +239,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   leading: Icon(Icons.help_outline, color: Theme.of(context).colorScheme.primary),
                   title: Text(AppLocalizations.of(context)!.support),
                   trailing: const Icon(Icons.open_in_new),
-                  onTap: () => _openUrl(LegalUrls.support),
+                  onTap: () async {
+                    final opened = await _openUrl(LegalUrls.support);
+                    if (!opened && context.mounted) {
+                      await Clipboard.setData(const ClipboardData(text: 'support@mykidapp.com'));
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('support@mykidapp.com')),
+                        );
+                      }
+                    }
+                  },
                 ),
                 const Divider(height: 1),
                 ListTile(
@@ -269,14 +283,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: Text(AppLocalizations.of(context)!.exportMyData),
                   subtitle: Text(AppLocalizations.of(context)!.exportMyDataSubtitle),
                   trailing: const Icon(Icons.open_in_new),
-                  onTap: () => _openUrl(LegalUrls.dataExport),
+                  onTap: () async {
+                    final opened = await _openUrl(LegalUrls.dataExport);
+                    if (!opened && context.mounted) {
+                      await Clipboard.setData(const ClipboardData(text: 'support@mykidapp.com'));
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('${AppLocalizations.of(context)!.exportMyDataSubtitle} support@mykidapp.com')),
+                        );
+                      }
+                    }
+                  },
                 ),
                 const Divider(height: 1),
                 ListTile(
                   leading: Icon(Icons.delete_forever_outlined, color: Theme.of(context).colorScheme.error),
                   title: Text(AppLocalizations.of(context)!.deleteAccount),
                   subtitle: Text(AppLocalizations.of(context)!.deleteAccountConfirmSubtitle),
-                  trailing: const Icon(Icons.open_in_new),
+                  trailing: const Icon(Icons.chevron_right),
                   onTap: () async {
                     final ok = await showDialog<bool>(
                       context: context,
@@ -309,8 +333,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ],
                       ),
                     );
-                    if (ok == true && context.mounted) {
-                      _openUrl(LegalUrls.accountDeletion);
+                    if (ok != true || !context.mounted) return;
+                    try {
+                      final res = await Supabase.instance.client.functions.invoke('delete-account');
+                      if (!context.mounted) return;
+                      if (res.status == 200 && res.data?['success'] == true) {
+                        await Supabase.instance.client.auth.signOut();
+                        if (context.mounted) {
+                          Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
+                        }
+                      } else {
+                        final err = res.data?['error'] ?? res.data?['details'] ?? res.data?.toString() ?? '';
+                        final status = res.status;
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('${AppLocalizations.of(context)!.deleteAccountFailed} [$status] $err'),
+                              duration: const Duration(seconds: 5),
+                            ),
+                          );
+                        }
+                      }
+                    } catch (e, st) {
+                      debugPrint('delete-account error: $e\n$st');
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('${AppLocalizations.of(context)!.deleteAccountFailed} $e'),
+                            duration: const Duration(seconds: 5),
+                          ),
+                        );
+                      }
                     }
                   },
                 ),

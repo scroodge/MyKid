@@ -1216,6 +1216,12 @@ abstract class AppLocalizations {
   /// **'You can also request deletion by email.'**
   String get deleteAccountConfirmSubtitle;
 
+  /// No description provided for @deleteAccountFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete account. Please try again or contact support.'**
+  String get deleteAccountFailed;
+
   /// No description provided for @exportMyData.
   ///
   /// In en, this message translates to:

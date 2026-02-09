@@ -616,6 +616,10 @@ class AppLocalizationsBe extends AppLocalizations {
       'Вы таксама можаце запытаць выдаленне па email.';
 
   @override
+  String get deleteAccountFailed =>
+      'Не ўдалося выдаліць акаўнт. Паспрабуйце зноў або звярніцеся ў падтрымку.';
+
+  @override
   String get exportMyData => 'Экспарт маіх даных';
 
   @override

@@ -180,6 +180,14 @@ DATA_EXPORT_URL=mailto:support@mykidapp.com?subject=Data%20Export%20Request
 
 Or use `--dart-define=PRIVACY_POLICY_URL=...` etc. when building.
 
+### Self-service account deletion
+
+The app calls the `delete-account` Edge Function, which removes the user and cascades to children, journal entries, household data. Deploy:
+
+```bash
+supabase functions deploy delete-account
+```
+
 ### Open Source Licenses
 
 Regenerate `lib/oss_licenses.dart` after changing `pubspec.yaml` dependencies:

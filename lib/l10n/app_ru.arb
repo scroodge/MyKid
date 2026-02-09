@@ -224,6 +224,7 @@
   "deleteAccount": "Удалить аккаунт",
   "deleteAccountConfirm": "Удалить аккаунт? Все ваши данные будут безвозвратно удалены. Это действие нельзя отменить.",
   "deleteAccountConfirmSubtitle": "Вы также можете запросить удаление по email.",
+  "deleteAccountFailed": "Не удалось удалить аккаунт. Попробуйте снова или обратитесь в поддержку.",
   "exportMyData": "Экспорт моих данных",
   "exportMyDataSubtitle": "Запросить копию данных (GDPR)"
 }

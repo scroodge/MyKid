@@ -618,6 +618,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Вы также можете запросить удаление по email.';
 
   @override
+  String get deleteAccountFailed =>
+      'Не удалось удалить аккаунт. Попробуйте снова или обратитесь в поддержку.';
+
+  @override
   String get exportMyData => 'Экспорт моих данных';
 
   @override

@@ -44,11 +44,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('pending_invite_token', inviteToken);
         }
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.checkEmailConfirm)),
-        );
-        Navigator.of(context).pop(true);
+        final session = Supabase.instance.client.auth.currentSession;
+        if (session != null) {
+          // Email confirmation disabled — already logged in, go to home
+          Navigator.of(context).pushNamedAndRemoveUntil('/', (_) => false);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context)!.checkEmailConfirm)),
+          );
+          Navigator.of(context).pop(true);
+        }
       }
     } on AuthException catch (e) {
       final msg = e.message;

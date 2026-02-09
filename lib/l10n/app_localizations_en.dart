@@ -616,6 +616,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'You can also request deletion by email.';
 
   @override
+  String get deleteAccountFailed =>
+      'Failed to delete account. Please try again or contact support.';
+
+  @override
   String get exportMyData => 'Export my data';
 
   @override
