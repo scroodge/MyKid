@@ -1,3 +1,4 @@
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 
 import 'core/brand/mykid_brand.dart';
@@ -16,20 +17,64 @@ import 'features/settings/licenses_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'l10n/app_localizations.dart';
 
-class MyKidApp extends StatelessWidget {
+class MyKidApp extends StatefulWidget {
   const MyKidApp({super.key, required this.supabaseInitialized});
 
   final bool supabaseInitialized;
 
   @override
+  State<MyKidApp> createState() => _MyKidAppState();
+}
+
+class _MyKidAppState extends State<MyKidApp> {
+  final _appLinks = AppLinks();
+  final _navigatorKey = GlobalKey<NavigatorState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _initDeepLinks();
+  }
+
+  void _initDeepLinks() {
+    // Handle initial link (if app was opened via deep link)
+    _appLinks.getInitialLink().then((uri) {
+      if (uri != null) {
+        _handleDeepLink(uri);
+      }
+    });
+
+    // Listen for deep links while app is running
+    _appLinks.uriLinkStream.listen((uri) {
+      _handleDeepLink(uri);
+    });
+  }
+
+  void _handleDeepLink(Uri uri) {
+    if (uri.scheme == 'mykid') {
+      // Handle mykid://invite/<token>
+      if (uri.pathSegments.isNotEmpty && uri.pathSegments[0] == 'invite') {
+        final token = uri.pathSegments.length > 1 ? uri.pathSegments[1] : null;
+        if (token != null && _navigatorKey.currentContext != null) {
+          Navigator.of(_navigatorKey.currentContext!).pushNamed(
+            '/accept-invite',
+            arguments: token,
+          );
+        }
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: _navigatorKey,
       title: 'MyKid Journal',
       theme: MyKidTheme.lightTheme,
       darkTheme: MyKidTheme.darkTheme,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      initialRoute: supabaseInitialized ? '/' : '/onboarding',
+      initialRoute: widget.supabaseInitialized ? '/' : '/onboarding',
       routes: {
         '/': (context) => const AuthGuard(child: HomeScreen()),
         '/login': (context) => const LoginScreen(),

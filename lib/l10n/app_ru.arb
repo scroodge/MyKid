@@ -156,6 +156,37 @@
   "inviteNotFound": "Приглашение не найдено или истекло",
   "inviteAccepted": "Вы присоединились к семье",
   "inviteAcceptFailed": "Не удалось принять приглашение",
+  "sendInviteEmail": "Отправить email",
+  "sendInviteEmailDescription": "Отправить приглашение на {email}",
+  "@sendInviteEmailDescription": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteEmailSubject": "Приглашение в семью MyKid",
+  "inviteEmailBody": "Вас пригласили в семью в MyKid!\n\nСсылка приглашения: {link}\nИли используйте код: {code}\n\nОткройте ссылку или введите код в приложении MyKid, чтобы принять приглашение.",
+  "@inviteEmailBody": {
+    "placeholders": {
+      "link": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteEmailSent": "Письмо с приглашением отправлено",
+  "inviteEmailSentTo": "Приглашение отправлено на {email}",
+  "@inviteEmailSentTo": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteEmailFailed": "Не удалось отправить письмо, но приглашение создано",
   "createHousehold": "Создать семью",
   "createHouseholdTitle": "Создать семью",
   "createHouseholdDescription": "Создайте семью, чтобы приглашать участников и делиться детьми и записями дневника.",

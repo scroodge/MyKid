@@ -536,6 +536,34 @@ class AppLocalizationsRu extends AppLocalizations {
   String get inviteAcceptFailed => 'Не удалось принять приглашение';
 
   @override
+  String get sendInviteEmail => 'Отправить email';
+
+  @override
+  String sendInviteEmailDescription(String email) {
+    return 'Отправить приглашение на $email';
+  }
+
+  @override
+  String get inviteEmailSubject => 'Приглашение в семью MyKid';
+
+  @override
+  String inviteEmailBody(String link, String code) {
+    return 'Вас пригласили в семью в MyKid!\n\nСсылка приглашения: $link\nИли используйте код: $code\n\nОткройте ссылку или введите код в приложении MyKid, чтобы принять приглашение.';
+  }
+
+  @override
+  String get inviteEmailSent => 'Письмо с приглашением отправлено';
+
+  @override
+  String inviteEmailSentTo(String email) {
+    return 'Приглашение отправлено на $email';
+  }
+
+  @override
+  String get inviteEmailFailed =>
+      'Не удалось отправить письмо, но приглашение создано';
+
+  @override
   String get createHousehold => 'Создать семью';
 
   @override

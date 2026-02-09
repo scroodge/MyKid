@@ -534,6 +534,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inviteAcceptFailed => 'Failed to accept invite';
 
   @override
+  String get sendInviteEmail => 'Send email';
+
+  @override
+  String sendInviteEmailDescription(String email) {
+    return 'Send invitation email to $email';
+  }
+
+  @override
+  String get inviteEmailSubject => 'Invitation to join MyKid family';
+
+  @override
+  String inviteEmailBody(String link, String code) {
+    return 'You\'ve been invited to join a family in MyKid!\n\nInvite link: $link\nOr use invite code: $code\n\nOpen the link or enter the code in the MyKid app to accept the invitation.';
+  }
+
+  @override
+  String get inviteEmailSent => 'Invitation email sent';
+
+  @override
+  String inviteEmailSentTo(String email) {
+    return 'Invitation sent to $email';
+  }
+
+  @override
+  String get inviteEmailFailed =>
+      'Failed to send email, but invite was created';
+
+  @override
   String get createHousehold => 'Create family';
 
   @override

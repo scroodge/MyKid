@@ -45,9 +45,13 @@ class HouseholdInviteRepository {
   String? get _userId => _client.auth.currentUser?.id;
 
   /// Creates an invite for the given household and email. Returns invite with token or null.
+  /// Optionally sends email via Edge Function.
   Future<HouseholdInvite?> createInvite({
     required String householdId,
     required String email,
+    bool sendEmail = true,
+    String? inviterEmail,
+    String? householdName,
   }) async {
     final uid = _userId;
     if (uid == null) return null;
@@ -56,7 +60,37 @@ class HouseholdInviteRepository {
       'email': email.trim().toLowerCase(),
       'invited_by': uid,
     }).select().single();
-    return HouseholdInvite.fromJson(res as Map<String, dynamic>);
+    final invite = HouseholdInvite.fromJson(res as Map<String, dynamic>);
+    
+    // Send email via Edge Function if requested
+    if (sendEmail) {
+      try {
+        final inviteCode = invite.token.substring(0, 8).toUpperCase();
+        final response = await _client.functions.invoke(
+          'send-invite-email',
+          body: {
+            'email': email.trim().toLowerCase(),
+            'inviteToken': invite.token,
+            'inviteCode': inviteCode,
+            if (inviterEmail != null) 'inviterEmail': inviterEmail,
+            if (householdName != null && householdName.isNotEmpty) 'householdName': householdName,
+          },
+        );
+        // Check if email was sent successfully
+        if (response.data != null) {
+          final data = response.data as Map<String, dynamic>?;
+          if (data?['success'] == false) {
+            print('Email service not configured or failed: ${data?['message']}');
+          }
+        }
+      } catch (e) {
+        // Email sending failed, but invite was created - log error but don't fail
+        // The invite is still valid and can be shared manually
+        print('Failed to send invite email: $e');
+      }
+    }
+    
+    return invite;
   }
 
   /// Lists all invites for the given household.

@@ -37,32 +37,40 @@ class HouseholdRepository {
   }
 
   /// Creates a new household with current user as owner and single member. Returns household id or null.
+  /// Uses RPC function to bypass RLS issues.
   /// Throws exception on error.
   Future<String?> createHousehold({String? name}) async {
     final uid = _userId;
     if (uid == null) throw Exception('User not authenticated');
     
     try {
-      // Create household
-      final insertRes = await _client
-          .from('households')
-          .insert({'owner_id': uid, if (name != null && name.isNotEmpty) 'name': name})
-          .select('id')
-          .single();
-      final householdId = insertRes['id'] as String?;
-      if (householdId == null) throw Exception('Failed to create household: no ID returned');
-      
-      // Add user as owner member
-      await _client.from('household_members').insert({
-        'household_id': householdId,
-        'user_id': uid,
-        'role': 'owner',
-      });
-      
-      return householdId;
+      // Use RPC function that bypasses RLS
+      final res = await _client.rpc(
+        'create_household',
+        params: {'p_name': name?.isEmpty == true ? null : name},
+      );
+      return res as String?;
     } catch (e) {
-      // Re-throw with more context
-      throw Exception('Failed to create household: $e');
+      // Fallback to direct insert if RPC doesn't exist
+      try {
+        final insertRes = await _client
+            .from('households')
+            .insert({'owner_id': uid, if (name != null && name.isNotEmpty) 'name': name})
+            .select('id')
+            .single();
+        final householdId = insertRes['id'] as String?;
+        if (householdId == null) throw Exception('Failed to create household: no ID returned');
+        
+        await _client.from('household_members').insert({
+          'household_id': householdId,
+          'user_id': uid,
+          'role': 'owner',
+        });
+        
+        return householdId;
+      } catch (fallbackError) {
+        throw Exception('Failed to create household: $e (fallback also failed: $fallbackError)');
+      }
     }
   }
 
@@ -83,5 +91,17 @@ class HouseholdRepository {
         .not('immich_vault_secret_id', 'is', null)
         .maybeSingle();
     return res != null;
+  }
+
+  /// Gets household name by id. Returns null if not found or no name set.
+  Future<String?> getHouseholdName(String householdId) async {
+    final res = await _client
+        .from('households')
+        .select('name')
+        .eq('id', householdId)
+        .maybeSingle();
+    final map = res as Map<String, dynamic>?;
+    final name = map?['name'] as String?;
+    return (name != null && name.trim().isNotEmpty) ? name.trim() : null;
   }
 }

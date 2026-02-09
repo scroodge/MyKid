@@ -236,6 +236,37 @@
   "inviteNotFound": "Invite not found or expired",
   "inviteAccepted": "You've joined the family",
   "inviteAcceptFailed": "Failed to accept invite",
+  "sendInviteEmail": "Send email",
+  "sendInviteEmailDescription": "Send invitation email to {email}",
+  "@sendInviteEmailDescription": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteEmailSubject": "Invitation to join MyKid family",
+  "inviteEmailBody": "You've been invited to join a family in MyKid!\n\nInvite link: {link}\nOr use invite code: {code}\n\nOpen the link or enter the code in the MyKid app to accept the invitation.",
+  "@inviteEmailBody": {
+    "placeholders": {
+      "link": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteEmailSent": "Invitation email sent",
+  "inviteEmailSentTo": "Invitation sent to {email}",
+  "@inviteEmailSentTo": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteEmailFailed": "Failed to send email, but invite was created",
   "createHousehold": "Create family",
   "createHouseholdTitle": "Create your family",
   "createHouseholdDescription": "Create a family to invite members and share children and journal entries.",

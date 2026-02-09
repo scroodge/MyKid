@@ -23,6 +23,7 @@ $$ language sql stable security definer set search_path = public;
 -- Drop and recreate policies for households to use helper functions.
 drop policy if exists "Members can read household" on public.households;
 drop policy if exists "Members can update household" on public.households;
+drop policy if exists "Authenticated can insert household" on public.households;
 
 create policy "Members can read household"
   on public.households for select
@@ -32,6 +33,11 @@ create policy "Members can update household"
   on public.households for update
   using (public.is_household_member(households.id))
   with check (true);
+
+-- Allow authenticated users to create households (they become owner).
+create policy "Authenticated can insert household"
+  on public.households for insert to authenticated
+  with check (owner_id = auth.uid());
 
 -- Drop and recreate policies for household_members to use helper functions.
 drop policy if exists "Members can read household_members" on public.household_members;

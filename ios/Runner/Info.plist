@@ -53,7 +53,20 @@
 		<true/>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
-		<key>UIStatusBarHidden</key>
-		<false/>
-	</dict>
+	<key>UIStatusBarHidden</key>
+	<false/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.mykid.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>mykid</string>
+			</array>
+		</dict>
+	</array>
+</dict>
 </plist>

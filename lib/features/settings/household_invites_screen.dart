@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/household_invite_repository.dart';
 import '../../data/household_repository.dart';
@@ -92,9 +93,26 @@ class _HouseholdInvitesScreenState extends State<HouseholdInvitesScreen> {
     final email = emailController.text.trim().toLowerCase();
     if (!email.contains('@')) return;
     try {
-      final invite = await _inviteRepo.createInvite(householdId: _householdId!, email: email);
+      // Get household name and inviter email for the email
+      final householdName = await _householdRepo.getHouseholdName(_householdId!);
+      final inviterEmail = Supabase.instance.client.auth.currentUser?.email;
+      
+      setState(() => _loading = true);
+      final invite = await _inviteRepo.createInvite(
+        householdId: _householdId!,
+        email: email,
+        sendEmail: true,
+        inviterEmail: inviterEmail,
+        householdName: householdName,
+      );
       if (invite != null && mounted) {
         await _load();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.inviteEmailSentTo(email)),
+            duration: const Duration(seconds: 3),
+          ),
+        );
         _showInviteCreated(invite);
       }
     } catch (e) {

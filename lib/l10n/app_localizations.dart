@@ -1072,6 +1072,48 @@ abstract class AppLocalizations {
   /// **'Failed to accept invite'**
   String get inviteAcceptFailed;
 
+  /// No description provided for @sendInviteEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Send email'**
+  String get sendInviteEmail;
+
+  /// No description provided for @sendInviteEmailDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invitation email to {email}'**
+  String sendInviteEmailDescription(String email);
+
+  /// No description provided for @inviteEmailSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation to join MyKid family'**
+  String get inviteEmailSubject;
+
+  /// No description provided for @inviteEmailBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve been invited to join a family in MyKid!\n\nInvite link: {link}\nOr use invite code: {code}\n\nOpen the link or enter the code in the MyKid app to accept the invitation.'**
+  String inviteEmailBody(String link, String code);
+
+  /// No description provided for @inviteEmailSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation email sent'**
+  String get inviteEmailSent;
+
+  /// No description provided for @inviteEmailSentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation sent to {email}'**
+  String inviteEmailSentTo(String email);
+
+  /// No description provided for @inviteEmailFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send email, but invite was created'**
+  String get inviteEmailFailed;
+
   /// No description provided for @createHousehold.
   ///
   /// In en, this message translates to:

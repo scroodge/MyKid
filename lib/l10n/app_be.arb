@@ -156,6 +156,37 @@
   "inviteNotFound": "Запрашэнне не знойдзена або скончылася",
   "inviteAccepted": "Вы далучыліся да сям'і",
   "inviteAcceptFailed": "Не ўдалося прыняць запрашэнне",
+  "sendInviteEmail": "Адправіць email",
+  "sendInviteEmailDescription": "Адправіць запрашэнне на {email}",
+  "@sendInviteEmailDescription": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteEmailSubject": "Запрашэнне ў сям'ю MyKid",
+  "inviteEmailBody": "Вас запрасілі ў сям'ю ў MyKid!\n\nСпасылка запрашэння: {link}\nАбо выкарыстайце код: {code}\n\nАдкрыйце спасылку або ўвядзіце код у дадатку MyKid, каб прыняць запрашэнне.",
+  "@inviteEmailBody": {
+    "placeholders": {
+      "link": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteEmailSent": "Ліст з запрашэннем адпраўлены",
+  "inviteEmailSentTo": "Запрашэнне адпраўлена на {email}",
+  "@inviteEmailSentTo": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteEmailFailed": "Не ўдалося адправіць ліст, але запрашэнне створана",
   "createHousehold": "Стварыць сям'ю",
   "createHouseholdTitle": "Стварыць сям'ю",
   "createHouseholdDescription": "Стварыце сям'ю, каб запрашаць удзельнікаў і дзяліцца дзецьмі і запісамі дзённіка.",

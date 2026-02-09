@@ -534,6 +534,34 @@ class AppLocalizationsBe extends AppLocalizations {
   String get inviteAcceptFailed => 'Не ўдалося прыняць запрашэнне';
 
   @override
+  String get sendInviteEmail => 'Адправіць email';
+
+  @override
+  String sendInviteEmailDescription(String email) {
+    return 'Адправіць запрашэнне на $email';
+  }
+
+  @override
+  String get inviteEmailSubject => 'Запрашэнне ў сям\'ю MyKid';
+
+  @override
+  String inviteEmailBody(String link, String code) {
+    return 'Вас запрасілі ў сям\'ю ў MyKid!\n\nСпасылка запрашэння: $link\nАбо выкарыстайце код: $code\n\nАдкрыйце спасылку або ўвядзіце код у дадатку MyKid, каб прыняць запрашэнне.';
+  }
+
+  @override
+  String get inviteEmailSent => 'Ліст з запрашэннем адпраўлены';
+
+  @override
+  String inviteEmailSentTo(String email) {
+    return 'Запрашэнне адпраўлена на $email';
+  }
+
+  @override
+  String get inviteEmailFailed =>
+      'Не ўдалося адправіць ліст, але запрашэнне створана';
+
+  @override
   String get createHousehold => 'Стварыць сям\'ю';
 
   @override
