@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/household_invite_repository.dart';
+import '../../data/household_repository.dart';
 import '../../l10n/app_localizations.dart';
 import '../auth/login_screen.dart';
 import '../auth/signup_screen.dart';
@@ -18,6 +19,7 @@ class AcceptInviteScreen extends StatefulWidget {
 
 class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
   final _inviteRepo = HouseholdInviteRepository();
+  final _householdRepo = HouseholdRepository();
   final _codeController = TextEditingController();
   bool _loading = false;
   String? _error;
@@ -126,6 +128,23 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
     }
   }
 
+  /// Pops back to home so that Settings/Home reload household and children.
+  void _goHomeAndShowSnackBar(String message) {
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  /// Verifies that user is actually in a household after accepting invite.
+  /// Returns true if user is now a member, false otherwise.
+  Future<bool> _verifyHouseholdMembership() async {
+    try {
+      final householdId = await _householdRepo.getMyFirstHouseholdId();
+      return householdId != null;
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<void> _acceptInvite() async {
     if (_invite == null) return;
     final l10n = AppLocalizations.of(context)!;
@@ -133,21 +152,67 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
     try {
       final result = await _inviteRepo.acceptInvite(_invite!.token);
       if (!mounted) return;
+      
       if (result.success) {
-        Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.inviteAccepted)),
-        );
+        // Wait a bit for DB to update, then verify membership
+        await Future.delayed(const Duration(milliseconds: 500));
+        final isMember = await _verifyHouseholdMembership();
+        if (isMember) {
+          _goHomeAndShowSnackBar(l10n.inviteAccepted);
+        } else {
+          // Try once more - sometimes DB needs a moment
+          await Future.delayed(const Duration(milliseconds: 1000));
+          final isMemberRetry = await _verifyHouseholdMembership();
+          if (isMemberRetry) {
+            _goHomeAndShowSnackBar(l10n.inviteAccepted);
+          } else {
+            // RPC said success but user is not in household - try accepting again
+            final retryResult = await _inviteRepo.acceptInvite(_invite!.token);
+            if (retryResult.success) {
+              await Future.delayed(const Duration(milliseconds: 500));
+              final isMemberAfterRetry = await _verifyHouseholdMembership();
+              if (isMemberAfterRetry) {
+                _goHomeAndShowSnackBar(l10n.inviteAccepted);
+              } else {
+                setState(() {
+                  _loading = false;
+                  _error = 'Приглашение принято, но данные не обновились. Попробуйте перезапустить приложение.';
+                });
+              }
+            } else {
+              _goHomeAndShowSnackBar(l10n.inviteAccepted);
+            }
+          }
+        }
       } else {
         // Check if user is already a member
         final errorMsg = result.error ?? '';
         if (errorMsg.toLowerCase().contains('already a member') || 
             errorMsg.toLowerCase().contains('already member')) {
-          // User is already in the family - show success message and close
-          Navigator.of(context).pop(true);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.alreadyMember)),
-          );
+          // Verify user is actually a member
+          await Future.delayed(const Duration(milliseconds: 500));
+          final isMember = await _verifyHouseholdMembership();
+          if (isMember) {
+            _goHomeAndShowSnackBar(l10n.alreadyMember);
+          } else {
+            // RPC says "already member" but user is not - try accepting anyway
+            final retryResult = await _inviteRepo.acceptInvite(_invite!.token);
+            if (retryResult.success) {
+              await Future.delayed(const Duration(milliseconds: 500));
+              final isMemberAfterRetry = await _verifyHouseholdMembership();
+              if (isMemberAfterRetry) {
+                _goHomeAndShowSnackBar(l10n.inviteAccepted);
+              } else {
+                setState(() {
+                  _loading = false;
+                  _error = 'Ошибка при принятии приглашения. Попробуйте еще раз или перезапустите приложение.';
+                });
+              }
+            } else {
+              // Still error - go home anyway, maybe user was added between calls
+              _goHomeAndShowSnackBar(l10n.alreadyMember);
+            }
+          }
         } else {
           setState(() {
             _loading = false;
@@ -159,10 +224,33 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
       if (mounted) {
         final errorStr = e.toString().toLowerCase();
         if (errorStr.contains('already a member') || errorStr.contains('already member')) {
-          Navigator.of(context).pop(true);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context)!.alreadyMember)),
-          );
+          // Verify membership before showing "already member"
+          await Future.delayed(const Duration(milliseconds: 500));
+          final isMember = await _verifyHouseholdMembership();
+          if (isMember) {
+            _goHomeAndShowSnackBar(AppLocalizations.of(context)!.alreadyMember);
+          } else {
+            // Try accepting one more time
+            try {
+              final retryResult = await _inviteRepo.acceptInvite(_invite!.token);
+              if (retryResult.success) {
+                await Future.delayed(const Duration(milliseconds: 500));
+                final isMemberAfterRetry = await _verifyHouseholdMembership();
+                if (isMemberAfterRetry) {
+                  _goHomeAndShowSnackBar(AppLocalizations.of(context)!.inviteAccepted);
+                } else {
+                  setState(() {
+                    _loading = false;
+                    _error = 'Ошибка при принятии приглашения. Попробуйте перезапустить приложение.';
+                  });
+                }
+              } else {
+                _goHomeAndShowSnackBar(AppLocalizations.of(context)!.alreadyMember);
+              }
+            } catch (retryError) {
+              _goHomeAndShowSnackBar(AppLocalizations.of(context)!.alreadyMember);
+            }
+          }
         } else {
           setState(() {
             _loading = false;

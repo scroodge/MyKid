@@ -11,6 +11,7 @@ class JournalRepository {
 
   String? get _userId => _client.auth.currentUser?.id;
 
+  /// Returns journal entries visible to the current user (own + entries for shared household children).
   Future<List<JournalEntry>> getEntries({
     int limit = 50,
     int offset = 0,
@@ -18,12 +19,8 @@ class JournalRepository {
     DateTime? to,
     String? childId,
   }) async {
-    final uid = _userId;
-    if (uid == null) return [];
-    var query = _client
-        .from('journal_entries')
-        .select()
-        .eq('user_id', uid);
+    if (_userId == null) return [];
+    var query = _client.from('journal_entries').select();
     if (childId != null) {
       query = query.eq('child_id', childId);
     }
@@ -40,13 +37,11 @@ class JournalRepository {
   }
 
   Future<JournalEntry?> getEntry(String id) async {
-    final uid = _userId;
-    if (uid == null) return null;
+    if (_userId == null) return null;
     final res = await _client
         .from('journal_entries')
         .select()
         .eq('id', id)
-        .eq('user_id', uid)
         .maybeSingle();
     if (res == null) return null;
     return JournalEntry.fromJson(res as Map<String, dynamic>);

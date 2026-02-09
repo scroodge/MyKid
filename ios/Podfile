@@ -40,4 +40,17 @@ post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
   end
+  
+  # Fix TOCropViewController umbrella header includes
+  # Framework headers must use angle-bracketed includes instead of double-quoted
+  umbrella_header_path = File.join(installer.sandbox.root, 'Target Support Files', 'TOCropViewController', 'TOCropViewController-umbrella.h')
+  if File.exist?(umbrella_header_path)
+    content = File.read(umbrella_header_path)
+    # Replace double-quoted includes with angle-bracketed includes
+    content.gsub!(/#import "([^"]+)"/) do |match|
+      header_name = $1
+      "#import <TOCropViewController/#{header_name}>"
+    end
+    File.write(umbrella_header_path, content)
+  end
 end

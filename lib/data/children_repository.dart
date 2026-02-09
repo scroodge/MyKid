@@ -11,25 +11,22 @@ class ChildrenRepository {
 
   String? get _userId => _client.auth.currentUser?.id;
 
+  /// Returns all children visible to the current user: own + children in their household(s).
   Future<List<Child>> getAll() async {
-    final uid = _userId;
-    if (uid == null) return [];
+    if (_userId == null) return [];
     final res = await _client
         .from('children')
         .select()
-        .eq('user_id', uid)
         .order('name');
     return (res as List).map((e) => Child.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   Future<Child?> get(String id) async {
-    final uid = _userId;
-    if (uid == null) return null;
+    if (_userId == null) return null;
     final res = await _client
         .from('children')
         .select()
         .eq('id', id)
-        .eq('user_id', uid)
         .maybeSingle();
     if (res == null) return null;
     return Child.fromJson(res as Map<String, dynamic>);
@@ -41,13 +38,28 @@ class ChildrenRepository {
   }) async {
     final uid = _userId;
     if (uid == null) return null;
+    final householdId = await _getMyFirstHouseholdId();
     final payload = {
       'user_id': uid,
       'name': name,
       if (dateOfBirth != null) 'date_of_birth': dateOfBirth.toIso8601String().split('T').first,
+      if (householdId != null) 'household_id': householdId,
     };
     final res = await _client.from('children').insert(payload).select().single();
     return Child.fromJson(res as Map<String, dynamic>);
+  }
+
+  Future<String?> _getMyFirstHouseholdId() async {
+    final uid = _userId;
+    if (uid == null) return null;
+    final res = await _client
+        .from('household_members')
+        .select('household_id')
+        .eq('user_id', uid)
+        .limit(1)
+        .maybeSingle();
+    final map = res as Map<String, dynamic>?;
+    return map?['household_id'] as String?;
   }
 
   Future<Child?> update(
