@@ -464,4 +464,72 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingTestAndContinue => 'Test connection and continue';
+
+  @override
+  String get inviteToFamily => 'Invite to family';
+
+  @override
+  String get inviteEmail => 'Email';
+
+  @override
+  String get inviteEmailHint => 'Enter email address';
+
+  @override
+  String get createInvite => 'Create invite';
+
+  @override
+  String get inviteCreated => 'Invite created';
+
+  @override
+  String get inviteLink => 'Invite link';
+
+  @override
+  String get inviteCode => 'Invite code';
+
+  @override
+  String get copyInviteLink => 'Copy link';
+
+  @override
+  String get copyInviteCode => 'Copy code';
+
+  @override
+  String get inviteCopied => 'Copied to clipboard';
+
+  @override
+  String get pendingInvites => 'Pending invites';
+
+  @override
+  String get noInvites => 'No pending invites';
+
+  @override
+  String inviteExpires(String date) {
+    return 'Expires $date';
+  }
+
+  @override
+  String get cancelInvite => 'Cancel invite';
+
+  @override
+  String cancelInviteConfirm(String email) {
+    return 'Cancel invitation to $email?';
+  }
+
+  @override
+  String get acceptInvite => 'Accept invite';
+
+  @override
+  String get acceptInviteTitle => 'Join family';
+
+  @override
+  String get acceptInviteDescription =>
+      'You\'ve been invited to join a family. Accept to access shared children and journal entries.';
+
+  @override
+  String get inviteNotFound => 'Invite not found or expired';
+
+  @override
+  String get inviteAccepted => 'You\'ve joined the family';
+
+  @override
+  String get inviteAcceptFailed => 'Failed to accept invite';
 }

@@ -945,6 +945,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Test connection and continue'**
   String get onboardingTestAndContinue;
+
+  /// No description provided for @inviteToFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite to family'**
+  String get inviteToFamily;
+
+  /// No description provided for @inviteEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get inviteEmail;
+
+  /// No description provided for @inviteEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter email address'**
+  String get inviteEmailHint;
+
+  /// No description provided for @createInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Create invite'**
+  String get createInvite;
+
+  /// No description provided for @inviteCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite created'**
+  String get inviteCreated;
+
+  /// No description provided for @inviteLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite link'**
+  String get inviteLink;
+
+  /// No description provided for @inviteCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite code'**
+  String get inviteCode;
+
+  /// No description provided for @copyInviteLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy link'**
+  String get copyInviteLink;
+
+  /// No description provided for @copyInviteCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy code'**
+  String get copyInviteCode;
+
+  /// No description provided for @inviteCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get inviteCopied;
+
+  /// No description provided for @pendingInvites.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending invites'**
+  String get pendingInvites;
+
+  /// No description provided for @noInvites.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending invites'**
+  String get noInvites;
+
+  /// No description provided for @inviteExpires.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires {date}'**
+  String inviteExpires(String date);
+
+  /// No description provided for @cancelInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel invite'**
+  String get cancelInvite;
+
+  /// No description provided for @cancelInviteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel invitation to {email}?'**
+  String cancelInviteConfirm(String email);
+
+  /// No description provided for @acceptInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept invite'**
+  String get acceptInvite;
+
+  /// No description provided for @acceptInviteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join family'**
+  String get acceptInviteTitle;
+
+  /// No description provided for @acceptInviteDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve been invited to join a family. Accept to access shared children and journal entries.'**
+  String get acceptInviteDescription;
+
+  /// No description provided for @inviteNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite not found or expired'**
+  String get inviteNotFound;
+
+  /// No description provided for @inviteAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve joined the family'**
+  String get inviteAccepted;
+
+  /// No description provided for @inviteAcceptFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to accept invite'**
+  String get inviteAcceptFailed;
 }
 
 class _AppLocalizationsDelegate

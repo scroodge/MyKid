@@ -121,6 +121,41 @@
   "saveToFamily": "Сохранить в семью",
   "saveToFamilyDescription": "Сохранить текущие URL и API-ключ Immich для семьи? Остальные участники смогут использовать тот же Immich. Ключ хранится в облаке в зашифрованном виде.",
   "useFamilyImmichFailed": "Не удалось загрузить настройки Immich семьи",
+  "inviteToFamily": "Пригласить в семью",
+  "inviteEmail": "Email",
+  "inviteEmailHint": "Введите email",
+  "createInvite": "Создать приглашение",
+  "inviteCreated": "Приглашение создано",
+  "inviteLink": "Ссылка приглашения",
+  "inviteCode": "Код приглашения",
+  "copyInviteLink": "Копировать ссылку",
+  "copyInviteCode": "Копировать код",
+  "inviteCopied": "Скопировано",
+  "pendingInvites": "Ожидающие приглашения",
+  "noInvites": "Нет ожидающих приглашений",
+  "inviteExpires": "Истекает {date}",
+  "@inviteExpires": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelInvite": "Отменить приглашение",
+  "cancelInviteConfirm": "Отменить приглашение для {email}?",
+  "@cancelInviteConfirm": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "acceptInvite": "Принять приглашение",
+  "acceptInviteTitle": "Присоединиться к семье",
+  "acceptInviteDescription": "Вас пригласили в семью. Примите приглашение, чтобы получить доступ к общим детям и записям дневника.",
+  "inviteNotFound": "Приглашение не найдено или истекло",
+  "inviteAccepted": "Вы присоединились к семье",
+  "inviteAcceptFailed": "Не удалось принять приглашение",
   "onboardingTitle": "Настройка",
   "onboardingAccountTypeTitle": "Как хотите начать?",
   "onboardingNewAccount": "Новый аккаунт",
@@ -140,5 +175,15 @@
   "onboardingAnonKey": "Anon key",
   "onboardingContinue": "Далее",
   "onboardingSkipImmich": "Пропустить",
-  "onboardingTestAndContinue": "Проверить подключение и продолжить"
+  "onboardingTestAndContinue": "Проверить подключение и продолжить",
+  "legal": "Правовая информация",
+  "privacyPolicy": "Политика конфиденциальности",
+  "termsOfService": "Условия использования",
+  "support": "Поддержка",
+  "licenses": "Лицензии открытого ПО",
+  "deleteAccount": "Удалить аккаунт",
+  "deleteAccountConfirm": "Удалить аккаунт? Все ваши данные будут безвозвратно удалены. Это действие нельзя отменить.",
+  "deleteAccountConfirmSubtitle": "Вы также можете запросить удаление по email.",
+  "exportMyData": "Экспорт моих данных",
+  "exportMyDataSubtitle": "Запросить копию данных (GDPR)"
 }

@@ -464,4 +464,72 @@ class AppLocalizationsBe extends AppLocalizations {
 
   @override
   String get onboardingTestAndContinue => 'Праверыць падключэнне і працягнуць';
+
+  @override
+  String get inviteToFamily => 'Запрасіць у сям\'ю';
+
+  @override
+  String get inviteEmail => 'Email';
+
+  @override
+  String get inviteEmailHint => 'Увядзіце email';
+
+  @override
+  String get createInvite => 'Стварыць запрашэнне';
+
+  @override
+  String get inviteCreated => 'Запрашэнне створана';
+
+  @override
+  String get inviteLink => 'Спасылка запрашэння';
+
+  @override
+  String get inviteCode => 'Код запрашэння';
+
+  @override
+  String get copyInviteLink => 'Скапіяваць спасылку';
+
+  @override
+  String get copyInviteCode => 'Скапіяваць код';
+
+  @override
+  String get inviteCopied => 'Скапіявана';
+
+  @override
+  String get pendingInvites => 'Чакаючыя запрашэнні';
+
+  @override
+  String get noInvites => 'Няма чакаючых запрашэнняў';
+
+  @override
+  String inviteExpires(String date) {
+    return 'Сканчаецца $date';
+  }
+
+  @override
+  String get cancelInvite => 'Скасаваць запрашэнне';
+
+  @override
+  String cancelInviteConfirm(String email) {
+    return 'Скасаваць запрашэнне для $email?';
+  }
+
+  @override
+  String get acceptInvite => 'Прыняць запрашэнне';
+
+  @override
+  String get acceptInviteTitle => 'Далучыцца да сям\'і';
+
+  @override
+  String get acceptInviteDescription =>
+      'Вас запрасілі ў сям\'ю. Прыміце запрашэнне, каб атрымаць доступ да агульных дзяцей і запісаў дзённіка.';
+
+  @override
+  String get inviteNotFound => 'Запрашэнне не знойдзена або скончылася';
+
+  @override
+  String get inviteAccepted => 'Вы далучыліся да сям\'і';
+
+  @override
+  String get inviteAcceptFailed => 'Не ўдалося прыняць запрашэнне';
 }

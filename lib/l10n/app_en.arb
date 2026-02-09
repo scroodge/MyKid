@@ -200,5 +200,50 @@
   "onboardingAnonKey": "Anon key",
   "onboardingContinue": "Continue",
   "onboardingSkipImmich": "Skip for now",
-  "onboardingTestAndContinue": "Test connection and continue"
+  "onboardingTestAndContinue": "Test connection and continue",
+  "inviteToFamily": "Invite to family",
+  "inviteEmail": "Email",
+  "inviteEmailHint": "Enter email address",
+  "createInvite": "Create invite",
+  "inviteCreated": "Invite created",
+  "inviteLink": "Invite link",
+  "inviteCode": "Invite code",
+  "copyInviteLink": "Copy link",
+  "copyInviteCode": "Copy code",
+  "inviteCopied": "Copied to clipboard",
+  "pendingInvites": "Pending invites",
+  "noInvites": "No pending invites",
+  "inviteExpires": "Expires {date}",
+  "@inviteExpires": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelInvite": "Cancel invite",
+  "cancelInviteConfirm": "Cancel invitation to {email}?",
+  "@cancelInviteConfirm": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "acceptInvite": "Accept invite",
+  "acceptInviteTitle": "Join family",
+  "acceptInviteDescription": "You've been invited to join a family. Accept to access shared children and journal entries.",
+  "inviteNotFound": "Invite not found or expired",
+  "inviteAccepted": "You've joined the family",
+  "inviteAcceptFailed": "Failed to accept invite",
+  "legal": "Legal",
+  "privacyPolicy": "Privacy Policy",
+  "termsOfService": "Terms of Use",
+  "support": "Support",
+  "licenses": "Open Source Licenses",
+  "deleteAccount": "Delete account",
+  "deleteAccountConfirm": "Delete your account? All your data will be permanently removed. This cannot be undone.",
+  "deleteAccountConfirmSubtitle": "You can also request deletion by email.",
+  "exportMyData": "Export my data",
+  "exportMyDataSubtitle": "Request a copy of your data (GDPR)"
 }

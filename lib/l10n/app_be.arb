@@ -121,6 +121,41 @@
   "saveToFamily": "Захаваць для сям'і",
   "saveToFamilyDescription": "Захаваць бягучыя URL і API-ключ Immich для сям'і? Іншыя ўдзельнікі змогуць выкарыстоўваць той жа Immich. Ключ захоўваецца ў воблаку ў зашыфраваным выглядзе.",
   "useFamilyImmichFailed": "Не ўдалося загрузіць налады Immich сям'і",
+  "inviteToFamily": "Запрасіць у сям'ю",
+  "inviteEmail": "Email",
+  "inviteEmailHint": "Увядзіце email",
+  "createInvite": "Стварыць запрашэнне",
+  "inviteCreated": "Запрашэнне створана",
+  "inviteLink": "Спасылка запрашэння",
+  "inviteCode": "Код запрашэння",
+  "copyInviteLink": "Скапіяваць спасылку",
+  "copyInviteCode": "Скапіяваць код",
+  "inviteCopied": "Скапіявана",
+  "pendingInvites": "Чакаючыя запрашэнні",
+  "noInvites": "Няма чакаючых запрашэнняў",
+  "inviteExpires": "Сканчаецца {date}",
+  "@inviteExpires": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelInvite": "Скасаваць запрашэнне",
+  "cancelInviteConfirm": "Скасаваць запрашэнне для {email}?",
+  "@cancelInviteConfirm": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "acceptInvite": "Прыняць запрашэнне",
+  "acceptInviteTitle": "Далучыцца да сям'і",
+  "acceptInviteDescription": "Вас запрасілі ў сям'ю. Прыміце запрашэнне, каб атрымаць доступ да агульных дзяцей і запісаў дзённіка.",
+  "inviteNotFound": "Запрашэнне не знойдзена або скончылася",
+  "inviteAccepted": "Вы далучыліся да сям'і",
+  "inviteAcceptFailed": "Не ўдалося прыняць запрашэнне",
   "onboardingTitle": "Налада",
   "onboardingAccountTypeTitle": "Як хочаце пачаць?",
   "onboardingNewAccount": "Новы акаўнт",
@@ -140,5 +175,15 @@
   "onboardingAnonKey": "Anon key",
   "onboardingContinue": "Далей",
   "onboardingSkipImmich": "Прапусціць",
-  "onboardingTestAndContinue": "Праверыць падключэнне і працягнуць"
+  "onboardingTestAndContinue": "Праверыць падключэнне і працягнуць",
+  "legal": "Правая інфармацыя",
+  "privacyPolicy": "Палітыка канфідэнцыйнасці",
+  "termsOfService": "Умовы выкарыстання",
+  "support": "Падтрымка",
+  "licenses": "Ліцэнзіі адкрытага ПЗ",
+  "deleteAccount": "Выдаліць акаўнт",
+  "deleteAccountConfirm": "Выдаліць акаўнт? Усе вашы даныя будуць беззваротна выдалены. Гэта дзеянне нельга адмяніць.",
+  "deleteAccountConfirmSubtitle": "Вы таксама можаце запытаць выдаленне па email.",
+  "exportMyData": "Экспарт маіх даных",
+  "exportMyDataSubtitle": "Запытаць копію даных (GDPR)"
 }

@@ -466,4 +466,72 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboardingTestAndContinue => 'Проверить подключение и продолжить';
+
+  @override
+  String get inviteToFamily => 'Пригласить в семью';
+
+  @override
+  String get inviteEmail => 'Email';
+
+  @override
+  String get inviteEmailHint => 'Введите email';
+
+  @override
+  String get createInvite => 'Создать приглашение';
+
+  @override
+  String get inviteCreated => 'Приглашение создано';
+
+  @override
+  String get inviteLink => 'Ссылка приглашения';
+
+  @override
+  String get inviteCode => 'Код приглашения';
+
+  @override
+  String get copyInviteLink => 'Копировать ссылку';
+
+  @override
+  String get copyInviteCode => 'Копировать код';
+
+  @override
+  String get inviteCopied => 'Скопировано';
+
+  @override
+  String get pendingInvites => 'Ожидающие приглашения';
+
+  @override
+  String get noInvites => 'Нет ожидающих приглашений';
+
+  @override
+  String inviteExpires(String date) {
+    return 'Истекает $date';
+  }
+
+  @override
+  String get cancelInvite => 'Отменить приглашение';
+
+  @override
+  String cancelInviteConfirm(String email) {
+    return 'Отменить приглашение для $email?';
+  }
+
+  @override
+  String get acceptInvite => 'Принять приглашение';
+
+  @override
+  String get acceptInviteTitle => 'Присоединиться к семье';
+
+  @override
+  String get acceptInviteDescription =>
+      'Вас пригласили в семью. Примите приглашение, чтобы получить доступ к общим детям и записям дневника.';
+
+  @override
+  String get inviteNotFound => 'Приглашение не найдено или истекло';
+
+  @override
+  String get inviteAccepted => 'Вы присоединились к семье';
+
+  @override
+  String get inviteAcceptFailed => 'Не удалось принять приглашение';
 }

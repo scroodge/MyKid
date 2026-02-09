@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 
+import '../../core/legal_urls.dart';
 import '../../l10n/app_localizations.dart';
+
+Future<void> _openUrl(String url) async {
+  final uri = Uri.tryParse(url);
+  if (uri != null && await canLaunchUrl(uri)) {
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+}
 
 String _displayNameFromUser(User? user) {
   if (user == null) return '';
@@ -150,6 +159,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => Navigator.of(context).pushNamed('/children'),
                 ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: Icon(Icons.family_restroom, color: Theme.of(context).colorScheme.secondary),
+                  title: Text(AppLocalizations.of(context)!.inviteToFamily),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).pushNamed('/household-invites'),
+                ),
               ],
             ),
           ),
@@ -182,6 +198,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 24),
 
+          // Section: Legal
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 8),
+            child: Text(
+              AppLocalizations.of(context)!.legal,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ),
+          Card(
+            margin: EdgeInsets.zero,
+            child: Column(
+              children: [
+                ListTile(
+                  leading: Icon(Icons.privacy_tip_outlined, color: Theme.of(context).colorScheme.primary),
+                  title: Text(AppLocalizations.of(context)!.privacyPolicy),
+                  trailing: const Icon(Icons.open_in_new),
+                  onTap: () => _openUrl(LegalUrls.privacyPolicy),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: Icon(Icons.description_outlined, color: Theme.of(context).colorScheme.primary),
+                  title: Text(AppLocalizations.of(context)!.termsOfService),
+                  trailing: const Icon(Icons.open_in_new),
+                  onTap: () => _openUrl(LegalUrls.termsOfService),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: Icon(Icons.help_outline, color: Theme.of(context).colorScheme.primary),
+                  title: Text(AppLocalizations.of(context)!.support),
+                  trailing: const Icon(Icons.open_in_new),
+                  onTap: () => _openUrl(LegalUrls.support),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: Icon(Icons.code, color: Theme.of(context).colorScheme.primary),
+                  title: Text(AppLocalizations.of(context)!.licenses),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).pushNamed('/licenses'),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
           // Section: Аккаунт
           Padding(
             padding: const EdgeInsets.only(left: 4, bottom: 8),
@@ -197,6 +260,57 @@ class _SettingsScreenState extends State<SettingsScreen> {
             margin: EdgeInsets.zero,
             child: Column(
               children: [
+                ListTile(
+                  leading: Icon(Icons.download_outlined, color: Theme.of(context).colorScheme.secondary),
+                  title: Text(AppLocalizations.of(context)!.exportMyData),
+                  subtitle: Text(AppLocalizations.of(context)!.exportMyDataSubtitle),
+                  trailing: const Icon(Icons.open_in_new),
+                  onTap: () => _openUrl(LegalUrls.dataExport),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: Icon(Icons.delete_forever_outlined, color: Theme.of(context).colorScheme.error),
+                  title: Text(AppLocalizations.of(context)!.deleteAccount),
+                  subtitle: Text(AppLocalizations.of(context)!.deleteAccountConfirmSubtitle),
+                  trailing: const Icon(Icons.open_in_new),
+                  onTap: () async {
+                    final ok = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text(AppLocalizations.of(context)!.deleteAccount),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(AppLocalizations.of(context)!.deleteAccountConfirm),
+                            const SizedBox(height: 8),
+                            Text(
+                              AppLocalizations.of(context)!.deleteAccountConfirmSubtitle,
+                              style: Theme.of(ctx).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: Text(AppLocalizations.of(context)!.cancel),
+                          ),
+                          FilledButton(
+                            onPressed: () => Navigator.pop(ctx, true),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: Theme.of(ctx).colorScheme.error,
+                            ),
+                            child: Text(AppLocalizations.of(context)!.delete),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (ok == true && context.mounted) {
+                      _openUrl(LegalUrls.accountDeletion);
+                    }
+                  },
+                ),
+                const Divider(height: 1),
                 ListTile(
                   leading: Icon(Icons.logout, color: Theme.of(context).colorScheme.error),
                   title: Text(AppLocalizations.of(context)!.signOut),
