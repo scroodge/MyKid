@@ -37,22 +37,33 @@ class HouseholdRepository {
   }
 
   /// Creates a new household with current user as owner and single member. Returns household id or null.
+  /// Throws exception on error.
   Future<String?> createHousehold({String? name}) async {
     final uid = _userId;
-    if (uid == null) return null;
-    final insertRes = await _client
-        .from('households')
-        .insert({'owner_id': uid, if (name != null && name.isNotEmpty) 'name': name})
-        .select('id')
-        .single();
-    final householdId = insertRes['id'] as String?;
-    if (householdId == null) return null;
-    await _client.from('household_members').insert({
-      'household_id': householdId,
-      'user_id': uid,
-      'role': 'owner',
-    });
-    return householdId;
+    if (uid == null) throw Exception('User not authenticated');
+    
+    try {
+      // Create household
+      final insertRes = await _client
+          .from('households')
+          .insert({'owner_id': uid, if (name != null && name.isNotEmpty) 'name': name})
+          .select('id')
+          .single();
+      final householdId = insertRes['id'] as String?;
+      if (householdId == null) throw Exception('Failed to create household: no ID returned');
+      
+      // Add user as owner member
+      await _client.from('household_members').insert({
+        'household_id': householdId,
+        'user_id': uid,
+        'role': 'owner',
+      });
+      
+      return householdId;
+    } catch (e) {
+      // Re-throw with more context
+      throw Exception('Failed to create household: $e');
+    }
   }
 
   /// Ensures current user has at least one household; creates one if not. Returns its id or null.

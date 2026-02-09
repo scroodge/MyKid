@@ -532,4 +532,58 @@ class AppLocalizationsBe extends AppLocalizations {
 
   @override
   String get inviteAcceptFailed => 'Не ўдалося прыняць запрашэнне';
+
+  @override
+  String get createHousehold => 'Стварыць сям\'ю';
+
+  @override
+  String get createHouseholdTitle => 'Стварыць сям\'ю';
+
+  @override
+  String get createHouseholdDescription =>
+      'Стварыце сям\'ю, каб запрашаць удзельнікаў і дзяліцца дзецьмі і запісамі дзённіка.';
+
+  @override
+  String get householdName => 'Назва сям\'і';
+
+  @override
+  String get householdNameHint => 'Неабавязкова';
+
+  @override
+  String get householdCreated => 'Сям\'я створана';
+
+  @override
+  String get createHouseholdFailed => 'Не ўдалося стварыць сям\'ю';
+
+  @override
+  String get legal => 'Правая інфармацыя';
+
+  @override
+  String get privacyPolicy => 'Палітыка канфідэнцыйнасці';
+
+  @override
+  String get termsOfService => 'Умовы выкарыстання';
+
+  @override
+  String get support => 'Падтрымка';
+
+  @override
+  String get licenses => 'Ліцэнзіі адкрытага ПЗ';
+
+  @override
+  String get deleteAccount => 'Выдаліць акаўнт';
+
+  @override
+  String get deleteAccountConfirm =>
+      'Выдаліць акаўнт? Усе вашы даныя будуць беззваротна выдалены. Гэта дзеянне нельга адмяніць.';
+
+  @override
+  String get deleteAccountConfirmSubtitle =>
+      'Вы таксама можаце запытаць выдаленне па email.';
+
+  @override
+  String get exportMyData => 'Экспарт маіх даных';
+
+  @override
+  String get exportMyDataSubtitle => 'Запытаць копію даных (GDPR)';
 }

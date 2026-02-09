@@ -68,8 +68,9 @@ RLS: users can access only their own rows.
 
 6. **Settings** (route `/settings`)
    - Immich: server URL and API key; Test connection (saves on success).
-   - Link to Manage children.
-   - Sign out.
+   - Link to Manage children, Family invites.
+   - Legal: Privacy Policy, Terms of Use, Support, Open Source Licenses (App Store / Google Play compliance).
+   - Account: Export my data (GDPR), Delete account, Sign out.
 
 ### Key modules
 
@@ -164,6 +165,28 @@ When the app cannot reach Supabase, the journal list falls back to the last cach
   - `features/` — auth, journal list/detail, settings, batch import
 - `supabase/migrations/` — SQL for `journal_entries` and RLS
 - `docs/backend.md` — schema and API description
+
+### Legal URLs (App Store / Google Play)
+
+For store compliance, the app includes links to Privacy Policy, Terms of Use, Support, Account Deletion, and Data Export. Configure in `.env`:
+
+```
+PRIVACY_POLICY_URL=https://mykidapp.com/privacy
+TERMS_OF_SERVICE_URL=https://mykidapp.com/terms
+SUPPORT_URL=mailto:support@mykidapp.com
+ACCOUNT_DELETION_URL=mailto:support@mykidapp.com?subject=Account%20Deletion%20Request
+DATA_EXPORT_URL=mailto:support@mykidapp.com?subject=Data%20Export%20Request
+```
+
+Or use `--dart-define=PRIVACY_POLICY_URL=...` etc. when building.
+
+### Open Source Licenses
+
+Regenerate `lib/oss_licenses.dart` after changing `pubspec.yaml` dependencies:
+
+```bash
+dart run dart_pubspec_licenses:generate
+```
 
 ## License
 

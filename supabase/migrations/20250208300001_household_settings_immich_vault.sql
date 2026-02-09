@@ -16,30 +16,15 @@ alter table public.household_settings enable row level security;
 
 create policy "Members can read household_settings"
   on public.household_settings for select
-  using (
-    exists (
-      select 1 from public.household_members m
-      where m.household_id = household_settings.household_id and m.user_id = auth.uid()
-    )
-  );
+  using (public.is_household_member(household_settings.household_id));
 
 create policy "Members can insert household_settings"
   on public.household_settings for insert to authenticated
-  with check (
-    exists (
-      select 1 from public.household_members m
-      where m.household_id = household_settings.household_id and m.user_id = auth.uid()
-    )
-  );
+  with check (public.is_household_member(household_settings.household_id));
 
 create policy "Members can update household_settings"
   on public.household_settings for update
-  using (
-    exists (
-      select 1 from public.household_members m
-      where m.household_id = household_settings.household_id and m.user_id = auth.uid()
-    )
-  )
+  using (public.is_household_member(household_settings.household_id))
   with check (true);
 
 -- Returns Immich server_url and api_key for a household. Only callable by members.
@@ -55,10 +40,7 @@ declare
   v_secret_id uuid;
   v_api_key text;
 begin
-  if not exists (
-    select 1 from public.household_members m
-    where m.household_id = p_household_id and m.user_id = auth.uid()
-  ) then
+  if not public.is_household_member(p_household_id) then
     raise exception 'Not a member of this household';
   end if;
 
@@ -97,10 +79,7 @@ declare
   v_secret_id uuid;
   v_name text;
 begin
-  if not exists (
-    select 1 from public.household_members m
-    where m.household_id = p_household_id and m.user_id = auth.uid()
-  ) then
+  if not public.is_household_member(p_household_id) then
     raise exception 'Not a member of this household';
   end if;
 

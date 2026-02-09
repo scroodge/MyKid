@@ -1071,6 +1071,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to accept invite'**
   String get inviteAcceptFailed;
+
+  /// No description provided for @createHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'Create family'**
+  String get createHousehold;
+
+  /// No description provided for @createHouseholdTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your family'**
+  String get createHouseholdTitle;
+
+  /// No description provided for @createHouseholdDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a family to invite members and share children and journal entries.'**
+  String get createHouseholdDescription;
+
+  /// No description provided for @householdName.
+  ///
+  /// In en, this message translates to:
+  /// **'Family name'**
+  String get householdName;
+
+  /// No description provided for @householdNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get householdNameHint;
+
+  /// No description provided for @householdCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Family created'**
+  String get householdCreated;
+
+  /// No description provided for @createHouseholdFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create family'**
+  String get createHouseholdFailed;
+
+  /// No description provided for @legal.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal'**
+  String get legal;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @termsOfService.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Use'**
+  String get termsOfService;
+
+  /// No description provided for @support.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get support;
+
+  /// No description provided for @licenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Source Licenses'**
+  String get licenses;
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete your account? All your data will be permanently removed. This cannot be undone.'**
+  String get deleteAccountConfirm;
+
+  /// No description provided for @deleteAccountConfirmSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You can also request deletion by email.'**
+  String get deleteAccountConfirmSubtitle;
+
+  /// No description provided for @exportMyData.
+  ///
+  /// In en, this message translates to:
+  /// **'Export my data'**
+  String get exportMyData;
+
+  /// No description provided for @exportMyDataSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request a copy of your data (GDPR)'**
+  String get exportMyDataSubtitle;
 }
 
 class _AppLocalizationsDelegate

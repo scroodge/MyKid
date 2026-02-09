@@ -534,4 +534,58 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get inviteAcceptFailed => 'Не удалось принять приглашение';
+
+  @override
+  String get createHousehold => 'Создать семью';
+
+  @override
+  String get createHouseholdTitle => 'Создать семью';
+
+  @override
+  String get createHouseholdDescription =>
+      'Создайте семью, чтобы приглашать участников и делиться детьми и записями дневника.';
+
+  @override
+  String get householdName => 'Название семьи';
+
+  @override
+  String get householdNameHint => 'Необязательно';
+
+  @override
+  String get householdCreated => 'Семья создана';
+
+  @override
+  String get createHouseholdFailed => 'Не удалось создать семью';
+
+  @override
+  String get legal => 'Правовая информация';
+
+  @override
+  String get privacyPolicy => 'Политика конфиденциальности';
+
+  @override
+  String get termsOfService => 'Условия использования';
+
+  @override
+  String get support => 'Поддержка';
+
+  @override
+  String get licenses => 'Лицензии открытого ПО';
+
+  @override
+  String get deleteAccount => 'Удалить аккаунт';
+
+  @override
+  String get deleteAccountConfirm =>
+      'Удалить аккаунт? Все ваши данные будут безвозвратно удалены. Это действие нельзя отменить.';
+
+  @override
+  String get deleteAccountConfirmSubtitle =>
+      'Вы также можете запросить удаление по email.';
+
+  @override
+  String get exportMyData => 'Экспорт моих данных';
+
+  @override
+  String get exportMyDataSubtitle => 'Запросить копию данных (GDPR)';
 }

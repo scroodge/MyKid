@@ -18,12 +18,7 @@ alter table public.household_invites enable row level security;
 -- Members can read invites for their household (to see pending invites).
 create policy "Members can read household_invites"
   on public.household_invites for select
-  using (
-    exists (
-      select 1 from public.household_members m
-      where m.household_id = household_invites.household_id and m.user_id = auth.uid()
-    )
-  );
+  using (public.is_household_member(household_invites.household_id));
 
 -- Any authenticated user can read invite by token (for accept screen).
 create policy "Authenticated can read invite by token"
@@ -34,24 +29,14 @@ create policy "Authenticated can read invite by token"
 create policy "Members can create household_invites"
   on public.household_invites for insert to authenticated
   with check (
-    exists (
-      select 1 from public.household_members m
-      where m.household_id = household_invites.household_id and m.user_id = auth.uid()
-    )
+    public.is_household_member(household_invites.household_id)
     and invited_by = auth.uid()
   );
 
 -- Owner can delete invites (cancel invitation).
 create policy "Owner can delete household_invites"
   on public.household_invites for delete
-  using (
-    exists (
-      select 1 from public.household_members m
-      where m.household_id = household_invites.household_id
-        and m.user_id = auth.uid()
-        and m.role = 'owner'
-    )
-  );
+  using (public.is_household_owner(household_invites.household_id));
 
 -- RPC: accept invite by token. Checks email match (optional), expiration, adds to household_members, deletes invite.
 create or replace function public.accept_household_invite(p_token uuid)
@@ -78,11 +63,8 @@ begin
     return jsonb_build_object('success', false, 'error', 'Invite not found or expired');
   end if;
 
-  -- Check if user is already a member
-  if exists (
-    select 1 from public.household_members
-    where household_id = v_invite.household_id and user_id = v_user_id
-  ) then
+  -- Check if user is already a member (using function to avoid RLS recursion)
+  if public.is_household_member(v_invite.household_id) then
     return jsonb_build_object('success', false, 'error', 'Already a member');
   end if;
 

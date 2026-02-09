@@ -167,6 +167,71 @@ class _HouseholdInvitesScreenState extends State<HouseholdInvitesScreen> {
     );
   }
 
+  Future<void> _createHousehold() async {
+    final l10n = AppLocalizations.of(context)!;
+    final nameController = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.createHouseholdTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(l10n.createHouseholdDescription),
+            const SizedBox(height: 16),
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: l10n.householdName,
+                hintText: l10n.householdNameHint,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.createHousehold),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _loading = true);
+    try {
+      final name = nameController.text.trim();
+      final householdId = await _householdRepo.createHousehold(
+        name: name.isEmpty ? null : name,
+      );
+      if (householdId != null && mounted) {
+        await _load();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.householdCreated)),
+        );
+      } else if (mounted) {
+        setState(() => _loading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${l10n.createHouseholdFailed}: No household ID returned')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _loading = false);
+        final errorMsg = e.toString();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${l10n.createHouseholdFailed}: $errorMsg'),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _cancelInvite(HouseholdInvite invite) async {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
@@ -221,8 +286,23 @@ class _HouseholdInvitesScreenState extends State<HouseholdInvitesScreen> {
                       Icon(Icons.family_restroom, size: 64, color: Theme.of(context).colorScheme.outline),
                       const SizedBox(height: 16),
                       Text(
-                        'Create a household first',
+                        AppLocalizations.of(context)!.createHouseholdTitle,
                         style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 32),
+                        child: Text(
+                          AppLocalizations.of(context)!.createHouseholdDescription,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      FilledButton.icon(
+                        onPressed: _loading ? null : _createHousehold,
+                        icon: const Icon(Icons.add),
+                        label: Text(AppLocalizations.of(context)!.createHousehold),
                       ),
                     ],
                   ),

@@ -532,4 +532,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inviteAcceptFailed => 'Failed to accept invite';
+
+  @override
+  String get createHousehold => 'Create family';
+
+  @override
+  String get createHouseholdTitle => 'Create your family';
+
+  @override
+  String get createHouseholdDescription =>
+      'Create a family to invite members and share children and journal entries.';
+
+  @override
+  String get householdName => 'Family name';
+
+  @override
+  String get householdNameHint => 'Optional';
+
+  @override
+  String get householdCreated => 'Family created';
+
+  @override
+  String get createHouseholdFailed => 'Failed to create family';
+
+  @override
+  String get legal => 'Legal';
+
+  @override
+  String get privacyPolicy => 'Privacy Policy';
+
+  @override
+  String get termsOfService => 'Terms of Use';
+
+  @override
+  String get support => 'Support';
+
+  @override
+  String get licenses => 'Open Source Licenses';
+
+  @override
+  String get deleteAccount => 'Delete account';
+
+  @override
+  String get deleteAccountConfirm =>
+      'Delete your account? All your data will be permanently removed. This cannot be undone.';
+
+  @override
+  String get deleteAccountConfirmSubtitle =>
+      'You can also request deletion by email.';
+
+  @override
+  String get exportMyData => 'Export my data';
+
+  @override
+  String get exportMyDataSubtitle => 'Request a copy of your data (GDPR)';
 }

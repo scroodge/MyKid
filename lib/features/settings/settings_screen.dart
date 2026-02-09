@@ -7,11 +7,15 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/legal_urls.dart';
 import '../../l10n/app_localizations.dart';
 
-Future<void> _openUrl(String url) async {
+/// Opens URL: in-app WebView for http/https (Privacy, Terms), external for mailto etc.
+Future<void> _openUrl(String url, {bool inApp = false}) async {
   final uri = Uri.tryParse(url);
-  if (uri != null && await canLaunchUrl(uri)) {
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
-  }
+  if (uri == null || !await canLaunchUrl(uri)) return;
+  final useInApp = inApp && (uri.scheme == 'http' || uri.scheme == 'https');
+  await launchUrl(
+    uri,
+    mode: useInApp ? LaunchMode.inAppWebView : LaunchMode.externalApplication,
+  );
 }
 
 String _displayNameFromUser(User? user) {
@@ -217,14 +221,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   leading: Icon(Icons.privacy_tip_outlined, color: Theme.of(context).colorScheme.primary),
                   title: Text(AppLocalizations.of(context)!.privacyPolicy),
                   trailing: const Icon(Icons.open_in_new),
-                  onTap: () => _openUrl(LegalUrls.privacyPolicy),
+                  onTap: () => _openUrl(LegalUrls.privacyPolicy, inApp: true),
                 ),
                 const Divider(height: 1),
                 ListTile(
                   leading: Icon(Icons.description_outlined, color: Theme.of(context).colorScheme.primary),
                   title: Text(AppLocalizations.of(context)!.termsOfService),
                   trailing: const Icon(Icons.open_in_new),
-                  onTap: () => _openUrl(LegalUrls.termsOfService),
+                  onTap: () => _openUrl(LegalUrls.termsOfService, inApp: true),
                 ),
                 const Divider(height: 1),
                 ListTile(
