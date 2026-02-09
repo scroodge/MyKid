@@ -41,16 +41,49 @@ post_install do |installer|
     flutter_additional_ios_build_settings(target)
   end
   
-  # Fix TOCropViewController umbrella header includes
-  # Framework headers must use angle-bracketed includes instead of double-quoted
-  umbrella_header_path = File.join(installer.sandbox.root, 'Target Support Files', 'TOCropViewController', 'TOCropViewController-umbrella.h')
-  if File.exist?(umbrella_header_path)
-    content = File.read(umbrella_header_path)
-    # Replace double-quoted includes with angle-bracketed includes
-    content.gsub!(/#import "([^"]+)"/) do |match|
-      header_name = $1
-      "#import <TOCropViewController/#{header_name}>"
+  # Fix framework header includes - replace double-quoted with angle-bracketed
+  # This is required when using use_frameworks!
+  frameworks_config = {
+    'TOCropViewController' => ['TO', 'UIImage+CropRotate'],
+    'SDWebImage' => ['SD', 'NSData+ImageContentType', 'NSImage+Compatibility', 'NSButton+WebCache', 'UIImage+', 'UIView+', 'UIButton+WebCache']
+  }
+  
+  frameworks_config.each do |framework_name, prefixes|
+    # Fix umbrella header
+    umbrella_header_path = File.join(installer.sandbox.root, 'Target Support Files', framework_name, "#{framework_name}-umbrella.h")
+    if File.exist?(umbrella_header_path)
+      content = File.read(umbrella_header_path)
+      content.gsub!(/#import "([^"]+)"/) do |match|
+        header_name = $1
+        "#import <#{framework_name}/#{header_name}>"
+      end
+      File.write(umbrella_header_path, content)
     end
-    File.write(umbrella_header_path, content)
+    
+    # Fix all header files in the framework directory
+    framework_dir = File.join(installer.sandbox.root, framework_name)
+    if Dir.exist?(framework_dir)
+      Dir.glob("#{framework_dir}/**/*.h").each do |header_path|
+        content = File.read(header_path)
+        original_content = content.dup
+        
+        # Replace double-quoted includes that match framework header patterns
+        content.gsub!(/#import "([^"]+)"/) do |match|
+          header_name = $1
+          header_file = header_name.split('/').last
+          
+          # Check if this header belongs to the framework
+          should_fix = prefixes.any? { |prefix| header_file.start_with?(prefix) }
+          
+          if should_fix
+            "#import <#{framework_name}/#{header_name}>"
+          else
+            match # Keep original if not from same framework
+          end
+        end
+        
+        File.write(header_path, content) if content != original_content
+      end
+    end
   end
 end

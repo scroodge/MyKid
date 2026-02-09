@@ -38,15 +38,26 @@ class ChildrenRepository {
   }) async {
     final uid = _userId;
     if (uid == null) return null;
+    // Get household_id if user is in a household, otherwise explicitly set to null
     final householdId = await _getMyFirstHouseholdId();
-    final payload = {
+    final payload = <String, dynamic>{
       'user_id': uid,
       'name': name,
       if (dateOfBirth != null) 'date_of_birth': dateOfBirth.toIso8601String().split('T').first,
-      if (householdId != null) 'household_id': householdId,
+      // Explicitly set household_id: null if user not in household, or actual id if in household
+      'household_id': householdId,
     };
-    final res = await _client.from('children').insert(payload).select().single();
-    return Child.fromJson(res as Map<String, dynamic>);
+    try {
+      final res = await _client.from('children').insert(payload).select().single();
+      return Child.fromJson(res as Map<String, dynamic>);
+    } catch (e) {
+      // Log error for debugging
+      print('Error creating child: $e');
+      print('Payload: $payload');
+      print('User ID: $uid');
+      print('Household ID: $householdId');
+      rethrow;
+    }
   }
 
   Future<String?> _getMyFirstHouseholdId() async {
