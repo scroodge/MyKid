@@ -528,6 +528,9 @@ class AppLocalizationsBe extends AppLocalizations {
   String get inviteNotFound => 'Запрашэнне не знойдзена або скончылася';
 
   @override
+  String get inviteCodeTooShort => 'Увядзіце не менш за 8 сімвалаў';
+
+  @override
   String get inviteAccepted => 'Вы далучыліся да сям\'і';
 
   @override

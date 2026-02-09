@@ -116,6 +116,22 @@ class HouseholdInviteRepository {
     return HouseholdInvite.fromJson(res as Map<String, dynamic>);
   }
 
+  /// Gets invite by 8-character code (prefix of token). Returns null if not found or expired.
+  Future<HouseholdInvite?> getInviteByCode(String code) async {
+    final normalized = code.trim().toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
+    if (normalized.length < 8) return null;
+    final code8 = normalized.substring(0, 8);
+    try {
+      final res = await _client.rpc('get_invite_token_by_code', params: {'p_code': code8});
+      if (res == null) return null;
+      final token = res as String?;
+      if (token == null || token.isEmpty) return null;
+      return getInviteByToken(token);
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Deletes an invite (cancel invitation).
   Future<bool> deleteInvite(String inviteId) async {
     final uid = _userId;

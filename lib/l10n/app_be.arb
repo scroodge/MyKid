@@ -154,6 +154,7 @@
   "acceptInviteTitle": "Далучыцца да сям'і",
   "acceptInviteDescription": "Вас запрасілі ў сям'ю. Прыміце запрашэнне, каб атрымаць доступ да агульных дзяцей і запісаў дзённіка.",
   "inviteNotFound": "Запрашэнне не знойдзена або скончылася",
+  "inviteCodeTooShort": "Увядзіце не менш за 8 сімвалаў",
   "inviteAccepted": "Вы далучыліся да сям'і",
   "inviteAcceptFailed": "Не ўдалося прыняць запрашэнне",
   "sendInviteEmail": "Адправіць email",

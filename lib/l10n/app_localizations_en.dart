@@ -528,6 +528,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inviteNotFound => 'Invite not found or expired';
 
   @override
+  String get inviteCodeTooShort => 'Enter at least 8 characters';
+
+  @override
   String get inviteAccepted => 'You\'ve joined the family';
 
   @override

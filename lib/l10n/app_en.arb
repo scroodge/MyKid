@@ -234,6 +234,7 @@
   "acceptInviteTitle": "Join family",
   "acceptInviteDescription": "You've been invited to join a family. Accept to access shared children and journal entries.",
   "inviteNotFound": "Invite not found or expired",
+  "inviteCodeTooShort": "Enter at least 8 characters",
   "inviteAccepted": "You've joined the family",
   "inviteAcceptFailed": "Failed to accept invite",
   "sendInviteEmail": "Send email",

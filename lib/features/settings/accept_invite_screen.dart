@@ -100,14 +100,42 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
   Future<void> _searchByCode() async {
     final code = _codeController.text.trim().toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
     if (code.length < 8) {
-      setState(() => _error = 'Code too short');
+      setState(() => _error = AppLocalizations.of(context)!.inviteCodeTooShort);
       return;
     }
-    // Try to find invite by partial token match (first 8 chars)
-    // Note: This is a simplified approach. In production, you might want a separate code field.
     setState(() {
-      _error = 'Code lookup not implemented. Use invite link instead.';
+      _loading = true;
+      _error = null;
     });
+    try {
+      final invite = await _inviteRepo.getInviteByCode(code);
+      if (!mounted) return;
+      if (invite == null) {
+        setState(() {
+          _loading = false;
+          _error = AppLocalizations.of(context)!.inviteNotFound;
+        });
+        return;
+      }
+      if (invite.isExpired) {
+        setState(() {
+          _loading = false;
+          _error = AppLocalizations.of(context)!.inviteNotFound;
+        });
+        return;
+      }
+      setState(() {
+        _loading = false;
+        _invite = invite;
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _error = e.toString();
+        });
+      }
+    }
   }
 
   @override

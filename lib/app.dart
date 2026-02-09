@@ -51,16 +51,33 @@ class _MyKidAppState extends State<MyKidApp> {
   }
 
   void _handleDeepLink(Uri uri) {
+    print('Deep link received: $uri'); // Debug
     if (uri.scheme == 'mykid') {
       // Handle mykid://invite/<token>
-      if (uri.pathSegments.isNotEmpty && uri.pathSegments[0] == 'invite') {
-        final token = uri.pathSegments.length > 1 ? uri.pathSegments[1] : null;
-        if (token != null && _navigatorKey.currentContext != null) {
-          Navigator.of(_navigatorKey.currentContext!).pushNamed(
-            '/accept-invite',
-            arguments: token,
-          );
-        }
+      // Path can be: /invite/<token> or host can be "invite" with path /<token>
+      String? token;
+      
+      if (uri.host == 'invite' && uri.pathSegments.isNotEmpty) {
+        // Format: mykid://invite/<token>
+        token = uri.pathSegments.first;
+      } else if (uri.pathSegments.isNotEmpty && uri.pathSegments[0] == 'invite') {
+        // Format: mykid://invite/<token> (alternative parsing)
+        token = uri.pathSegments.length > 1 ? uri.pathSegments[1] : null;
+      }
+      
+      if (token != null && token.isNotEmpty) {
+        print('Navigating to accept-invite with token: $token'); // Debug
+        // Use SchedulerBinding to ensure context is available
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_navigatorKey.currentContext != null) {
+            Navigator.of(_navigatorKey.currentContext!).pushNamed(
+              '/accept-invite',
+              arguments: token,
+            );
+          }
+        });
+      } else {
+        print('No valid token found in deep link'); // Debug
       }
     }
   }

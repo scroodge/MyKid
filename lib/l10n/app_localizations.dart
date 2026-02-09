@@ -1060,6 +1060,12 @@ abstract class AppLocalizations {
   /// **'Invite not found or expired'**
   String get inviteNotFound;
 
+  /// No description provided for @inviteCodeTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter at least 8 characters'**
+  String get inviteCodeTooShort;
+
   /// No description provided for @inviteAccepted.
   ///
   /// In en, this message translates to:

@@ -530,6 +530,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get inviteNotFound => 'Приглашение не найдено или истекло';
 
   @override
+  String get inviteCodeTooShort => 'Введите не менее 8 символов';
+
+  @override
   String get inviteAccepted => 'Вы присоединились к семье';
 
   @override
