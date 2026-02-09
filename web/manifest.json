@@ -1,11 +1,11 @@
 {
-    "name": "mykid_app",
-    "short_name": "mykid_app",
+    "name": "MyKid Journal",
+    "short_name": "MyKid Journal",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Baby diary & child moments",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

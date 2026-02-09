@@ -106,6 +106,12 @@ abstract class AppLocalizations {
   /// **'MyKid Journal'**
   String get appTitle;
 
+  /// No description provided for @appDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Baby diary & child moments'**
+  String get appDescription;
+
   /// No description provided for @signInSubtitle.
   ///
   /// In en, this message translates to:
@@ -819,6 +825,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not load family Immich settings'**
   String get useFamilyImmichFailed;
+
+  /// No description provided for @onboardingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup'**
+  String get onboardingTitle;
+
+  /// No description provided for @onboardingAccountTypeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you want to start?'**
+  String get onboardingAccountTypeTitle;
+
+  /// No description provided for @onboardingNewAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'New account'**
+  String get onboardingNewAccount;
+
+  /// No description provided for @onboardingNewAccountSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your own Immich and Supabase'**
+  String get onboardingNewAccountSubtitle;
+
+  /// No description provided for @onboardingFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get onboardingFamily;
+
+  /// No description provided for @onboardingFamilySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join with invite code (coming soon)'**
+  String get onboardingFamilySubtitle;
+
+  /// No description provided for @onboardingFamilyComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Family onboarding will be available soon. Use New account for now.'**
+  String get onboardingFamilyComingSoon;
+
+  /// No description provided for @onboardingImmichTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Immich'**
+  String get onboardingImmichTitle;
+
+  /// No description provided for @onboardingImmichQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you have an Immich server URL and API key?'**
+  String get onboardingImmichQuestion;
+
+  /// No description provided for @onboardingImmichYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, I have them'**
+  String get onboardingImmichYes;
+
+  /// No description provided for @onboardingImmichNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No, create one'**
+  String get onboardingImmichNo;
+
+  /// No description provided for @onboardingCreateImmich.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Immich on PikaPods'**
+  String get onboardingCreateImmich;
+
+  /// No description provided for @onboardingCreateImmichSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens in browser. After setup, return and enter URL and API key.'**
+  String get onboardingCreateImmichSubtitle;
+
+  /// No description provided for @onboardingSupabaseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Supabase'**
+  String get onboardingSupabaseTitle;
+
+  /// No description provided for @onboardingSupabaseDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a project at supabase.com, run migrations, then copy URL and anon key from Settings → API.'**
+  String get onboardingSupabaseDescription;
+
+  /// No description provided for @onboardingSupabaseUrlHint.
+  ///
+  /// In en, this message translates to:
+  /// **'https://xxxx.supabase.co'**
+  String get onboardingSupabaseUrlHint;
+
+  /// No description provided for @onboardingAnonKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Anon key'**
+  String get onboardingAnonKey;
+
+  /// No description provided for @onboardingContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get onboardingContinue;
+
+  /// No description provided for @onboardingSkipImmich.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip for now'**
+  String get onboardingSkipImmich;
+
+  /// No description provided for @onboardingTestAndContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Test connection and continue'**
+  String get onboardingTestAndContinue;
 }
 
 class _AppLocalizationsDelegate

@@ -12,6 +12,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'MyKid Journal';
 
   @override
+  String get appDescription => 'Baby diary & child moments';
+
+  @override
   String get signInSubtitle => 'Sign in to sync your journal';
 
   @override
@@ -396,4 +399,69 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get useFamilyImmichFailed => 'Could not load family Immich settings';
+
+  @override
+  String get onboardingTitle => 'Setup';
+
+  @override
+  String get onboardingAccountTypeTitle => 'How do you want to start?';
+
+  @override
+  String get onboardingNewAccount => 'New account';
+
+  @override
+  String get onboardingNewAccountSubtitle =>
+      'Create your own Immich and Supabase';
+
+  @override
+  String get onboardingFamily => 'Family';
+
+  @override
+  String get onboardingFamilySubtitle => 'Join with invite code (coming soon)';
+
+  @override
+  String get onboardingFamilyComingSoon =>
+      'Family onboarding will be available soon. Use New account for now.';
+
+  @override
+  String get onboardingImmichTitle => 'Immich';
+
+  @override
+  String get onboardingImmichQuestion =>
+      'Do you have an Immich server URL and API key?';
+
+  @override
+  String get onboardingImmichYes => 'Yes, I have them';
+
+  @override
+  String get onboardingImmichNo => 'No, create one';
+
+  @override
+  String get onboardingCreateImmich => 'Create Immich on PikaPods';
+
+  @override
+  String get onboardingCreateImmichSubtitle =>
+      'Opens in browser. After setup, return and enter URL and API key.';
+
+  @override
+  String get onboardingSupabaseTitle => 'Supabase';
+
+  @override
+  String get onboardingSupabaseDescription =>
+      'Create a project at supabase.com, run migrations, then copy URL and anon key from Settings → API.';
+
+  @override
+  String get onboardingSupabaseUrlHint => 'https://xxxx.supabase.co';
+
+  @override
+  String get onboardingAnonKey => 'Anon key';
+
+  @override
+  String get onboardingContinue => 'Continue';
+
+  @override
+  String get onboardingSkipImmich => 'Skip for now';
+
+  @override
+  String get onboardingTestAndContinue => 'Test connection and continue';
 }

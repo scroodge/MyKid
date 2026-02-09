@@ -12,6 +12,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get appTitle => 'Дневник MyKid';
 
   @override
+  String get appDescription => 'Детский дневник и моменты ребёнка';
+
+  @override
   String get signInSubtitle => 'Войдите, чтобы синхронизировать дневник';
 
   @override
@@ -27,7 +30,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get createAccount => 'Создать аккаунт';
 
   @override
-  String get signUpTitle => 'Регистрация в MyKid Дневник';
+  String get signUpTitle => 'Регистрация в MyKid Journal';
 
   @override
   String get signUpSubtitle => 'Введите email и придумайте пароль.';
@@ -398,4 +401,69 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get useFamilyImmichFailed =>
       'Не удалось загрузить настройки Immich семьи';
+
+  @override
+  String get onboardingTitle => 'Настройка';
+
+  @override
+  String get onboardingAccountTypeTitle => 'Как хотите начать?';
+
+  @override
+  String get onboardingNewAccount => 'Новый аккаунт';
+
+  @override
+  String get onboardingNewAccountSubtitle => 'Создайте свой Immich и Supabase';
+
+  @override
+  String get onboardingFamily => 'Семья';
+
+  @override
+  String get onboardingFamilySubtitle =>
+      'Присоединиться по коду приглашения (скоро)';
+
+  @override
+  String get onboardingFamilyComingSoon =>
+      'Семейная настройка скоро будет доступна. Пока используйте «Новый аккаунт».';
+
+  @override
+  String get onboardingImmichTitle => 'Immich';
+
+  @override
+  String get onboardingImmichQuestion =>
+      'Есть ли у вас URL сервера Immich и API-ключ?';
+
+  @override
+  String get onboardingImmichYes => 'Да, есть';
+
+  @override
+  String get onboardingImmichNo => 'Нет, создать';
+
+  @override
+  String get onboardingCreateImmich => 'Создать Immich на PikaPods';
+
+  @override
+  String get onboardingCreateImmichSubtitle =>
+      'Откроется в браузере. После настройки вернитесь и введите URL и API-ключ.';
+
+  @override
+  String get onboardingSupabaseTitle => 'Supabase';
+
+  @override
+  String get onboardingSupabaseDescription =>
+      'Создайте проект на supabase.com, выполните миграции, затем скопируйте URL и anon key из Settings → API.';
+
+  @override
+  String get onboardingSupabaseUrlHint => 'https://xxxx.supabase.co';
+
+  @override
+  String get onboardingAnonKey => 'Anon key';
+
+  @override
+  String get onboardingContinue => 'Далее';
+
+  @override
+  String get onboardingSkipImmich => 'Пропустить';
+
+  @override
+  String get onboardingTestAndContinue => 'Проверить подключение и продолжить';
 }
