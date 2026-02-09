@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/household_invite_repository.dart';
 import '../../l10n/app_localizations.dart';
+import '../auth/login_screen.dart';
+import '../auth/signup_screen.dart';
 
 class AcceptInviteScreen extends StatefulWidget {
   final String? token;
@@ -18,13 +21,34 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
   bool _loading = false;
   String? _error;
   HouseholdInvite? _invite;
+  bool _isAuthenticated = false;
 
   @override
   void initState() {
     super.initState();
+    _checkAuth();
     if (widget.token != null) {
       _loadInvite(widget.token!);
     }
+  }
+
+  void _checkAuth() {
+    final user = Supabase.instance.client.auth.currentUser;
+    setState(() {
+      _isAuthenticated = user != null;
+    });
+    // Listen for auth changes
+    Supabase.instance.client.auth.onAuthStateChange.listen((event) {
+      if (mounted) {
+        setState(() {
+          _isAuthenticated = event.session?.user != null;
+        });
+        // If user just logged in and we have an invite, try to accept it
+        if (_isAuthenticated && _invite != null && !_loading) {
+          _acceptInvite();
+        }
+      }
+    });
   }
 
   @override
@@ -165,11 +189,17 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 32),
+                    Text(
+                      'Open the invite link you received, or enter code manually:',
+                      style: Theme.of(context).textTheme.bodySmall,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
                     TextField(
                       controller: _codeController,
                       decoration: InputDecoration(
                         labelText: l10n.inviteCode,
-                        hintText: 'Enter 8-character code',
+                        hintText: 'Enter 8-character code (optional)',
                         prefixIcon: const Icon(Icons.tag),
                       ),
                       textCapitalization: TextCapitalization.characters,
@@ -185,13 +215,7 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
                     ],
                     FilledButton(
                       onPressed: _loading ? null : _searchByCode,
-                      child: Text(_loading ? l10n.testing : 'Search'),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Or use the invite link you received',
-                      style: Theme.of(context).textTheme.bodySmall,
-                      textAlign: TextAlign.center,
+                      child: Text(_loading ? l10n.testing : 'Search by code'),
                     ),
                   ],
                 )
@@ -239,21 +263,47 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
                       ),
                       const SizedBox(height: 16),
                     ],
-                    FilledButton(
-                      onPressed: _loading ? null : _acceptInvite,
-                      child: _loading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(l10n.acceptInvite),
-                    ),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text(l10n.cancel),
-                    ),
+                    if (!_isAuthenticated) ...[
+                      Text(
+                        'You need to sign in or create an account to accept this invitation.',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      FilledButton(
+                        onPressed: _loading ? null : () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const SignUpScreen()),
+                          );
+                        },
+                        child: Text('Sign up to accept'),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: _loading ? null : () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const LoginScreen()),
+                          );
+                        },
+                        child: Text('Already have an account? Sign in'),
+                      ),
+                    ] else ...[
+                      FilledButton(
+                        onPressed: _loading ? null : _acceptInvite,
+                        child: _loading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Text(l10n.acceptInvite),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: Text(l10n.cancel),
+                      ),
+                    ],
                   ],
                 ),
     );

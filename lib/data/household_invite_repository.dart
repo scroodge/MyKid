@@ -107,13 +107,19 @@ class HouseholdInviteRepository {
 
   /// Gets invite by token (for accept screen).
   Future<HouseholdInvite?> getInviteByToken(String token) async {
-    final res = await _client
-        .from('household_invites')
-        .select()
-        .eq('token', token)
-        .maybeSingle();
-    if (res == null) return null;
-    return HouseholdInvite.fromJson(res as Map<String, dynamic>);
+    try {
+      // Ensure token is properly formatted UUID string
+      final cleanToken = token.trim().replaceAll('"', '').replaceAll("'", '');
+      final res = await _client
+          .from('household_invites')
+          .select()
+          .eq('token', cleanToken)
+          .maybeSingle();
+      if (res == null) return null;
+      return HouseholdInvite.fromJson(res as Map<String, dynamic>);
+    } catch (e) {
+      return null;
+    }
   }
 
   /// Gets invite by 8-character code (prefix of token). Returns null if not found or expired.
@@ -123,11 +129,28 @@ class HouseholdInviteRepository {
     final code8 = normalized.substring(0, 8);
     try {
       final res = await _client.rpc('get_invite_token_by_code', params: {'p_code': code8});
-      if (res == null) return null;
-      final token = res as String?;
-      if (token == null || token.isEmpty) return null;
-      return getInviteByToken(token);
-    } catch (_) {
+      
+      // RPC returns UUID - Supabase may return it as String or Map
+      String token;
+      if (res is String) {
+        token = res;
+      } else if (res is Map) {
+        // If returned as map, try to extract value
+        token = res.values.first.toString();
+      } else {
+        token = res.toString();
+      }
+      
+      // Clean token string
+      token = token.replaceAll('"', '').replaceAll("'", '').trim();
+      
+      if (token.isEmpty || token == 'null') {
+        return null;
+      }
+      
+      // Get invite by token
+      return await getInviteByToken(token);
+    } catch (e) {
       return null;
     }
   }
