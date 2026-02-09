@@ -201,6 +201,14 @@
   "onboardingContinue": "Continue",
   "onboardingSkipImmich": "Skip for now",
   "onboardingTestAndContinue": "Test connection and continue",
+  "onboardingTestSupabaseFirst": "Test connection first. If schema is missing, run the SQL in Supabase Dashboard.",
+  "onboardingSchemaMissingTitle": "Database setup required",
+  "onboardingSchemaMissingDescription": "Your Supabase project needs our schema. Copy the SQL below, paste it in Supabase Dashboard → SQL Editor, run it, then tap Retry.",
+  "onboardingCopySql": "Copy SQL",
+  "onboardingOpenSupabaseDashboard": "Open Supabase SQL Editor",
+  "onboardingSqlCopied": "SQL copied to clipboard",
+  "onboardingSqlCopyFailed": "Could not copy SQL",
+  "onboardingRunMigrationsFirst": "Test connection and ensure schema is set up first",
   "inviteToFamily": "Invite to family",
   "inviteEmail": "Email",
   "inviteEmailHint": "Enter email address",
@@ -286,5 +294,32 @@
   "deleteAccountConfirmSubtitle": "You can also request deletion by email.",
   "deleteAccountFailed": "Failed to delete account. Please try again or contact support.",
   "exportMyData": "Export my data",
-  "exportMyDataSubtitle": "Request a copy of your data (GDPR)"
+  "exportMyDataSubtitle": "Request a copy of your data (GDPR)",
+  "aiProviders": "AI Providers",
+  "aiProvidersSubtitle": "Configure AI for photo analysis",
+  "aiProviderSettings": "AI Providers",
+  "aiProviderSettingsDescription": "Configure AI providers to automatically generate descriptions for photos. Enter your API keys and select a provider.",
+  "selectProvider": "Select Provider",
+  "openAi": "OpenAI (GPT-4 Vision)",
+  "openAiDescription": "High quality, paid",
+  "gemini": "Google Gemini",
+  "geminiDescription": "Good quality, free tier available",
+  "claude": "Anthropic Claude",
+  "claudeDescription": "High quality, paid",
+  "apiKeys": "API Keys",
+  "enterApiKey": "Enter API key",
+  "getApiKey": "Get API key",
+  "generateDescription": "Generate description",
+  "generatingDescription": "Analyzing photo...",
+  "descriptionGenerated": "Description generated",
+  "noPhotoForAnalysis": "No photo available for analysis",
+  "apiKeyNotConfigured": "AI provider not configured. Please configure it in Settings.",
+  "analysisFailed": "Failed to analyze photo: {error}",
+  "@analysisFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

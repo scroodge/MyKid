@@ -466,6 +466,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingTestAndContinue => 'Test connection and continue';
 
   @override
+  String get onboardingTestSupabaseFirst =>
+      'Test connection first. If schema is missing, run the SQL in Supabase Dashboard.';
+
+  @override
+  String get onboardingSchemaMissingTitle => 'Database setup required';
+
+  @override
+  String get onboardingSchemaMissingDescription =>
+      'Your Supabase project needs our schema. Copy the SQL below, paste it in Supabase Dashboard → SQL Editor, run it, then tap Retry.';
+
+  @override
+  String get onboardingCopySql => 'Copy SQL';
+
+  @override
+  String get onboardingOpenSupabaseDashboard => 'Open Supabase SQL Editor';
+
+  @override
+  String get onboardingSqlCopied => 'SQL copied to clipboard';
+
+  @override
+  String get onboardingSqlCopyFailed => 'Could not copy SQL';
+
+  @override
+  String get onboardingRunMigrationsFirst =>
+      'Test connection and ensure schema is set up first';
+
+  @override
   String get inviteToFamily => 'Invite to family';
 
   @override
@@ -624,4 +651,68 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exportMyDataSubtitle => 'Request a copy of your data (GDPR)';
+
+  @override
+  String get aiProviders => 'AI Providers';
+
+  @override
+  String get aiProvidersSubtitle => 'Configure AI for photo analysis';
+
+  @override
+  String get aiProviderSettings => 'AI Providers';
+
+  @override
+  String get aiProviderSettingsDescription =>
+      'Configure AI providers to automatically generate descriptions for photos. Enter your API keys and select a provider.';
+
+  @override
+  String get selectProvider => 'Select Provider';
+
+  @override
+  String get openAi => 'OpenAI (GPT-4 Vision)';
+
+  @override
+  String get openAiDescription => 'High quality, paid';
+
+  @override
+  String get gemini => 'Google Gemini';
+
+  @override
+  String get geminiDescription => 'Good quality, free tier available';
+
+  @override
+  String get claude => 'Anthropic Claude';
+
+  @override
+  String get claudeDescription => 'High quality, paid';
+
+  @override
+  String get apiKeys => 'API Keys';
+
+  @override
+  String get enterApiKey => 'Enter API key';
+
+  @override
+  String get getApiKey => 'Get API key';
+
+  @override
+  String get generateDescription => 'Generate description';
+
+  @override
+  String get generatingDescription => 'Analyzing photo...';
+
+  @override
+  String get descriptionGenerated => 'Description generated';
+
+  @override
+  String get noPhotoForAnalysis => 'No photo available for analysis';
+
+  @override
+  String get apiKeyNotConfigured =>
+      'AI provider not configured. Please configure it in Settings.';
+
+  @override
+  String analysisFailed(String error) {
+    return 'Failed to analyze photo: $error';
+  }
 }

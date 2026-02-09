@@ -216,6 +216,14 @@
   "onboardingContinue": "Далее",
   "onboardingSkipImmich": "Пропустить",
   "onboardingTestAndContinue": "Проверить подключение и продолжить",
+  "onboardingTestSupabaseFirst": "Сначала проверьте подключение. Если схема отсутствует — выполните SQL в Supabase Dashboard.",
+  "onboardingSchemaMissingTitle": "Требуется настройка базы данных",
+  "onboardingSchemaMissingDescription": "Проекту Supabase нужна наша схема. Скопируйте SQL, вставьте в Supabase Dashboard → SQL Editor, выполните, затем нажмите «Повторить».",
+  "onboardingCopySql": "Скопировать SQL",
+  "onboardingOpenSupabaseDashboard": "Открыть SQL Editor в Supabase",
+  "onboardingSqlCopied": "SQL скопирован в буфер",
+  "onboardingSqlCopyFailed": "Не удалось скопировать SQL",
+  "onboardingRunMigrationsFirst": "Сначала проверьте подключение и выполните миграции",
   "legal": "Правовая информация",
   "privacyPolicy": "Политика конфиденциальности",
   "termsOfService": "Условия использования",
@@ -226,5 +234,32 @@
   "deleteAccountConfirmSubtitle": "Вы также можете запросить удаление по email.",
   "deleteAccountFailed": "Не удалось удалить аккаунт. Попробуйте снова или обратитесь в поддержку.",
   "exportMyData": "Экспорт моих данных",
-  "exportMyDataSubtitle": "Запросить копию данных (GDPR)"
+  "exportMyDataSubtitle": "Запросить копию данных (GDPR)",
+  "aiProviders": "AI Провайдеры",
+  "aiProvidersSubtitle": "Настроить AI для анализа фото",
+  "aiProviderSettings": "AI Провайдеры",
+  "aiProviderSettingsDescription": "Настройте AI провайдеры для автоматической генерации описаний к фотографиям. Введите ваши API ключи и выберите провайдера.",
+  "selectProvider": "Выберите провайдера",
+  "openAi": "OpenAI (GPT-4 Vision)",
+  "openAiDescription": "Высокое качество, платно",
+  "gemini": "Google Gemini",
+  "geminiDescription": "Хорошее качество, есть бесплатный tier",
+  "claude": "Anthropic Claude",
+  "claudeDescription": "Высокое качество, платно",
+  "apiKeys": "API Ключи",
+  "enterApiKey": "Введите API ключ",
+  "getApiKey": "Получить API ключ",
+  "generateDescription": "Сгенерировать описание",
+  "generatingDescription": "Анализирую фото...",
+  "descriptionGenerated": "Описание сгенерировано",
+  "noPhotoForAnalysis": "Нет фото для анализа",
+  "apiKeyNotConfigured": "AI провайдер не настроен. Пожалуйста, настройте его в Настройках.",
+  "analysisFailed": "Не удалось проанализировать фото: {error}",
+  "@analysisFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

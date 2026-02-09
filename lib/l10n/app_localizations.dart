@@ -946,6 +946,54 @@ abstract class AppLocalizations {
   /// **'Test connection and continue'**
   String get onboardingTestAndContinue;
 
+  /// No description provided for @onboardingTestSupabaseFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Test connection first. If schema is missing, run the SQL in Supabase Dashboard.'**
+  String get onboardingTestSupabaseFirst;
+
+  /// No description provided for @onboardingSchemaMissingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Database setup required'**
+  String get onboardingSchemaMissingTitle;
+
+  /// No description provided for @onboardingSchemaMissingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Supabase project needs our schema. Copy the SQL below, paste it in Supabase Dashboard → SQL Editor, run it, then tap Retry.'**
+  String get onboardingSchemaMissingDescription;
+
+  /// No description provided for @onboardingCopySql.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy SQL'**
+  String get onboardingCopySql;
+
+  /// No description provided for @onboardingOpenSupabaseDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Supabase SQL Editor'**
+  String get onboardingOpenSupabaseDashboard;
+
+  /// No description provided for @onboardingSqlCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'SQL copied to clipboard'**
+  String get onboardingSqlCopied;
+
+  /// No description provided for @onboardingSqlCopyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not copy SQL'**
+  String get onboardingSqlCopyFailed;
+
+  /// No description provided for @onboardingRunMigrationsFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Test connection and ensure schema is set up first'**
+  String get onboardingRunMigrationsFirst;
+
   /// No description provided for @inviteToFamily.
   ///
   /// In en, this message translates to:
@@ -1233,6 +1281,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Request a copy of your data (GDPR)'**
   String get exportMyDataSubtitle;
+
+  /// No description provided for @aiProviders.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Providers'**
+  String get aiProviders;
+
+  /// No description provided for @aiProvidersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure AI for photo analysis'**
+  String get aiProvidersSubtitle;
+
+  /// No description provided for @aiProviderSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Providers'**
+  String get aiProviderSettings;
+
+  /// No description provided for @aiProviderSettingsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure AI providers to automatically generate descriptions for photos. Enter your API keys and select a provider.'**
+  String get aiProviderSettingsDescription;
+
+  /// No description provided for @selectProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Provider'**
+  String get selectProvider;
+
+  /// No description provided for @openAi.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI (GPT-4 Vision)'**
+  String get openAi;
+
+  /// No description provided for @openAiDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'High quality, paid'**
+  String get openAiDescription;
+
+  /// No description provided for @gemini.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Gemini'**
+  String get gemini;
+
+  /// No description provided for @geminiDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Good quality, free tier available'**
+  String get geminiDescription;
+
+  /// No description provided for @claude.
+  ///
+  /// In en, this message translates to:
+  /// **'Anthropic Claude'**
+  String get claude;
+
+  /// No description provided for @claudeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'High quality, paid'**
+  String get claudeDescription;
+
+  /// No description provided for @apiKeys.
+  ///
+  /// In en, this message translates to:
+  /// **'API Keys'**
+  String get apiKeys;
+
+  /// No description provided for @enterApiKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter API key'**
+  String get enterApiKey;
+
+  /// No description provided for @getApiKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Get API key'**
+  String get getApiKey;
+
+  /// No description provided for @generateDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate description'**
+  String get generateDescription;
+
+  /// No description provided for @generatingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing photo...'**
+  String get generatingDescription;
+
+  /// No description provided for @descriptionGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'Description generated'**
+  String get descriptionGenerated;
+
+  /// No description provided for @noPhotoForAnalysis.
+  ///
+  /// In en, this message translates to:
+  /// **'No photo available for analysis'**
+  String get noPhotoForAnalysis;
+
+  /// No description provided for @apiKeyNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'AI provider not configured. Please configure it in Settings.'**
+  String get apiKeyNotConfigured;
+
+  /// No description provided for @analysisFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to analyze photo: {error}'**
+  String analysisFailed(String error);
 }
 
 class _AppLocalizationsDelegate

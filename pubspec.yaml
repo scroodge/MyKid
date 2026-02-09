@@ -34,7 +34,6 @@ dependencies:
   intl: ^0.20.2
   cached_network_image: ^3.4.1
   uuid: ^4.5.1
-  flutter_dotenv: ^5.2.1
   share_plus: ^10.0.0
   shared_preferences: ^2.3.3
   url_launcher: ^6.2.5
@@ -52,7 +51,7 @@ flutter:
   uses-material-design: true
   generate: true
   assets:
-    - .env
+    - assets/supabase/setup.sql
     - assets/brand/app_icon/
     - assets/brand/logo/
     - assets/fonts/Manrope/

@@ -1,8 +1,7 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 import 'supabase_storage.dart';
 
-/// App configuration. Loads from SupabaseStorage first, then dart-define, then .env.
+/// App configuration. Loads from SupabaseStorage first, then dart-define.
+/// No .env — use onboarding or --dart-define for production builds.
 class AppConfig {
   AppConfig({
     required this.supabaseUrl,
@@ -20,13 +19,9 @@ class AppConfig {
     if ((url ?? '').trim().isNotEmpty && (key ?? '').trim().isNotEmpty) {
       return AppConfig(supabaseUrl: url!.trim(), supabaseAnonKey: key!.trim());
     }
-    // Fallback: dart-define (e.g. CI/production) then .env (local dev)
+    // Fallback: dart-define (e.g. CI/production)
     url = const String.fromEnvironment('SUPABASE_URL', defaultValue: '');
     key = const String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: '');
-    if (url.isEmpty || key.isEmpty) {
-      url = url.isEmpty ? (dotenv.env['SUPABASE_URL'] ?? '') : url;
-      key = key.isEmpty ? (dotenv.env['SUPABASE_ANON_KEY'] ?? '') : key;
-    }
     if (url.isNotEmpty && key.isNotEmpty) {
       return AppConfig(supabaseUrl: url, supabaseAnonKey: key);
     }

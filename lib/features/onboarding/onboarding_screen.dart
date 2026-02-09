@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -26,6 +27,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   // Supabase
   final _supabaseUrlController = TextEditingController();
   final _supabaseAnonKeyController = TextEditingController();
+  bool _supabaseSchemaOk = false; // true if journal_entries table exists
+  bool _showSupabaseMigrationHelp = false;
 
   // Sign up
   final _emailController = TextEditingController();
@@ -63,6 +66,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     setState(() {
       _step = (_step - 1).clamp(0, 10);
       _error = null;
+      if (_step < 2) {
+        _supabaseSchemaOk = false;
+        _showSupabaseMigrationHelp = false;
+      }
     });
   }
 
@@ -103,11 +110,101 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _nextStep();
   }
 
+  Future<void> _testSupabaseConnection() async {
+    final url = _supabaseUrlController.text.trim();
+    final key = _supabaseAnonKeyController.text.trim();
+    if (url.isEmpty || key.isEmpty) {
+      setState(() => _error = AppLocalizations.of(context)!.enterUrlAndKey);
+      return;
+    }
+    setState(() {
+      _loading = true;
+      _error = null;
+      _supabaseSchemaOk = false;
+      _showSupabaseMigrationHelp = false;
+    });
+    try {
+      final baseUrl = url.endsWith('/') ? url.substring(0, url.length - 1) : url;
+      final client = SupabaseClient(baseUrl, key);
+      await client.from('journal_entries').select('id').limit(1).maybeSingle().timeout(
+        const Duration(seconds: 10),
+      );
+      if (mounted) {
+        setState(() {
+          _supabaseSchemaOk = true;
+          _loading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.connectedSuccessfully)),
+        );
+      }
+    } on PostgrestException catch (e) {
+      final msg = e.message.toLowerCase();
+      if (msg.contains('relation') && msg.contains('does not exist')) {
+        if (mounted) {
+          setState(() {
+            _supabaseSchemaOk = false;
+            _showSupabaseMigrationHelp = true;
+            _loading = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _error = e.message;
+            _loading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _loading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _copySupabaseSetupSql() async {
+    try {
+      final sql = await rootBundle.loadString('assets/supabase/setup.sql');
+      await Clipboard.setData(ClipboardData(text: sql));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.onboardingSqlCopied)),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.onboardingSqlCopyFailed)),
+        );
+      }
+    }
+  }
+
+  Future<void> _openSupabaseSqlEditor() async {
+    final url = _supabaseUrlController.text.trim();
+    final uri = Uri.tryParse(url);
+    if (uri == null || uri.host.isEmpty) return;
+    final ref = uri.host.split('.').first;
+    final dashboardUrl = 'https://supabase.com/dashboard/project/$ref/sql/new';
+    final parsed = Uri.tryParse(dashboardUrl);
+    if (parsed != null && await canLaunchUrl(parsed)) {
+      await launchUrl(parsed, mode: LaunchMode.externalApplication);
+    }
+  }
+
   Future<void> _saveSupabaseAndContinue() async {
     final url = _supabaseUrlController.text.trim();
     final key = _supabaseAnonKeyController.text.trim();
     if (url.isEmpty || key.isEmpty) {
       setState(() => _error = AppLocalizations.of(context)!.enterUrlAndKey);
+      return;
+    }
+    if (!_supabaseSchemaOk) {
+      setState(() => _error = AppLocalizations.of(context)!.onboardingRunMigrationsFirst);
       return;
     }
     setState(() {
@@ -348,13 +445,85 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           const SizedBox(height: 16),
           Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
         ],
+        if (_supabaseSchemaOk) ...[
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                l10n.connectedSuccessfully,
+                style: TextStyle(color: Theme.of(context).colorScheme.primary),
+              ),
+            ],
+          ),
+        ],
+        if (_showSupabaseMigrationHelp) ...[
+          const SizedBox(height: 24),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    l10n.onboardingSchemaMissingTitle,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.onboardingSchemaMissingDescription,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    onPressed: _copySupabaseSetupSql,
+                    icon: const Icon(Icons.copy),
+                    label: Text(l10n.onboardingCopySql),
+                  ),
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: _openSupabaseSqlEditor,
+                    icon: const Icon(Icons.open_in_new),
+                    label: Text(l10n.onboardingOpenSupabaseDashboard),
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton.icon(
+                    onPressed: _loading ? null : _testSupabaseConnection,
+                    icon: _loading
+                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Icon(Icons.refresh),
+                    label: Text(l10n.retry),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
         const SizedBox(height: 24),
         FilledButton(
-          onPressed: _loading ? null : _saveSupabaseAndContinue,
+          onPressed: _loading ? null : _testSupabaseConnection,
           child: _loading
               ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2))
-              : Text(l10n.onboardingContinue),
+              : Text(l10n.testConnection),
         ),
+        if (!_supabaseSchemaOk) ...[
+          const SizedBox(height: 8),
+          Text(
+            l10n.onboardingTestSupabaseFirst,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+          ),
+        ] else ...[
+          const SizedBox(height: 12),
+          FilledButton(
+            onPressed: _loading ? null : _saveSupabaseAndContinue,
+            child: Text(l10n.onboardingContinue),
+          ),
+        ],
       ],
     );
   }

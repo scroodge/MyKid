@@ -2,13 +2,13 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:cross_file/cross_file.dart';
+import 'package:http/http.dart' as http;
 
+import '../../core/ai_vision_service.dart';
 import '../../core/immich_client.dart';
 import '../../core/immich_service.dart';
 import '../../data/child.dart';
@@ -50,8 +50,10 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   final _repo = JournalRepository();
   final _childrenRepo = ChildrenRepository();
   final _immich = ImmichService();
+  final _aiVision = AiVisionService();
   bool _saving = false;
   bool _uploading = false;
+  bool _generatingDescription = false;
   String? _error;
   /// True = view mode (preview or fullscreen); false = edit form.
   bool _viewMode = false;
@@ -119,6 +121,97 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
     _locationController.dispose();
     _viewModePageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _generateDescription() async {
+    // Check if AI provider is configured
+    final isConfigured = await _aiVision.isConfigured();
+    if (!isConfigured) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.apiKeyNotConfigured),
+            action: SnackBarAction(
+              label: AppLocalizations.of(context)!.settings,
+              onPressed: () => Navigator.of(context).pushNamed('/settings-ai-providers'),
+            ),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+      return;
+    }
+
+    // Get first available photo
+    Uint8List? imageBytes;
+    
+    // Try pending assets first
+    if (_pendingAssets.isNotEmpty) {
+      imageBytes = _pendingAssets.first.bytes;
+    } else if (_assets.isNotEmpty) {
+      // Try to get from local preview bytes
+      final firstAsset = _assets.first;
+      imageBytes = _localPreviewBytes[firstAsset.immichAssetId];
+      
+      // If not in local cache, try to download from Immich
+      if (imageBytes == null) {
+        final client = await _immich.getClient();
+        if (client != null) {
+          try {
+            final imageUrl = client.getAssetThumbnailUrl(firstAsset.immichAssetId, size: 'preview');
+            final response = await http.get(
+              Uri.parse(imageUrl),
+              headers: {'x-api-key': client.apiKey},
+            ).timeout(const Duration(seconds: 10));
+            if (response.statusCode == 200) {
+              imageBytes = response.bodyBytes;
+            }
+          } catch (e) {
+            // Ignore error, will show message below
+          }
+        }
+      }
+    }
+
+    if (imageBytes == null || imageBytes.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.noPhotoForAnalysis)),
+        );
+      }
+      return;
+    }
+
+    setState(() {
+      _generatingDescription = true;
+      _error = null;
+    });
+
+    final result = await _aiVision.analyzeImage(imageBytes);
+    if (!mounted) return;
+
+    setState(() {
+      _generatingDescription = false;
+    });
+
+    if (result.text != null) {
+      _textController.text = result.text!;
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.descriptionGenerated)),
+        );
+      }
+    } else {
+      final errorMsg = result.error ?? AppLocalizations.of(context)!.analysisFailed('Unknown error');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMsg),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _pickAndUpload() async {
@@ -593,7 +686,24 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          Text(AppLocalizations.of(context)!.description, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(AppLocalizations.of(context)!.description, style: const TextStyle(fontWeight: FontWeight.bold)),
+              if ((_assets.isNotEmpty || _pendingAssets.isNotEmpty) && !_generatingDescription)
+                TextButton.icon(
+                  onPressed: _generateDescription,
+                  icon: const Icon(Icons.auto_awesome, size: 18),
+                  label: Text(AppLocalizations.of(context)!.generateDescription),
+                )
+              else if (_generatingDescription)
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+            ],
+          ),
           const SizedBox(height: 4),
           TextField(
             controller: _textController,

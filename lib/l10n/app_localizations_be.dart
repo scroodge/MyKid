@@ -466,6 +466,33 @@ class AppLocalizationsBe extends AppLocalizations {
   String get onboardingTestAndContinue => 'Праверыць падключэнне і працягнуць';
 
   @override
+  String get onboardingTestSupabaseFirst =>
+      'Спачатку праверце падключэнне. Калі схемы няма — выканайце SQL у Supabase Dashboard.';
+
+  @override
+  String get onboardingSchemaMissingTitle => 'Патрабуецца налада базы даных';
+
+  @override
+  String get onboardingSchemaMissingDescription =>
+      'Праекту Supabase патрэбна наша схема. Скапіруйце SQL, устаўце ў Supabase Dashboard → SQL Editor, выканайце, затым націсніце «Паўтарыць».';
+
+  @override
+  String get onboardingCopySql => 'Скапіяваць SQL';
+
+  @override
+  String get onboardingOpenSupabaseDashboard => 'Адкрыць SQL Editor у Supabase';
+
+  @override
+  String get onboardingSqlCopied => 'SQL скапіяваны ў буфер';
+
+  @override
+  String get onboardingSqlCopyFailed => 'Не ўдалося скапіяваць SQL';
+
+  @override
+  String get onboardingRunMigrationsFirst =>
+      'Спачатку праверце падключэнне і выканайце міграцыі';
+
+  @override
   String get inviteToFamily => 'Запрасіць у сям\'ю';
 
   @override
@@ -624,4 +651,68 @@ class AppLocalizationsBe extends AppLocalizations {
 
   @override
   String get exportMyDataSubtitle => 'Запытаць копію даных (GDPR)';
+
+  @override
+  String get aiProviders => 'AI Правайдэры';
+
+  @override
+  String get aiProvidersSubtitle => 'Наладзіць AI для аналізу фота';
+
+  @override
+  String get aiProviderSettings => 'AI Правайдэры';
+
+  @override
+  String get aiProviderSettingsDescription =>
+      'Наладзьце AI правайдэры для аўтаматычнай генерацыі апісанняў да фотаздымкаў. Увядзіце вашы API ключы і выберыце правайдэра.';
+
+  @override
+  String get selectProvider => 'Выберыце правайдэра';
+
+  @override
+  String get openAi => 'OpenAI (GPT-4 Vision)';
+
+  @override
+  String get openAiDescription => 'Высокая якасць, платна';
+
+  @override
+  String get gemini => 'Google Gemini';
+
+  @override
+  String get geminiDescription => 'Добрая якасць, ёсць бясплатны tier';
+
+  @override
+  String get claude => 'Anthropic Claude';
+
+  @override
+  String get claudeDescription => 'Высокая якасць, платна';
+
+  @override
+  String get apiKeys => 'API Ключы';
+
+  @override
+  String get enterApiKey => 'Увядзіце API ключ';
+
+  @override
+  String get getApiKey => 'Атрымаць API ключ';
+
+  @override
+  String get generateDescription => 'Згенераваць апісанне';
+
+  @override
+  String get generatingDescription => 'Аналізую фота...';
+
+  @override
+  String get descriptionGenerated => 'Апісанне згенеравана';
+
+  @override
+  String get noPhotoForAnalysis => 'Няма фота для аналізу';
+
+  @override
+  String get apiKeyNotConfigured =>
+      'AI правайдэр не наладжаны. Калі ласка, наладзьце яго ў Наладах.';
+
+  @override
+  String analysisFailed(String error) {
+    return 'Не ўдалося прааналізаваць фота: $error';
+  }
 }

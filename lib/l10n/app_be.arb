@@ -216,6 +216,14 @@
   "onboardingContinue": "Далей",
   "onboardingSkipImmich": "Прапусціць",
   "onboardingTestAndContinue": "Праверыць падключэнне і працягнуць",
+  "onboardingTestSupabaseFirst": "Спачатку праверце падключэнне. Калі схемы няма — выканайце SQL у Supabase Dashboard.",
+  "onboardingSchemaMissingTitle": "Патрабуецца налада базы даных",
+  "onboardingSchemaMissingDescription": "Праекту Supabase патрэбна наша схема. Скапіруйце SQL, устаўце ў Supabase Dashboard → SQL Editor, выканайце, затым націсніце «Паўтарыць».",
+  "onboardingCopySql": "Скапіяваць SQL",
+  "onboardingOpenSupabaseDashboard": "Адкрыць SQL Editor у Supabase",
+  "onboardingSqlCopied": "SQL скапіяваны ў буфер",
+  "onboardingSqlCopyFailed": "Не ўдалося скапіяваць SQL",
+  "onboardingRunMigrationsFirst": "Спачатку праверце падключэнне і выканайце міграцыі",
   "legal": "Правая інфармацыя",
   "privacyPolicy": "Палітыка канфідэнцыйнасці",
   "termsOfService": "Умовы выкарыстання",
@@ -226,5 +234,30 @@
   "deleteAccountConfirmSubtitle": "Вы таксама можаце запытаць выдаленне па email.",
   "deleteAccountFailed": "Не ўдалося выдаліць акаўнт. Паспрабуйце зноў або звярніцеся ў падтрымку.",
   "exportMyData": "Экспарт маіх даных",
-  "exportMyDataSubtitle": "Запытаць копію даных (GDPR)"
+  "exportMyDataSubtitle": "Запытаць копію даных (GDPR)",
+  "aiProviders": "AI Правайдэры",
+  "aiProvidersSubtitle": "Наладзіць AI для аналізу фота",
+  "aiProviderSettings": "AI Правайдэры",
+  "aiProviderSettingsDescription": "Наладзьце AI правайдэры для аўтаматычнай генерацыі апісанняў да фотаздымкаў. Увядзіце вашы API ключы і выберыце правайдэра.",
+  "selectProvider": "Выберыце правайдэра",
+  "openAi": "OpenAI (GPT-4 Vision)",
+  "openAiDescription": "Высокая якасць, платна",
+  "gemini": "Google Gemini",
+  "geminiDescription": "Добрая якасць, ёсць бясплатны tier",
+  "claude": "Anthropic Claude",
+  "claudeDescription": "Высокая якасць, платна",
+  "apiKeys": "API Ключы",
+  "enterApiKey": "Увядзіце API ключ",
+  "getApiKey": "Атрымаць API ключ",
+  "generateDescription": "Згенераваць апісанне",
+  "generatingDescription": "Аналізую фота...",
+  "descriptionGenerated": "Апісанне згенеравана",
+  "noPhotoForAnalysis": "Няма фота для аналізу",
+  "apiKeyNotConfigured": "AI правайдэр не наладжаны. Калі ласка, наладзьце яго ў Наладах.",
+  "analysisFailed": "Не ўдалося прааналізаваць фота: {error}",
+  "@analysisFailed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  }
 }
