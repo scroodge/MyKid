@@ -342,10 +342,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get selectAChild => 'Выберите ребёнка';
 
   @override
-  String get onlyAuthorCanEditEntry =>
-      'Редактировать запись может только её автор.';
-
-  @override
   String get pickFilesAndUpload => 'Выбрать файлы и загрузить';
 
   @override

@@ -341,10 +341,6 @@ class AppLocalizationsBe extends AppLocalizations {
   String get selectAChild => 'Выберыце дзіця';
 
   @override
-  String get onlyAuthorCanEditEntry =>
-      'Рэдагаваць запіс можа толькі яго аўтар.';
-
-  @override
   String get pickFilesAndUpload => 'Выбраць файлы і загрузіць';
 
   @override
