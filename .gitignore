@@ -67,3 +67,4 @@ migrate_working_dir/
 
 # Supabase
 .supabase/
+supabase/.temp/
