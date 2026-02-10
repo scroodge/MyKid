@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart';
 
 import 'ai_provider_storage.dart';
+import 'on_device_image_labels.dart';
 
 class AiVisionService {
   AiVisionService([AiProviderStorage? storage]) : _storage = storage ?? AiProviderStorage();
@@ -44,11 +44,6 @@ class AiVisionService {
       return (text: null, error: 'No AI provider selected');
     }
 
-    // DeepSeek official API accepts only text in messages (no image_url or image variant).
-    if (selectedProvider == 'deepseek') {
-      return (text: null, error: 'DeepSeek does not support image analysis. Use Gemini, OpenAI or Claude in Settings → AI Providers.');
-    }
-
     // Get API key for selected provider
     String? apiKey;
     switch (selectedProvider) {
@@ -84,7 +79,7 @@ class AiVisionService {
       case 'claude':
         return await _callClaudeVision(apiKey, base64Image);
       case 'deepseek':
-        return (text: null, error: 'DeepSeek does not support image analysis.');
+        return await _analyzeImageWithDeepSeek(apiKey, imageBytes);
       default:
         return (text: null, error: 'Unknown provider: $selectedProvider');
     }
@@ -331,53 +326,22 @@ class AiVisionService {
     }
   }
 
-  /// DeepSeek: try vision endpoint first, then chat with image type (not image_url).
-  Future<({String? text, String? error})> _callDeepSeekVision(String apiKey, String base64Image) async {
-    const prompt = 'Это фото из семейного приложения для ведения дневника жизни ребенка. Как родитель, я хочу создать теплое, личное описание этого момента для дневника моего ребенка. Опиши, что ты видишь на фото - что делает ребенок, обстановку и любые заметные детали. Напиши на русском языке, будь теплым и позитивным, 2-3 предложения.';
-
-    // 1) Try dedicated vision endpoint (if available)
-    final visionResult = await _callDeepSeekVisionEndpoint(apiKey, base64Image, prompt);
-    if (visionResult.text != null) return visionResult;
-    if (visionResult.error != null && !visionResult.error!.contains('404') && !visionResult.error!.contains('Not Found')) {
-      return visionResult;
+  /// DeepSeek (text-only API): get on-device labels via ML Kit, then ask DeepSeek to write a journal entry from them.
+  Future<({String? text, String? error})> _analyzeImageWithDeepSeek(String apiKey, Uint8List imageBytes) async {
+    final labelsText = await getImageLabelsDescription(imageBytes);
+    if (labelsText == null || labelsText.isEmpty) {
+      return (text: null, error: 'Could not analyze photo on this device. Use Gemini, OpenAI or Claude for direct photo analysis, or describe the photo yourself.');
     }
-
-    // 2) Try chat/completions with content type "image" + base64 (Claude-style; API may support it)
-    return await _callDeepSeekChatWithImage(apiKey, base64Image, prompt);
+    return _callDeepSeekText(apiKey, labelsText);
   }
 
-  Future<({String? text, String? error})> _callDeepSeekVisionEndpoint(String apiKey, String base64Image, String prompt) async {
+  Future<({String? text, String? error})> _callDeepSeekText(String apiKey, String labelsText) async {
     try {
+      const url = 'https://api.deepseek.com/v1/chat/completions';
+      final userMessage = 'По фото из дневника ребёнка определили такие объекты и сцены: $labelsText. '
+          'Напиши тёплое, короткое описание этого момента для детского дневника: 2–3 предложения на русском.';
       final response = await http.post(
-        Uri.parse('https://api.deepseek.com/v1/vision'),
-        headers: {
-          'Authorization': 'Bearer $apiKey',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'model': 'deepseek-vision',
-          'image': base64Image,
-          'prompt': prompt,
-        }),
-      ).timeout(const Duration(seconds: 30));
-      if (response.statusCode != 200) {
-        final err = jsonDecode(response.body) as Map<String, dynamic>?;
-        final msg = err?['error']?['message'] as String? ?? response.body;
-        return (text: null, error: response.statusCode == 404 ? '404' : msg);
-      }
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-      final text = data['choices']?[0]?['message']?['content'] as String? ?? data['text'] as String? ?? data['content'] as String?;
-      if (text != null && text.trim().isNotEmpty) return (text: text.trim(), error: null);
-      return (text: null, error: 'Empty response from DeepSeek vision');
-    } catch (e) {
-      return (text: null, error: e.toString());
-    }
-  }
-
-  Future<({String? text, String? error})> _callDeepSeekChatWithImage(String apiKey, String base64Image, String prompt) async {
-    try {
-      final response = await http.post(
-        Uri.parse('https://api.deepseek.com/v1/chat/completions'),
+        Uri.parse(url),
         headers: {
           'Authorization': 'Bearer $apiKey',
           'Content-Type': 'application/json',
@@ -387,18 +351,9 @@ class AiVisionService {
           'messages': [
             {
               'role': 'system',
-              'content': 'You are a helpful assistant that helps parents create journal entries for their children. You describe photos in a warm, positive, and age-appropriate manner.',
+              'content': 'You are a helpful assistant that helps parents create journal entries for their children. You write warm, positive, age-appropriate descriptions.',
             },
-            {
-              'role': 'user',
-              'content': [
-                {
-                  'type': 'image',
-                  'source': {'type': 'base64', 'media_type': 'image/jpeg', 'data': base64Image},
-                },
-                {'type': 'text', 'text': prompt},
-              ],
-            },
+            {'role': 'user', 'content': userMessage},
           ],
           'max_tokens': 300,
         }),
@@ -411,32 +366,23 @@ class AiVisionService {
           final choice = choices[0] as Map<String, dynamic>?;
           final finishReason = choice?['finish_reason'] as String?;
           if (finishReason == 'content_filter') {
-            return (text: null, error: 'DeepSeek blocked the response due to content filters. Try using a different provider.');
+            return (text: null, error: 'DeepSeek blocked the response. Try a different provider or describe the photo yourself.');
           }
           final message = choice?['message'] as Map<String, dynamic>?;
           final content = message?['content'] as String?;
           if (content != null && content.trim().isNotEmpty) {
             final lowerContent = content.toLowerCase();
             if (lowerContent.contains('извини') && (lowerContent.contains('не могу помочь') || lowerContent.contains('не могу'))) {
-              return (text: null, error: 'AI provider refused to analyze the image. This may happen with certain content. Try a different provider or describe the photo manually.');
+              return (text: null, error: 'AI refused. Try a different provider or describe the photo yourself.');
             }
             return (text: content.trim(), error: null);
           }
         }
         return (text: null, error: 'Empty response from DeepSeek');
       } else {
-        // Try to parse error response
-        String errorMessage = 'Unknown error';
-        try {
-          final errorData = jsonDecode(response.body) as Map<String, dynamic>?;
-          errorMessage = errorData?['error']?['message'] as String? ?? 
-                        errorData?['error']?['code'] as String? ?? 
-                        errorData?.toString() ?? 
-                        response.body;
-        } catch (_) {
-          errorMessage = response.body;
-        }
-        return (text: null, error: 'DeepSeek API error (${response.statusCode}): $errorMessage');
+        final errorData = jsonDecode(response.body) as Map<String, dynamic>?;
+        final errorMessage = errorData?['error']?['message'] as String? ?? response.body;
+        return (text: null, error: 'DeepSeek API error: $errorMessage');
       }
     } catch (e) {
       return (text: null, error: 'Failed to call DeepSeek: $e');

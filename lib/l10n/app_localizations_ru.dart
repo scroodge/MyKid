@@ -729,7 +729,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get deepSeek => 'DeepSeek';
 
   @override
-  String get deepSeekDescription => 'Поддержка изображений (экспериментально)';
+  String get deepSeekDescription => 'Только текст, без анализа фото';
 
   @override
   String get apiKeys => 'API Ключи';
