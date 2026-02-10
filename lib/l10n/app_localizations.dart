@@ -1270,6 +1270,18 @@ abstract class AppLocalizations {
   /// **'Support'**
   String get support;
 
+  /// No description provided for @sourceCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Source Code'**
+  String get sourceCode;
+
+  /// No description provided for @supportDevelopment.
+  ///
+  /// In en, this message translates to:
+  /// **'Support development'**
+  String get supportDevelopment;
+
   /// No description provided for @licenses.
   ///
   /// In en, this message translates to:
@@ -1401,6 +1413,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'High quality, paid'**
   String get claudeDescription;
+
+  /// No description provided for @deepSeek.
+  ///
+  /// In en, this message translates to:
+  /// **'DeepSeek'**
+  String get deepSeek;
+
+  /// No description provided for @deepSeekDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Vision model, competitive pricing'**
+  String get deepSeekDescription;
 
   /// No description provided for @apiKeys.
   ///

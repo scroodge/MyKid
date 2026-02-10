@@ -646,6 +646,12 @@ class AppLocalizationsBe extends AppLocalizations {
   String get support => 'Падтрымка';
 
   @override
+  String get sourceCode => 'Зыходны код';
+
+  @override
+  String get supportDevelopment => 'Падтрымаць распрацоўку';
+
+  @override
   String get licenses => 'Ліцэнзіі адкрытага ПЗ';
 
   @override
@@ -715,6 +721,12 @@ class AppLocalizationsBe extends AppLocalizations {
 
   @override
   String get claudeDescription => 'Высокая якасць, платна';
+
+  @override
+  String get deepSeek => 'DeepSeek';
+
+  @override
+  String get deepSeekDescription => 'Мадэль з падтрымкай выяў, выгодныя цэны';
 
   @override
   String get apiKeys => 'API Ключы';

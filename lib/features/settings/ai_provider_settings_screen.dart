@@ -18,12 +18,14 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
   final _openAiController = TextEditingController();
   final _geminiController = TextEditingController();
   final _claudeController = TextEditingController();
+  final _deepSeekController = TextEditingController();
   String? _selectedProvider;
   bool _loading = false;
   String? _message;
   bool _obscureOpenAi = true;
   bool _obscureGemini = true;
   bool _obscureClaude = true;
+  bool _obscureDeepSeek = true;
 
   @override
   void initState() {
@@ -32,6 +34,7 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
     _openAiController.addListener(_onFieldsChanged);
     _geminiController.addListener(_onFieldsChanged);
     _claudeController.addListener(_onFieldsChanged);
+    _deepSeekController.addListener(_onFieldsChanged);
   }
 
   void _onFieldsChanged() => setState(() {});
@@ -40,11 +43,13 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
     final openAiKey = await _storage.getOpenAiKey();
     final geminiKey = await _storage.getGeminiKey();
     final claudeKey = await _storage.getClaudeKey();
+    final deepSeekKey = await _storage.getDeepSeekKey();
     final selected = await _storage.getSelectedProvider();
     if (mounted) {
       _openAiController.text = openAiKey ?? '';
       _geminiController.text = geminiKey ?? '';
       _claudeController.text = claudeKey ?? '';
+      _deepSeekController.text = deepSeekKey ?? '';
       _selectedProvider = selected ?? 'gemini'; // Default to Gemini (has free tier)
       setState(() {});
     }
@@ -61,6 +66,9 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
         break;
       case 'claude':
         apiKey = _claudeController.text.trim();
+        break;
+      case 'deepseek':
+        apiKey = _deepSeekController.text.trim();
         break;
     }
 
@@ -79,6 +87,9 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
         break;
       case 'claude':
         await _storage.setClaudeKey(apiKey);
+        break;
+      case 'deepseek':
+        await _storage.setDeepSeekKey(apiKey);
         break;
     }
 
@@ -112,6 +123,8 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
         _geminiController.text.trim().isEmpty ? null : _geminiController.text.trim());
     await _storage.setClaudeKey(
         _claudeController.text.trim().isEmpty ? null : _claudeController.text.trim());
+    await _storage.setDeepSeekKey(
+        _deepSeekController.text.trim().isEmpty ? null : _deepSeekController.text.trim());
     await _storage.setSelectedProvider(_selectedProvider);
     if (mounted && showSnackBar) {
       ScaffoldMessenger.of(context)
@@ -131,9 +144,11 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
     _openAiController.removeListener(_onFieldsChanged);
     _geminiController.removeListener(_onFieldsChanged);
     _claudeController.removeListener(_onFieldsChanged);
+    _deepSeekController.removeListener(_onFieldsChanged);
     _openAiController.dispose();
     _geminiController.dispose();
     _claudeController.dispose();
+    _deepSeekController.dispose();
     super.dispose();
   }
 
@@ -185,6 +200,13 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
             title: Text(l10n.claude),
             subtitle: Text(l10n.claudeDescription),
             value: 'claude',
+            groupValue: _selectedProvider,
+            onChanged: (value) => setState(() => _selectedProvider = value),
+          ),
+          RadioListTile<String>(
+            title: Text(l10n.deepSeek),
+            subtitle: Text(l10n.deepSeekDescription),
+            value: 'deepseek',
             groupValue: _selectedProvider,
             onChanged: (value) => setState(() => _selectedProvider = value),
           ),
@@ -293,6 +315,41 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
                   const SizedBox(height: 8),
                   TextButton.icon(
                     onPressed: () => _openUrl('https://console.anthropic.com/settings/keys'),
+                    icon: const Icon(Icons.open_in_new, size: 18),
+                    label: Text(l10n.getApiKey),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    l10n.deepSeek,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _deepSeekController,
+                    decoration: InputDecoration(
+                      labelText: l10n.apiKey,
+                      hintText: l10n.enterApiKey,
+                      suffixIcon: IconButton(
+                        icon: Icon(_obscureDeepSeek ? Icons.visibility : Icons.visibility_off),
+                        onPressed: () => setState(() => _obscureDeepSeek = !_obscureDeepSeek),
+                      ),
+                    ),
+                    obscureText: _obscureDeepSeek,
+                    autocorrect: false,
+                  ),
+                  const SizedBox(height: 8),
+                  TextButton.icon(
+                    onPressed: () => _openUrl('https://platform.deepseek.com/api_keys'),
                     icon: const Icon(Icons.open_in_new, size: 18),
                     label: Text(l10n.getApiKey),
                   ),

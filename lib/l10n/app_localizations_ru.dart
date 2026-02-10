@@ -648,6 +648,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get support => 'Поддержка';
 
   @override
+  String get sourceCode => 'Исходный код';
+
+  @override
+  String get supportDevelopment => 'Поддержать разработку';
+
+  @override
   String get licenses => 'Лицензии открытого ПО';
 
   @override
@@ -718,6 +724,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get claudeDescription => 'Высокое качество, платно';
+
+  @override
+  String get deepSeek => 'DeepSeek';
+
+  @override
+  String get deepSeekDescription =>
+      'Модель с поддержкой изображений, выгодные цены';
 
   @override
   String get apiKeys => 'API Ключи';

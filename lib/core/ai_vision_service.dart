@@ -25,6 +25,9 @@ class AiVisionService {
       case 'claude':
         final key = await _storage.getClaudeKey();
         return key != null && key.trim().isNotEmpty;
+      case 'deepseek':
+        final key = await _storage.getDeepSeekKey();
+        return key != null && key.trim().isNotEmpty;
       default:
         return false;
     }
@@ -53,6 +56,9 @@ class AiVisionService {
       case 'claude':
         apiKey = await _storage.getClaudeKey();
         break;
+      case 'deepseek':
+        apiKey = await _storage.getDeepSeekKey();
+        break;
       default:
         return (text: null, error: 'Unknown provider: $selectedProvider');
     }
@@ -72,6 +78,8 @@ class AiVisionService {
         return await _callGeminiVision(apiKey, base64Image);
       case 'claude':
         return await _callClaudeVision(apiKey, base64Image);
+      case 'deepseek':
+        return await _callDeepSeekVision(apiKey, base64Image);
       default:
         return (text: null, error: 'Unknown provider: $selectedProvider');
     }
@@ -318,6 +326,70 @@ class AiVisionService {
     }
   }
 
+  /// DeepSeek API is OpenAI-compatible; supports vision via image_url in content.
+  Future<({String? text, String? error})> _callDeepSeekVision(String apiKey, String base64Image) async {
+    try {
+      const url = 'https://api.deepseek.com/v1/chat/completions';
+      final prompt = 'Это фото из семейного приложения для ведения дневника жизни ребенка. Как родитель, я хочу создать теплое, личное описание этого момента для дневника моего ребенка. Опиши, что ты видишь на фото - что делает ребенок, обстановку и любые заметные детали. Напиши на русском языке, будь теплым и позитивным, 2-3 предложения.';
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $apiKey',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'model': 'deepseek-chat',
+          'messages': [
+            {
+              'role': 'system',
+              'content': 'You are a helpful assistant that helps parents create journal entries for their children. You describe photos in a warm, positive, and age-appropriate manner.',
+            },
+            {
+              'role': 'user',
+              'content': [
+                {'type': 'text', 'text': prompt},
+                {
+                  'type': 'image_url',
+                  'image_url': {'url': 'data:image/jpeg;base64,$base64Image'},
+                },
+              ],
+            },
+          ],
+          'max_tokens': 300,
+        }),
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final choices = data['choices'] as List?;
+        if (choices != null && choices.isNotEmpty) {
+          final choice = choices[0] as Map<String, dynamic>?;
+          final finishReason = choice?['finish_reason'] as String?;
+          if (finishReason == 'content_filter') {
+            return (text: null, error: 'DeepSeek blocked the response due to content filters. Try using a different provider.');
+          }
+          final message = choice?['message'] as Map<String, dynamic>?;
+          final content = message?['content'] as String?;
+          if (content != null && content.trim().isNotEmpty) {
+            final lowerContent = content.toLowerCase();
+            if (lowerContent.contains('извини') && (lowerContent.contains('не могу помочь') || lowerContent.contains('не могу'))) {
+              return (text: null, error: 'AI provider refused to analyze the image. This may happen with certain content. Try a different provider or describe the photo manually.');
+            }
+            return (text: content.trim(), error: null);
+          }
+        }
+        return (text: null, error: 'Empty response from DeepSeek');
+      } else {
+        final errorData = jsonDecode(response.body) as Map<String, dynamic>?;
+        final errorMessage = errorData?['error']?['message'] as String? ?? response.body;
+        return (text: null, error: 'DeepSeek API error: $errorMessage');
+      }
+    } catch (e) {
+      return (text: null, error: 'Failed to call DeepSeek: $e');
+    }
+  }
+
   /// Test connection to a provider with a simple request
   Future<({bool success, String? error})> testConnection(String provider) async {
     String? apiKey;
@@ -330,6 +402,9 @@ class AiVisionService {
         break;
       case 'claude':
         apiKey = await _storage.getClaudeKey();
+        break;
+      case 'deepseek':
+        apiKey = await _storage.getDeepSeekKey();
         break;
       default:
         return (success: false, error: 'Unknown provider');

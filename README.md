@@ -1,12 +1,48 @@
-# MyKid — Journal for your child
+# MyKid
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS-lightgrey)](https://github.com)
-[![Flutter](https://img.shields.io/badge/Flutter-3.5+-02569B?logo=flutter)](https://flutter.dev)
+<p align="center">
+  <img src="assets/brand/logo/mykid_logo_text_only.png" alt="MyKid" height="64">
+</p>
 
-A cross-platform (Android / iOS) app to keep a journal of your child's life: entries with photos/videos and text. Media is stored in **your** [Immich](https://immich.app) instance; journal entries sync via **Supabase**.
+<p align="center">
+  <strong>Journal for your child's life</strong>
+</p>
 
-For logo and branding (splash, login, README, presentations), see `assets/brand/logo/mykid_logo_text_only.png` and [docs/Brand.md](docs/Brand.md).
+<p align="center">
+  Photos, videos, moments — stored in <em>your</em> <a href="https://immich.app">Immich</a>. Journal syncs via <a href="https://supabase.com">Supabase</a>.
+</p>
+
+<p align="center">
+  <a href="#features">Features</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#setup">Setup</a> •
+  <a href="#license">License</a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Platform-Android%20%7C%20iOS-3DDC84?logo=android&logoColor=white" alt="Platform">
+  <img src="https://img.shields.io/badge/Flutter-3.5+-02569B?logo=flutter" alt="Flutter">
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
+</p>
+
+---
+
+## Features
+
+- **Self-hosted** — photos in your Immich, data in your Supabase
+- **Family sharing** — invite household members, share children and entries
+- **EXIF magic** — date and location auto-filled from photo metadata
+- **Offline-ready** — cached journal list when offline
+- **Batch import** — add many photos at once
+
+## Quick Start
+
+```bash
+flutter pub get
+flutter run --dart-define-from-file=.env
+```
+
+See [Setup](#setup) for Supabase and Immich configuration.
 
 ---
 
@@ -180,6 +216,8 @@ TERMS_OF_SERVICE_URL=https://mykidapp.com/terms
 SUPPORT_URL=mailto:support@mykidapp.com
 ACCOUNT_DELETION_URL=mailto:support@mykidapp.com?subject=Account%20Deletion%20Request
 DATA_EXPORT_URL=mailto:support@mykidapp.com?subject=Data%20Export%20Request
+SOURCE_CODE_URL=https://github.com/scroodge/MyKid
+SPONSOR_URL=https://github.com/sponsors/scroodge
 ```
 
 Or use `--dart-define=PRIVACY_POLICY_URL=...` etc. when building.
@@ -208,8 +246,8 @@ Thanks to everyone who contributes to MyKid. See [CONTRIBUTING.md](CONTRIBUTING.
 
 If you find MyKid useful, consider supporting its development:
 
-- [GitHub Sponsors](https://github.com/sponsors) — once set up, link will be added here
-- Or spread the word and star the repo
+- [GitHub Sponsors](https://github.com/sponsors/scroodge)
+- Or spread the word and star the [repo](https://github.com/scroodge/MyKid)
 
 ## License
 

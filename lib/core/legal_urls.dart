@@ -37,13 +37,13 @@ class LegalUrls {
   static String get sourceCode =>
       const String.fromEnvironment(
         'SOURCE_CODE_URL',
-        defaultValue: 'https://github.com/mykidapp/mykid',
+        defaultValue: 'https://github.com/scroodge/MyKid',
       );
 
   /// GitHub Sponsors or similar donation URL. Override via SPONSOR_URL env/dart-define.
   static String get sponsor =>
       const String.fromEnvironment(
         'SPONSOR_URL',
-        defaultValue: 'https://github.com/sponsors',
+        defaultValue: 'https://github.com/sponsors/scroodge',
       );
 }

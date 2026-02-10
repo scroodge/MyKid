@@ -646,6 +646,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get support => 'Support';
 
   @override
+  String get sourceCode => 'Source Code';
+
+  @override
+  String get supportDevelopment => 'Support development';
+
+  @override
   String get licenses => 'Open Source Licenses';
 
   @override
@@ -715,6 +721,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get claudeDescription => 'High quality, paid';
+
+  @override
+  String get deepSeek => 'DeepSeek';
+
+  @override
+  String get deepSeekDescription => 'Vision model, competitive pricing';
 
   @override
   String get apiKeys => 'API Keys';
