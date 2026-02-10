@@ -730,6 +730,12 @@ abstract class AppLocalizations {
   /// **'Select a child'**
   String get selectAChild;
 
+  /// No description provided for @onlyAuthorCanEditEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the author of the entry can edit it.'**
+  String get onlyAuthorCanEditEntry;
+
   /// No description provided for @pickFilesAndUpload.
   ///
   /// In en, this message translates to:

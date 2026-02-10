@@ -341,6 +341,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectAChild => 'Select a child';
 
   @override
+  String get onlyAuthorCanEditEntry =>
+      'Only the author of the entry can edit it.';
+
+  @override
   String get pickFilesAndUpload => 'Pick files and upload';
 
   @override

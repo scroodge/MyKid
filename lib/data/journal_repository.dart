@@ -89,7 +89,6 @@ class JournalRepository {
         .from('journal_entries')
         .update(payload)
         .eq('id', id)
-        .eq('user_id', uid)
         .select()
         .maybeSingle();
     if (res == null) return null;
@@ -97,9 +96,8 @@ class JournalRepository {
   }
 
   Future<bool> deleteEntry(String id) async {
-    final uid = _userId;
-    if (uid == null) return false;
-    await _client.from('journal_entries').delete().eq('id', id).eq('user_id', uid);
+    if (_userId == null) return false;
+    await _client.from('journal_entries').delete().eq('id', id);
     return true;
   }
 }

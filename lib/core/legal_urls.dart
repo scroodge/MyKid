@@ -18,19 +18,19 @@ class LegalUrls {
   static String get support =>
       const String.fromEnvironment(
         'SUPPORT_URL',
-        defaultValue: 'mailto:support@mykidapp.com',
+        defaultValue: 'mailto:scroodgemac@gmail.com',
       );
 
   static String get accountDeletion =>
       const String.fromEnvironment(
         'ACCOUNT_DELETION_URL',
-        defaultValue: 'mailto:support@mykidapp.com?subject=Account%20Deletion%20Request',
+        defaultValue: 'mailto:scroodgemac@gmail.com?subject=Account%20Deletion%20Request',
       );
 
   static String get dataExport =>
       const String.fromEnvironment(
         'DATA_EXPORT_URL',
-        defaultValue: 'mailto:support@mykidapp.com?subject=Data%20Export%20Request',
+        defaultValue: 'mailto:scroodgemac@gmail.com?subject=Data%20Export%20Request',
       );
 
   /// Source code repository URL. Override via SOURCE_CODE_URL env/dart-define.

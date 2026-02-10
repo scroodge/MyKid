@@ -283,10 +283,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onTap: () async {
                     final opened = await _openUrl(LegalUrls.support);
                     if (!opened && context.mounted) {
-                      await Clipboard.setData(const ClipboardData(text: 'support@mykidapp.com'));
+                      await Clipboard.setData(const ClipboardData(text: 'scroodgemac@gmail.com'));
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('support@mykidapp.com')),
+                          const SnackBar(content: Text('scroodgemac@gmail.com')),
                         );
                       }
                     }
@@ -341,10 +341,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onTap: () async {
                     final opened = await _openUrl(LegalUrls.dataExport);
                     if (!opened && context.mounted) {
-                      await Clipboard.setData(const ClipboardData(text: 'support@mykidapp.com'));
+                      await Clipboard.setData(const ClipboardData(text: 'scroodgemac@gmail.com'));
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('${AppLocalizations.of(context)!.exportMyDataSubtitle} support@mykidapp.com')),
+                          SnackBar(content: Text('${AppLocalizations.of(context)!.exportMyDataSubtitle} scroodgemac@gmail.com')),
                         );
                       }
                     }

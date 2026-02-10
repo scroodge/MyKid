@@ -4,6 +4,10 @@
 
 Journal entries (date, text, and references to Immich assets) are stored in Supabase. Media files stay in the user's Immich; we only store asset IDs.
 
+## Applying the schema
+
+В [Supabase Dashboard](https://supabase.com/dashboard) → SQL Editor вставьте и выполните содержимое [docs/full_schema.sql](full_schema.sql). Схема создаётся за один запуск.
+
 ## Table: `children`
 
 | Column            | Type         | Description |

@@ -170,9 +170,8 @@ The app also supports loading these from a config file or build-time defines; se
 ### Backend (Supabase)
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. Run the migration in `supabase/migrations/` to create the `journal_entries` table and RLS.
+2. Apply the schema: in Supabase Dashboard → SQL Editor run [docs/full_schema.sql](docs/full_schema.sql).
 3. In Supabase Dashboard → Authentication → enable Email (or other providers you want).
-4. (Optional) Profile photos: run the storage migration so the `avatars` bucket and RLS policies exist (`supabase db push` or run `supabase/migrations/20250208100001_storage_avatars_bucket.sql` in the SQL editor). Without it, avatar upload fails with "row-level security policy".
 
 Table `journal_entries` and API are described in [docs/backend.md](docs/backend.md).
 
@@ -212,8 +211,7 @@ When the app cannot reach Supabase, the journal list falls back to the last cach
   - `core/` — config, Immich client, secure storage, AI provider storage & vision service, on-device image labels (ML Kit)
   - `data/` — models, Supabase repository, local cache (Hive)
   - `features/` — auth, journal list/detail, settings, AI provider settings, batch import
-- `supabase/migrations/` — SQL for `journal_entries` and RLS
-- `docs/` — [backend.md](docs/backend.md) (schema, API), [ai-providers.md](docs/ai-providers.md) (AI descriptions), [immich-api.md](docs/immich-api.md), [edge-function-setup.md](docs/edge-function-setup.md)
+- `docs/` — [full_schema.sql](docs/full_schema.sql) (apply once in SQL Editor), [backend.md](docs/backend.md) (schema, API), [ai-providers.md](docs/ai-providers.md), [immich-api.md](docs/immich-api.md), [edge-function-setup.md](docs/edge-function-setup.md)
 
 ### Legal URLs (App Store / Google Play)
 
@@ -222,9 +220,9 @@ For store compliance, the app includes links to Privacy Policy, Terms of Use, Su
 ```
 PRIVACY_POLICY_URL=https://scroodge.github.io/MyKid/privacy.html
 TERMS_OF_SERVICE_URL=https://scroodge.github.io/MyKid/terms.html
-SUPPORT_URL=mailto:support@mykidapp.com
-ACCOUNT_DELETION_URL=mailto:support@mykidapp.com?subject=Account%20Deletion%20Request
-DATA_EXPORT_URL=mailto:support@mykidapp.com?subject=Data%20Export%20Request
+SUPPORT_URL=mailto:scroodgemac@gmail.com
+ACCOUNT_DELETION_URL=mailto:scroodgemac@gmail.com?subject=Account%20Deletion%20Request
+DATA_EXPORT_URL=mailto:scroodgemac@gmail.com?subject=Data%20Export%20Request
 SOURCE_CODE_URL=https://github.com/scroodge/MyKid
 SPONSOR_URL=https://github.com/sponsors/scroodge
 ```
