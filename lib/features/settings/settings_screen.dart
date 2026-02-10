@@ -7,6 +7,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../core/legal_urls.dart';
 import '../../core/supabase_storage.dart';
+import '../../data/household_repository.dart';
 import '../../l10n/app_localizations.dart';
 
 /// Opens URL: in-app WebView for http/https (Privacy, Terms), external for mailto etc.
@@ -54,6 +55,20 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  final _householdRepo = HouseholdRepository();
+  String? _householdId;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHousehold();
+  }
+
+  Future<void> _loadHousehold() async {
+    final id = await _householdRepo.getMyFirstHouseholdId();
+    if (mounted) setState(() => _householdId = id);
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = Supabase.instance.client.auth.currentUser;
@@ -175,9 +190,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const Divider(height: 1),
                 ListTile(
                   leading: Icon(Icons.family_restroom, color: Theme.of(context).colorScheme.secondary),
-                  title: Text(AppLocalizations.of(context)!.inviteToFamily),
+                  title: Text(
+                    _householdId != null
+                        ? AppLocalizations.of(context)!.myFamily
+                        : AppLocalizations.of(context)!.inviteToFamily,
+                  ),
+                  subtitle: _householdId != null
+                      ? null
+                      : Text(AppLocalizations.of(context)!.createHouseholdDescription),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.of(context).pushNamed('/household-invites'),
+                  onTap: () async {
+                    if (_householdId != null) {
+                      await Navigator.of(context).pushNamed('/my-family');
+                    } else {
+                      await Navigator.of(context).pushNamed('/household-invites');
+                    }
+                    if (mounted) _loadHousehold();
+                  },
                 ),
               ],
             ),

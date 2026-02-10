@@ -515,6 +515,21 @@ class AppLocalizationsRu extends AppLocalizations {
   String get inviteToFamily => 'Пригласить в семью';
 
   @override
+  String get myFamily => 'Моя семья';
+
+  @override
+  String get familyMembers => 'Участники семьи';
+
+  @override
+  String get householdMemberRoleOwner => 'Владелец';
+
+  @override
+  String get householdMemberRoleMember => 'Участник';
+
+  @override
+  String get you => 'Вы';
+
+  @override
   String get inviteEmail => 'Email';
 
   @override

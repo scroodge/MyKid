@@ -513,6 +513,21 @@ class AppLocalizationsBe extends AppLocalizations {
   String get inviteToFamily => 'Запрасіць у сям\'ю';
 
   @override
+  String get myFamily => 'Мая сям\'я';
+
+  @override
+  String get familyMembers => 'Удзельнікі сям\'і';
+
+  @override
+  String get householdMemberRoleOwner => 'Уладальнік';
+
+  @override
+  String get householdMemberRoleMember => 'Удзельнік';
+
+  @override
+  String get you => 'Вы';
+
+  @override
   String get inviteEmail => 'Email';
 
   @override

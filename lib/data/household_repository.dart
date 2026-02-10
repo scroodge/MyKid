@@ -104,4 +104,35 @@ class HouseholdRepository {
     final name = map?['name'] as String?;
     return (name != null && name.trim().isNotEmpty) ? name.trim() : null;
   }
+
+  /// Returns true if the current user is the owner of the given household.
+  Future<bool> isHouseholdOwner(String householdId) async {
+    final uid = _userId;
+    if (uid == null) return false;
+    final res = await _client
+        .from('household_members')
+        .select('role')
+        .eq('household_id', householdId)
+        .eq('user_id', uid)
+        .maybeSingle();
+    final map = res as Map<String, dynamic>?;
+    return map?['role'] == 'owner';
+  }
+
+  /// Returns list of members in the household: [{ userId, role }].
+  /// Only call when current user is a member (RLS allows read).
+  Future<List<({String userId, String role})>> getHouseholdMembers(String householdId) async {
+    final res = await _client
+        .from('household_members')
+        .select('user_id, role')
+        .eq('household_id', householdId)
+        .order('joined_at');
+    return (res as List).map((e) {
+      final m = e as Map<String, dynamic>;
+      return (
+        userId: m['user_id'] as String,
+        role: m['role'] as String? ?? 'member',
+      );
+    }).toList();
+  }
 }

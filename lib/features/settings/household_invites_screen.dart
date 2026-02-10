@@ -20,6 +20,7 @@ class _HouseholdInvitesScreenState extends State<HouseholdInvitesScreen> {
   List<HouseholdInvite> _invites = [];
   bool _loading = true;
   String? _householdId;
+  bool _isOwner = false;
 
   @override
   void initState() {
@@ -35,14 +36,17 @@ class _HouseholdInvitesScreenState extends State<HouseholdInvitesScreen> {
         setState(() {
           _loading = false;
           _householdId = null;
+          _isOwner = false;
         });
         return;
       }
       final invites = await _inviteRepo.getInvitesForHousehold(householdId);
+      final isOwner = await _householdRepo.isHouseholdOwner(householdId);
       if (mounted) {
         setState(() {
           _invites = invites;
           _householdId = householdId;
+          _isOwner = isOwner;
           _loading = false;
         });
       }
@@ -372,11 +376,13 @@ class _HouseholdInvitesScreenState extends State<HouseholdInvitesScreen> {
                                     : Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                             ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.cancel_outlined),
-                              onPressed: expired ? null : () => _cancelInvite(invite),
-                              tooltip: l10n.cancelInvite,
-                            ),
+                            trailing: _isOwner
+                                ? IconButton(
+                                    icon: const Icon(Icons.cancel_outlined),
+                                    onPressed: expired ? null : () => _cancelInvite(invite),
+                                    tooltip: l10n.cancelInvite,
+                                  )
+                                : null,
                           );
                         }),
                       ],

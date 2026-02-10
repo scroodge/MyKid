@@ -513,6 +513,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inviteToFamily => 'Invite to family';
 
   @override
+  String get myFamily => 'My family';
+
+  @override
+  String get familyMembers => 'Family members';
+
+  @override
+  String get householdMemberRoleOwner => 'Owner';
+
+  @override
+  String get householdMemberRoleMember => 'Member';
+
+  @override
+  String get you => 'You';
+
+  @override
   String get inviteEmail => 'Email';
 
   @override

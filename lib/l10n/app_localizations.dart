@@ -1030,6 +1030,36 @@ abstract class AppLocalizations {
   /// **'Invite to family'**
   String get inviteToFamily;
 
+  /// No description provided for @myFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'My family'**
+  String get myFamily;
+
+  /// No description provided for @familyMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Family members'**
+  String get familyMembers;
+
+  /// No description provided for @householdMemberRoleOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get householdMemberRoleOwner;
+
+  /// No description provided for @householdMemberRoleMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get householdMemberRoleMember;
+
+  /// No description provided for @you.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get you;
+
   /// No description provided for @inviteEmail.
   ///
   /// In en, this message translates to:

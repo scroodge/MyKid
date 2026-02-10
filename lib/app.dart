@@ -11,6 +11,7 @@ import 'features/import/batch_import_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'features/settings/accept_invite_screen.dart';
 import 'features/settings/household_invites_screen.dart';
+import 'features/settings/my_family_screen.dart';
 import 'features/settings/ai_provider_settings_screen.dart';
 import 'features/settings/immich_settings_screen.dart';
 import 'features/settings/profile_screen.dart';
@@ -117,6 +118,7 @@ class _MyKidAppState extends State<MyKidApp> {
         '/settings-immich': (context) => const ImmichSettingsScreen(),
         '/settings-ai-providers': (context) => const AiProviderSettingsScreen(),
         '/household-invites': (context) => const HouseholdInvitesScreen(),
+        '/my-family': (context) => const MyFamilyScreen(),
         '/accept-invite': (context) {
           final args = ModalRoute.of(context)?.settings.arguments;
           final token = args is String ? args : null;
