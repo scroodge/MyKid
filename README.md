@@ -1,5 +1,9 @@
 # MyKid — Journal for your child
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS-lightgrey)](https://github.com)
+[![Flutter](https://img.shields.io/badge/Flutter-3.5+-02569B?logo=flutter)](https://flutter.dev)
+
 A cross-platform (Android / iOS) app to keep a journal of your child's life: entries with photos/videos and text. Media is stored in **your** [Immich](https://immich.app) instance; journal entries sync via **Supabase**.
 
 For logo and branding (splash, login, README, presentations), see `assets/brand/logo/mykid_logo_text_only.png` and [docs/Brand.md](docs/Brand.md).
@@ -196,6 +200,17 @@ Regenerate `lib/oss_licenses.dart` after changing `pubspec.yaml` dependencies:
 dart run dart_pubspec_licenses:generate
 ```
 
+## Contributors
+
+Thanks to everyone who contributes to MyKid. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get involved.
+
+## Support development
+
+If you find MyKid useful, consider supporting its development:
+
+- [GitHub Sponsors](https://github.com/sponsors) — once set up, link will be added here
+- Or spread the word and star the repo
+
 ## License
 
-Private / unlicensed unless you add one.
+[MIT License](LICENSE)

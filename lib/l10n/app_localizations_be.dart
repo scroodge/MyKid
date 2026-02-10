@@ -70,6 +70,16 @@ class AppLocalizationsBe extends AppLocalizations {
       'Рэгістрацыя адключана. У Supabase: Authentication → Providers → Email уключыце «Allow new users to sign up».';
 
   @override
+  String get startFromScratch => 'Пачаць з нуля';
+
+  @override
+  String get startFromScratchConfirm => 'Скінуць і запустиць онбордынг?';
+
+  @override
+  String get startFromScratchConfirmMessage =>
+      'Усе захаваныя налады Supabase і Immich будуць выдалены. Дадатак зачыніцца. Адкрыйце яго зноў, каб наладзіць з нуля.';
+
+  @override
   String get settings => 'Налады';
 
   @override
@@ -414,6 +424,13 @@ class AppLocalizationsBe extends AppLocalizations {
   String get onboardingNewAccountSubtitle => 'Стварыце свой Immich і Supabase';
 
   @override
+  String get onboardingExistingAccount => 'У мяне ўжо ёсць акаўнт';
+
+  @override
+  String get onboardingExistingAccountSubtitle =>
+      'Увайсці з URL і anon key Supabase';
+
+  @override
   String get onboardingFamily => 'Сям\'я';
 
   @override
@@ -657,6 +674,19 @@ class AppLocalizationsBe extends AppLocalizations {
 
   @override
   String get aiProvidersSubtitle => 'Наладзіць AI для аналізу фота';
+
+  @override
+  String get changeSupabase => 'Змяніць Supabase';
+
+  @override
+  String get changeSupabaseSubtitle => 'Пераключыцца на іншы праект Supabase';
+
+  @override
+  String get changeSupabaseConfirm => 'Змяніць праект Supabase?';
+
+  @override
+  String get changeSupabaseConfirmMessage =>
+      'Вы будзеце выйсці з акаўнта. Дадатак зачыніцца. Адкрыйце яго зноў, каб ўвесці новыя ўліковыя даныя Supabase.';
 
   @override
   String get aiProviderSettings => 'AI Правайдэры';

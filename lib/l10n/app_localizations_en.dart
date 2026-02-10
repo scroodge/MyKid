@@ -70,6 +70,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Sign-up is disabled. In Supabase: Authentication → Providers → Email → turn on \"Allow new users to sign up\".';
 
   @override
+  String get startFromScratch => 'Start from scratch';
+
+  @override
+  String get startFromScratchConfirm => 'Reset and run onboarding?';
+
+  @override
+  String get startFromScratchConfirmMessage =>
+      'All saved Supabase and Immich settings will be cleared. The app will close. Open it again to set up from scratch.';
+
+  @override
   String get settings => 'Settings';
 
   @override
@@ -414,6 +424,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Create your own Immich and Supabase';
 
   @override
+  String get onboardingExistingAccount => 'I already have an account';
+
+  @override
+  String get onboardingExistingAccountSubtitle =>
+      'Sign in with Supabase URL and anon key';
+
+  @override
   String get onboardingFamily => 'Family';
 
   @override
@@ -657,6 +674,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiProvidersSubtitle => 'Configure AI for photo analysis';
+
+  @override
+  String get changeSupabase => 'Change Supabase';
+
+  @override
+  String get changeSupabaseSubtitle => 'Switch to another Supabase project';
+
+  @override
+  String get changeSupabaseConfirm => 'Change Supabase project?';
+
+  @override
+  String get changeSupabaseConfirmMessage =>
+      'You will be signed out. The app will close. Open it again to enter new Supabase credentials.';
 
   @override
   String get aiProviderSettings => 'AI Providers';

@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../core/legal_urls.dart';
+import '../../core/supabase_storage.dart';
 import '../../l10n/app_localizations.dart';
 
 /// Opens URL: in-app WebView for http/https (Privacy, Terms), external for mailto etc.
@@ -209,6 +210,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => Navigator.of(context).pushNamed('/settings-ai-providers'),
                 ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: Icon(Icons.storage_outlined, color: Theme.of(context).colorScheme.secondary),
+                  title: Text(AppLocalizations.of(context)!.changeSupabase),
+                  subtitle: Text(AppLocalizations.of(context)!.changeSupabaseSubtitle),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () async {
+                    final ok = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text(AppLocalizations.of(context)!.changeSupabaseConfirm),
+                        content: Text(AppLocalizations.of(context)!.changeSupabaseConfirmMessage),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: Text(AppLocalizations.of(context)!.cancel),
+                          ),
+                          FilledButton(
+                            onPressed: () => Navigator.pop(ctx, true),
+                            child: Text(AppLocalizations.of(context)!.changeSupabase),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (ok != true || !context.mounted) return;
+                    await SupabaseStorage().clear();
+                    await Supabase.instance.client.auth.signOut();
+                    if (context.mounted) {
+                      SystemNavigator.pop();
+                    }
+                  },
+                ),
               ],
             ),
           ),
@@ -262,6 +295,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const Divider(height: 1),
                 ListTile(
                   leading: Icon(Icons.code, color: Theme.of(context).colorScheme.primary),
+                  title: Text(AppLocalizations.of(context)!.sourceCode),
+                  trailing: const Icon(Icons.open_in_new),
+                  onTap: () => _openUrl(LegalUrls.sourceCode),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: Icon(Icons.favorite_outline, color: Theme.of(context).colorScheme.primary),
+                  title: Text(AppLocalizations.of(context)!.supportDevelopment),
+                  trailing: const Icon(Icons.open_in_new),
+                  onTap: () => _openUrl(LegalUrls.sponsor),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: Icon(Icons.description_outlined, color: Theme.of(context).colorScheme.primary),
                   title: Text(AppLocalizations.of(context)!.licenses),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => Navigator.of(context).pushNamed('/licenses'),

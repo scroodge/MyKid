@@ -80,7 +80,7 @@ class AiVisionService {
   Future<({String? text, String? error})> _callOpenAiVision(String apiKey, String base64Image) async {
     try {
       const url = 'https://api.openai.com/v1/chat/completions';
-      final prompt = 'Describe this photo for a child\'s journal entry. Write a warm, personal description in Russian that captures the moment, what the child is doing, and any notable details. Keep it concise (2-3 sentences).';
+      final prompt = 'This is a photo from a family journal app for documenting a child\'s life. As a parent, I want to create a warm, personal description of this moment for my child\'s memory book. Please describe what you see in the photo - what the child is doing, the setting, and any notable details. Write in Russian, keep it warm and positive, 2-3 sentences.';
 
       final response = await http.post(
         Uri.parse(url),
@@ -91,6 +91,10 @@ class AiVisionService {
         body: jsonEncode({
           'model': 'gpt-4o',
           'messages': [
+            {
+              'role': 'system',
+              'content': 'You are a helpful assistant that helps parents create journal entries for their children. You describe photos in a warm, positive, and age-appropriate manner.',
+            },
             {
               'role': 'user',
               'content': [
@@ -115,9 +119,22 @@ class AiVisionService {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         final choices = data['choices'] as List?;
         if (choices != null && choices.isNotEmpty) {
-          final message = choices[0]['message'] as Map<String, dynamic>?;
+          final choice = choices[0] as Map<String, dynamic>?;
+          
+          // Check finish_reason
+          final finishReason = choice?['finish_reason'] as String?;
+          if (finishReason == 'content_filter') {
+            return (text: null, error: 'OpenAI blocked the response due to content filters. Try using a different provider.');
+          }
+          
+          final message = choice?['message'] as Map<String, dynamic>?;
           final content = message?['content'] as String?;
           if (content != null && content.trim().isNotEmpty) {
+            // Check if response is a refusal
+            final lowerContent = content.toLowerCase();
+            if (lowerContent.contains('sorry') && (lowerContent.contains('can\'t help') || lowerContent.contains('cannot help'))) {
+              return (text: null, error: 'AI provider refused to analyze the image. This may happen with certain content. Try a different provider or describe the photo manually.');
+            }
             return (text: content.trim(), error: null);
           }
         }
@@ -135,7 +152,7 @@ class AiVisionService {
   Future<({String? text, String? error})> _callGeminiVision(String apiKey, String base64Image) async {
     try {
       final url = Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$apiKey');
-      final prompt = 'Опиши это фото для детского дневника. Напиши теплое, личное описание на русском языке, которое передает момент, что делает ребенок, и любые заметные детали. Будь кратким (2-3 предложения).';
+      final prompt = 'Это фото из семейного приложения для ведения дневника жизни ребенка. Как родитель, я хочу создать теплое, личное описание этого момента для дневника моего ребенка. Опиши, что ты видишь на фото - что делает ребенок, обстановку и любые заметные детали. Напиши на русском языке, будь теплым и позитивным, 2-3 предложения.';
 
       final response = await http.post(
         url,
@@ -146,6 +163,9 @@ class AiVisionService {
           'contents': [
             {
               'parts': [
+                {
+                  'text': 'You are a helpful assistant that helps parents create journal entries for their children. You describe photos in a warm, positive, and age-appropriate manner.',
+                },
                 {'text': prompt},
                 {
                   'inline_data': {
@@ -159,18 +179,59 @@ class AiVisionService {
           'generationConfig': {
             'maxOutputTokens': 300,
           },
+          'safetySettings': [
+            {
+              'category': 'HARM_CATEGORY_HARASSMENT',
+              'threshold': 'BLOCK_NONE',
+            },
+            {
+              'category': 'HARM_CATEGORY_HATE_SPEECH',
+              'threshold': 'BLOCK_NONE',
+            },
+            {
+              'category': 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+              'threshold': 'BLOCK_ONLY_HIGH',
+            },
+            {
+              'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
+              'threshold': 'BLOCK_ONLY_HIGH',
+            },
+          ],
         }),
       ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
+        
+        // Check for safety blocks
+        final promptFeedback = data['promptFeedback'] as Map<String, dynamic>?;
+        if (promptFeedback != null) {
+          final blockReason = promptFeedback['blockReason'] as String?;
+          if (blockReason != null) {
+            return (text: null, error: 'Gemini blocked the request: $blockReason. Try adjusting safety settings or use a different provider.');
+          }
+        }
+        
         final candidates = data['candidates'] as List?;
         if (candidates != null && candidates.isNotEmpty) {
-          final content = candidates[0]['content'] as Map<String, dynamic>?;
+          final candidate = candidates[0] as Map<String, dynamic>?;
+          
+          // Check if candidate was blocked
+          final finishReason = candidate?['finishReason'] as String?;
+          if (finishReason == 'SAFETY' || finishReason == 'RECITATION') {
+            return (text: null, error: 'Gemini blocked the response due to safety filters. Try using a different provider or adjusting settings.');
+          }
+          
+          final content = candidate?['content'] as Map<String, dynamic>?;
           final parts = content?['parts'] as List?;
           if (parts != null && parts.isNotEmpty) {
             final text = parts[0]['text'] as String?;
             if (text != null && text.trim().isNotEmpty) {
+              // Check if response is a refusal
+              final lowerText = text.toLowerCase();
+              if (lowerText.contains('извини') && lowerText.contains('не могу помочь')) {
+                return (text: null, error: 'AI provider refused to analyze the image. This may happen with certain content. Try a different provider or describe the photo manually.');
+              }
               return (text: text.trim(), error: null);
             }
           }
@@ -189,7 +250,7 @@ class AiVisionService {
   Future<({String? text, String? error})> _callClaudeVision(String apiKey, String base64Image) async {
     try {
       const url = 'https://api.anthropic.com/v1/messages';
-      final prompt = 'Опиши это фото для детского дневника. Напиши теплое, личное описание на русском языке, которое передает момент, что делает ребенок, и любые заметные детали. Будь кратким (2-3 предложения).';
+      final prompt = 'Это фото из семейного приложения для ведения дневника жизни ребенка. Как родитель, я хочу создать теплое, личное описание этого момента для дневника моего ребенка. Опиши, что ты видишь на фото - что делает ребенок, обстановку и любые заметные детали. Напиши на русском языке, будь теплым и позитивным, 2-3 предложения.';
 
       final response = await http.post(
         Uri.parse(url),
@@ -201,6 +262,7 @@ class AiVisionService {
         body: jsonEncode({
           'model': 'claude-3-5-sonnet-20241022',
           'max_tokens': 300,
+          'system': 'You are a helpful assistant that helps parents create journal entries for their children. You describe photos in a warm, positive, and age-appropriate manner.',
           'messages': [
             {
               'role': 'user',
@@ -230,9 +292,21 @@ class AiVisionService {
           final textBlock = content[0] as Map<String, dynamic>?;
           final text = textBlock?['text'] as String?;
           if (text != null && text.trim().isNotEmpty) {
+            // Check if response is a refusal
+            final lowerText = text.toLowerCase();
+            if (lowerText.contains('извини') && (lowerText.contains('не могу помочь') || lowerText.contains('не могу'))) {
+              return (text: null, error: 'AI provider refused to analyze the image. This may happen with certain content. Try a different provider or describe the photo manually.');
+            }
             return (text: text.trim(), error: null);
           }
         }
+        
+        // Check for stop_reason indicating refusal
+        final stopReason = data['stop_reason'] as String?;
+        if (stopReason == 'content_filtered') {
+          return (text: null, error: 'Claude blocked the response due to content filters. Try using a different provider.');
+        }
+        
         return (text: null, error: 'Empty response from Claude');
       } else {
         final errorData = jsonDecode(response.body) as Map<String, dynamic>?;

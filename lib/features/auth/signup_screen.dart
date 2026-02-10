@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/immich_storage.dart';
+import '../../core/supabase_storage.dart';
 import '../../l10n/app_localizations.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -64,6 +67,35 @@ class _SignUpScreenState extends State<SignUpScreen> {
       setState(() => _error = e.toString());
     } finally {
       if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _startFromScratch() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.startFromScratchConfirm),
+        content: Text(AppLocalizations.of(context)!.startFromScratchConfirmMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(AppLocalizations.of(context)!.startFromScratch),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    await SupabaseStorage().clear();
+    await ImmichStorage().clear();
+    try {
+      await Supabase.instance.client.auth.signOut();
+    } catch (_) {}
+    if (mounted) {
+      SystemNavigator.pop();
     }
   }
 
@@ -170,6 +202,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 TextButton(
                   onPressed: _loading ? null : () => Navigator.of(context).pushReplacementNamed('/login'),
                   child: Text(AppLocalizations.of(context)!.alreadyHaveAccount),
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: _loading ? null : _startFromScratch,
+                  child: Text(
+                    AppLocalizations.of(context)!.startFromScratch,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
                 ),
               ],
             ),

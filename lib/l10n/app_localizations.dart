@@ -220,6 +220,24 @@ abstract class AppLocalizations {
   /// **'Sign-up is disabled. In Supabase: Authentication → Providers → Email → turn on \"Allow new users to sign up\".'**
   String get signUpDisabled;
 
+  /// No description provided for @startFromScratch.
+  ///
+  /// In en, this message translates to:
+  /// **'Start from scratch'**
+  String get startFromScratch;
+
+  /// No description provided for @startFromScratchConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset and run onboarding?'**
+  String get startFromScratchConfirm;
+
+  /// No description provided for @startFromScratchConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'All saved Supabase and Immich settings will be cleared. The app will close. Open it again to set up from scratch.'**
+  String get startFromScratchConfirmMessage;
+
   /// No description provided for @settings.
   ///
   /// In en, this message translates to:
@@ -850,6 +868,18 @@ abstract class AppLocalizations {
   /// **'Create your own Immich and Supabase'**
   String get onboardingNewAccountSubtitle;
 
+  /// No description provided for @onboardingExistingAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'I already have an account'**
+  String get onboardingExistingAccount;
+
+  /// No description provided for @onboardingExistingAccountSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Supabase URL and anon key'**
+  String get onboardingExistingAccountSubtitle;
+
   /// No description provided for @onboardingFamily.
   ///
   /// In en, this message translates to:
@@ -1293,6 +1323,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Configure AI for photo analysis'**
   String get aiProvidersSubtitle;
+
+  /// No description provided for @changeSupabase.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Supabase'**
+  String get changeSupabase;
+
+  /// No description provided for @changeSupabaseSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to another Supabase project'**
+  String get changeSupabaseSubtitle;
+
+  /// No description provided for @changeSupabaseConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Supabase project?'**
+  String get changeSupabaseConfirm;
+
+  /// No description provided for @changeSupabaseConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You will be signed out. The app will close. Open it again to enter new Supabase credentials.'**
+  String get changeSupabaseConfirmMessage;
 
   /// No description provided for @aiProviderSettings.
   ///

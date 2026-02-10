@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'login_screen.dart';
+import 'sync_household_immich_on_login.dart';
 
 /// Redirects to login if not authenticated.
 class AuthGuard extends StatelessWidget {
@@ -17,7 +18,7 @@ class AuthGuard extends StatelessWidget {
         if (snapshot.hasData &&
             snapshot.data!.session != null &&
             snapshot.data!.session?.user != null) {
-          return child;
+          return SyncHouseholdImmichOnLogin(child: child);
         }
         return LoginScreen();
       },

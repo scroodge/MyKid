@@ -18,7 +18,8 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
   int _step = 0;
-  bool _isNewAccount = true; // true = new account, false = family
+  // 0 = new account, 1 = family, 2 = existing account (sign in)
+  int _accountType = 0;
 
   // Immich
   final _immichUrlController = TextEditingController();
@@ -215,7 +216,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       await _supabaseStorage.setUrl(url);
       await _supabaseStorage.setAnonKey(key);
       await Supabase.initialize(url: url, anonKey: key);
-      if (mounted) _nextStep();
+      if (mounted) {
+        if (_accountType == 2) {
+          Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
+        } else {
+          _nextStep();
+        }
+      }
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());
     }
@@ -279,7 +286,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildStep(AppLocalizations l10n) {
     if (_step == 0) return _buildAccountTypeStep(l10n);
-    if (!_isNewAccount) return _buildFamilyComingSoon(l10n);
+    if (_accountType == 1) return _buildFamilyComingSoon(l10n);
+    if (_accountType == 2) {
+      // Existing account: Supabase only, then login
+      return _buildSupabaseStep(l10n);
+    }
     if (_step == 1) return _buildImmichStep(l10n);
     if (_step == 2) return _buildSupabaseStep(l10n);
     if (_step == 3) return _buildSignUpStep(l10n);
@@ -299,16 +310,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           title: l10n.onboardingNewAccount,
           subtitle: l10n.onboardingNewAccountSubtitle,
           icon: Icons.person_add,
-          selected: _isNewAccount,
-          onTap: () => setState(() => _isNewAccount = true),
+          selected: _accountType == 0,
+          onTap: () => setState(() => _accountType = 0),
+        ),
+        const SizedBox(height: 16),
+        _AccountTypeCard(
+          title: l10n.onboardingExistingAccount,
+          subtitle: l10n.onboardingExistingAccountSubtitle,
+          icon: Icons.login,
+          selected: _accountType == 2,
+          onTap: () => setState(() => _accountType = 2),
         ),
         const SizedBox(height: 16),
         _AccountTypeCard(
           title: l10n.onboardingFamily,
           subtitle: l10n.onboardingFamilySubtitle,
           icon: Icons.family_restroom,
-          selected: !_isNewAccount,
-          onTap: () => setState(() => _isNewAccount = false),
+          selected: _accountType == 1,
+          onTap: () => setState(() => _accountType = 1),
         ),
         const SizedBox(height: 32),
         FilledButton(
@@ -331,7 +350,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ),
         const SizedBox(height: 32),
         FilledButton(
-          onPressed: () => setState(() => _isNewAccount = true),
+          onPressed: () => setState(() => _accountType = 0),
           child: Text(l10n.onboardingNewAccount),
         ),
       ],

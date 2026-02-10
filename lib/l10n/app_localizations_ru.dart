@@ -70,6 +70,16 @@ class AppLocalizationsRu extends AppLocalizations {
       'Регистрация отключена. В Supabase: Authentication → Providers → Email включите «Allow new users to sign up».';
 
   @override
+  String get startFromScratch => 'Начать с нуля';
+
+  @override
+  String get startFromScratchConfirm => 'Сбросить и запустить онбординг?';
+
+  @override
+  String get startFromScratchConfirmMessage =>
+      'Все сохранённые настройки Supabase и Immich будут удалены. Приложение закроется. Откройте его снова, чтобы настроить с нуля.';
+
+  @override
   String get settings => 'Настройки';
 
   @override
@@ -415,6 +425,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get onboardingNewAccountSubtitle => 'Создайте свой Immich и Supabase';
 
   @override
+  String get onboardingExistingAccount => 'У меня уже есть аккаунт';
+
+  @override
+  String get onboardingExistingAccountSubtitle =>
+      'Войти с URL и anon key Supabase';
+
+  @override
   String get onboardingFamily => 'Семья';
 
   @override
@@ -659,6 +676,20 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get aiProvidersSubtitle => 'Настроить AI для анализа фото';
+
+  @override
+  String get changeSupabase => 'Изменить Supabase';
+
+  @override
+  String get changeSupabaseSubtitle =>
+      'Переключиться на другой проект Supabase';
+
+  @override
+  String get changeSupabaseConfirm => 'Изменить проект Supabase?';
+
+  @override
+  String get changeSupabaseConfirmMessage =>
+      'Вы будете выйти из аккаунта. Приложение закроется. Откройте его снова, чтобы ввести новые учётные данные Supabase.';
 
   @override
   String get aiProviderSettings => 'AI Провайдеры';

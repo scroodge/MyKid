@@ -32,4 +32,18 @@ class LegalUrls {
         'DATA_EXPORT_URL',
         defaultValue: 'mailto:support@mykidapp.com?subject=Data%20Export%20Request',
       );
+
+  /// Source code repository URL. Override via SOURCE_CODE_URL env/dart-define.
+  static String get sourceCode =>
+      const String.fromEnvironment(
+        'SOURCE_CODE_URL',
+        defaultValue: 'https://github.com/mykidapp/mykid',
+      );
+
+  /// GitHub Sponsors or similar donation URL. Override via SPONSOR_URL env/dart-define.
+  static String get sponsor =>
+      const String.fromEnvironment(
+        'SPONSOR_URL',
+        defaultValue: 'https://github.com/sponsors',
+      );
 }
