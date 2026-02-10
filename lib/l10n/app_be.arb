@@ -258,7 +258,7 @@
   "claude": "Anthropic Claude",
   "claudeDescription": "Высокая якасць, платна",
   "deepSeek": "DeepSeek",
-  "deepSeekDescription": "Мадэль з падтрымкай выяў, выгодныя цэны",
+  "deepSeekDescription": "Толькі тэкст, без аналізу фота",
   "apiKeys": "API Ключы",
   "enterApiKey": "Увядзіце API ключ",
   "getApiKey": "Атрымаць API ключ",

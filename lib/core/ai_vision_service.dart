@@ -44,6 +44,11 @@ class AiVisionService {
       return (text: null, error: 'No AI provider selected');
     }
 
+    // DeepSeek official API accepts only text in messages (no image_url or image variant).
+    if (selectedProvider == 'deepseek') {
+      return (text: null, error: 'DeepSeek does not support image analysis. Use Gemini, OpenAI or Claude in Settings → AI Providers.');
+    }
+
     // Get API key for selected provider
     String? apiKey;
     switch (selectedProvider) {
@@ -79,7 +84,7 @@ class AiVisionService {
       case 'claude':
         return await _callClaudeVision(apiKey, base64Image);
       case 'deepseek':
-        return await _callDeepSeekVision(apiKey, base64Image);
+        return (text: null, error: 'DeepSeek does not support image analysis.');
       default:
         return (text: null, error: 'Unknown provider: $selectedProvider');
     }
@@ -326,14 +331,53 @@ class AiVisionService {
     }
   }
 
-  /// DeepSeek API is OpenAI-compatible; supports vision via image_url in content.
+  /// DeepSeek: try vision endpoint first, then chat with image type (not image_url).
   Future<({String? text, String? error})> _callDeepSeekVision(String apiKey, String base64Image) async {
-    try {
-      const url = 'https://api.deepseek.com/v1/chat/completions';
-      final prompt = 'Это фото из семейного приложения для ведения дневника жизни ребенка. Как родитель, я хочу создать теплое, личное описание этого момента для дневника моего ребенка. Опиши, что ты видишь на фото - что делает ребенок, обстановку и любые заметные детали. Напиши на русском языке, будь теплым и позитивным, 2-3 предложения.';
+    const prompt = 'Это фото из семейного приложения для ведения дневника жизни ребенка. Как родитель, я хочу создать теплое, личное описание этого момента для дневника моего ребенка. Опиши, что ты видишь на фото - что делает ребенок, обстановку и любые заметные детали. Напиши на русском языке, будь теплым и позитивным, 2-3 предложения.';
 
+    // 1) Try dedicated vision endpoint (if available)
+    final visionResult = await _callDeepSeekVisionEndpoint(apiKey, base64Image, prompt);
+    if (visionResult.text != null) return visionResult;
+    if (visionResult.error != null && !visionResult.error!.contains('404') && !visionResult.error!.contains('Not Found')) {
+      return visionResult;
+    }
+
+    // 2) Try chat/completions with content type "image" + base64 (Claude-style; API may support it)
+    return await _callDeepSeekChatWithImage(apiKey, base64Image, prompt);
+  }
+
+  Future<({String? text, String? error})> _callDeepSeekVisionEndpoint(String apiKey, String base64Image, String prompt) async {
+    try {
       final response = await http.post(
-        Uri.parse(url),
+        Uri.parse('https://api.deepseek.com/v1/vision'),
+        headers: {
+          'Authorization': 'Bearer $apiKey',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'model': 'deepseek-vision',
+          'image': base64Image,
+          'prompt': prompt,
+        }),
+      ).timeout(const Duration(seconds: 30));
+      if (response.statusCode != 200) {
+        final err = jsonDecode(response.body) as Map<String, dynamic>?;
+        final msg = err?['error']?['message'] as String? ?? response.body;
+        return (text: null, error: response.statusCode == 404 ? '404' : msg);
+      }
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final text = data['choices']?[0]?['message']?['content'] as String? ?? data['text'] as String? ?? data['content'] as String?;
+      if (text != null && text.trim().isNotEmpty) return (text: text.trim(), error: null);
+      return (text: null, error: 'Empty response from DeepSeek vision');
+    } catch (e) {
+      return (text: null, error: e.toString());
+    }
+  }
+
+  Future<({String? text, String? error})> _callDeepSeekChatWithImage(String apiKey, String base64Image, String prompt) async {
+    try {
+      final response = await http.post(
+        Uri.parse('https://api.deepseek.com/v1/chat/completions'),
         headers: {
           'Authorization': 'Bearer $apiKey',
           'Content-Type': 'application/json',
@@ -348,11 +392,11 @@ class AiVisionService {
             {
               'role': 'user',
               'content': [
-                {'type': 'text', 'text': prompt},
                 {
-                  'type': 'image_url',
-                  'image_url': {'url': 'data:image/jpeg;base64,$base64Image'},
+                  'type': 'image',
+                  'source': {'type': 'base64', 'media_type': 'image/jpeg', 'data': base64Image},
                 },
+                {'type': 'text', 'text': prompt},
               ],
             },
           ],
@@ -381,9 +425,18 @@ class AiVisionService {
         }
         return (text: null, error: 'Empty response from DeepSeek');
       } else {
-        final errorData = jsonDecode(response.body) as Map<String, dynamic>?;
-        final errorMessage = errorData?['error']?['message'] as String? ?? response.body;
-        return (text: null, error: 'DeepSeek API error: $errorMessage');
+        // Try to parse error response
+        String errorMessage = 'Unknown error';
+        try {
+          final errorData = jsonDecode(response.body) as Map<String, dynamic>?;
+          errorMessage = errorData?['error']?['message'] as String? ?? 
+                        errorData?['error']?['code'] as String? ?? 
+                        errorData?.toString() ?? 
+                        response.body;
+        } catch (_) {
+          errorMessage = response.body;
+        }
+        return (text: null, error: 'DeepSeek API error (${response.statusCode}): $errorMessage');
       }
     } catch (e) {
       return (text: null, error: 'Failed to call DeepSeek: $e');
@@ -412,6 +465,33 @@ class AiVisionService {
 
     if (apiKey == null || apiKey.trim().isEmpty) {
       return (success: false, error: 'API key not configured');
+    }
+
+    // DeepSeek does not support images; test with text-only request.
+    if (provider == 'deepseek') {
+      try {
+        final response = await http.post(
+          Uri.parse('https://api.deepseek.com/v1/chat/completions'),
+          headers: {
+            'Authorization': 'Bearer $apiKey',
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'model': 'deepseek-chat',
+            'messages': [
+              {'role': 'user', 'content': 'Say OK'},
+            ],
+            'max_tokens': 10,
+          }),
+        ).timeout(const Duration(seconds: 15));
+        if (response.statusCode == 200) {
+          return (success: true, error: null);
+        }
+        final err = jsonDecode(response.body) as Map<String, dynamic>?;
+        return (success: false, error: err?['error']?['message'] as String? ?? response.body);
+      } catch (e) {
+        return (success: false, error: e.toString());
+      }
     }
 
     // Create a minimal test image (1x1 pixel PNG)

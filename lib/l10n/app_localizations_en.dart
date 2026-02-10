@@ -726,7 +726,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deepSeek => 'DeepSeek';
 
   @override
-  String get deepSeekDescription => 'Vision model, competitive pricing';
+  String get deepSeekDescription => 'Vision supported (experimental)';
 
   @override
   String get apiKeys => 'API Keys';

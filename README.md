@@ -211,8 +211,8 @@ When the app cannot reach Supabase, the journal list falls back to the last cach
 For store compliance, the app includes links to Privacy Policy, Terms of Use, Support, Account Deletion, and Data Export. Configure in `.env`:
 
 ```
-PRIVACY_POLICY_URL=https://mykidapp.com/privacy
-TERMS_OF_SERVICE_URL=https://mykidapp.com/terms
+PRIVACY_POLICY_URL=https://scroodge.github.io/MyKid/privacy.html
+TERMS_OF_SERVICE_URL=https://scroodge.github.io/MyKid/terms.html
 SUPPORT_URL=mailto:support@mykidapp.com
 ACCOUNT_DELETION_URL=mailto:support@mykidapp.com?subject=Account%20Deletion%20Request
 DATA_EXPORT_URL=mailto:support@mykidapp.com?subject=Data%20Export%20Request

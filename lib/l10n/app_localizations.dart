@@ -1423,7 +1423,7 @@ abstract class AppLocalizations {
   /// No description provided for @deepSeekDescription.
   ///
   /// In en, this message translates to:
-  /// **'Vision model, competitive pricing'**
+  /// **'Vision supported (experimental)'**
   String get deepSeekDescription;
 
   /// No description provided for @apiKeys.

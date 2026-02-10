@@ -726,7 +726,7 @@ class AppLocalizationsBe extends AppLocalizations {
   String get deepSeek => 'DeepSeek';
 
   @override
-  String get deepSeekDescription => 'Мадэль з падтрымкай выяў, выгодныя цэны';
+  String get deepSeekDescription => 'Падтрымка выяў (эксперыментальна)';
 
   @override
   String get apiKeys => 'API Ключы';

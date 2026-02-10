@@ -318,7 +318,7 @@
   "claude": "Anthropic Claude",
   "claudeDescription": "High quality, paid",
   "deepSeek": "DeepSeek",
-  "deepSeekDescription": "Vision model, competitive pricing",
+  "deepSeekDescription": "Text only, no photo analysis",
   "apiKeys": "API Keys",
   "enterApiKey": "Enter API key",
   "getApiKey": "Get API key",

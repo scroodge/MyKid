@@ -6,13 +6,13 @@ class LegalUrls {
   static String get privacyPolicy =>
       const String.fromEnvironment(
         'PRIVACY_POLICY_URL',
-        defaultValue: 'https://mykidapp.com/privacy',
+        defaultValue: 'https://scroodge.github.io/MyKid/privacy.html',
       );
 
   static String get termsOfService =>
       const String.fromEnvironment(
         'TERMS_OF_SERVICE_URL',
-        defaultValue: 'https://mykidapp.com/terms',
+        defaultValue: 'https://scroodge.github.io/MyKid/terms.html',
       );
 
   static String get support =>
