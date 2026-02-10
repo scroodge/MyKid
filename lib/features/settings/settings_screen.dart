@@ -10,17 +10,21 @@ import '../../core/supabase_storage.dart';
 import '../../l10n/app_localizations.dart';
 
 /// Opens URL: in-app WebView for http/https (Privacy, Terms), external for mailto etc.
-/// For mailto:, canLaunchUrl often returns false on simulator — we try launchUrl anyway.
+/// On Android 11+ canLaunchUrl may return false without <queries> in manifest; we try launchUrl anyway.
 Future<bool> _openUrl(String url, {bool inApp = false}) async {
   final uri = Uri.tryParse(url);
   if (uri == null) return false;
   final useInApp = inApp && (uri.scheme == 'http' || uri.scheme == 'https');
-  final canLaunch = uri.scheme == 'mailto' || await canLaunchUrl(uri);
+  final canLaunch = uri.scheme == 'mailto' || uri.scheme == 'http' || uri.scheme == 'https' || await canLaunchUrl(uri);
   if (!canLaunch) return false;
-  return launchUrl(
-    uri,
-    mode: useInApp ? LaunchMode.inAppWebView : LaunchMode.externalApplication,
-  );
+  try {
+    return await launchUrl(
+      uri,
+      mode: useInApp ? LaunchMode.inAppWebView : LaunchMode.externalApplication,
+    );
+  } catch (_) {
+    return false;
+  }
 }
 
 String _displayNameFromUser(User? user) {
