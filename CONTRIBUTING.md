@@ -18,7 +18,7 @@ Thank you for your interest in contributing to MyKid! This document provides gui
 1. Fork the repository and create a branch from `main`.
 2. Make your changes. Follow the existing code style.
 3. Ensure tests pass (if applicable) and the app runs.
-4. Update documentation if needed.
+4. Update documentation if needed (README, `docs/` — e.g. when adding a new AI provider or feature).
 5. Submit a PR with a clear description of the change.
 
 ## Development setup

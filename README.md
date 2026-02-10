@@ -32,6 +32,7 @@
 - **Self-hosted** — photos in your Immich, data in your Supabase
 - **Family sharing** — invite household members, share children and entries
 - **EXIF magic** — date and location auto-filled from photo metadata
+- **AI descriptions** — generate journal text from photos (OpenAI, Gemini, Claude, or DeepSeek with on-device labels); see [docs/ai-providers.md](docs/ai-providers.md)
 - **Offline-ready** — cached journal list when offline
 - **Batch import** — add many photos at once
 
@@ -65,6 +66,7 @@ See [Setup](#setup) for Supabase and Immich configuration.
 - **Immich** (self-hosted photo server; REST API)
 - **Hive** (local cache)
 - **image_picker**, **file_picker**, **exif**, **geocoding**, **cached_network_image**, **share_plus**, **path_provider**
+- **AI (optional):** user API keys for OpenAI, Gemini, Claude, DeepSeek; **http** for API calls; **google_mlkit_image_labeling** for DeepSeek path (on-device labels → text prompt)
 
 ### Data model
 
@@ -93,6 +95,7 @@ RLS: users can access only their own rows.
 3. **Journal entry** (`JournalEntryScreen`)
    - **View mode** (default for existing entries): large photo preview, swipe between photos, tap photo → fullscreen with Share/Back. Edit button to switch to edit mode.
    - **Edit mode:** date picker, child selector (ChoiceChips), place field, description text, photo grid. Add photos (camera/gallery) → upload to Immich → add to entry; optionally add to selected child's Immich album.
+   - **Generate description:** button sends first photo to selected AI provider (OpenAI/Gemini/Claude vision, or DeepSeek via on-device ML Kit labels + text API) and fills description field. Configure in Settings → AI providers.
    - When child is selected and photos are added, app creates Immich album "MyKid: {name}" for the child (if needed) and adds assets to it.
    - Save creates/updates entry in Supabase. Delete: optionally remove photos from child's Immich album.
    - New entries open in edit mode; existing ones open in view mode.
@@ -107,6 +110,7 @@ RLS: users can access only their own rows.
    - Opens `JournalEntryScreen` in create mode.
 
 6. **Settings** (route `/settings`)
+   - **AI providers** (route `/settings-ai-providers`): API keys for OpenAI, Gemini, Claude, DeepSeek; select default provider for "Generate description" in journal entries.
    - Immich: server URL and API key; Test connection (saves on success).
    - Link to Manage children, Family invites.
    - Legal: Privacy Policy, Terms of Use, Support, Open Source Licenses (App Store / Google Play compliance).
@@ -114,13 +118,13 @@ RLS: users can access only their own rows.
 
 ### Key modules
 
-- `lib/core/`: config (Supabase URL/key), ImmichClient/ImmichService/ImmichStorage, photo_metadata (EXIF date/GPS→place), selected_child_storage (unused for now).
+- `lib/core/`: config (Supabase URL/key), ImmichClient/ImmichService/ImmichStorage, photo_metadata (EXIF date/GPS→place), ai_provider_storage (API keys + selected provider), ai_vision_service (Vision / DeepSeek text), on_device_image_labels (ML Kit labels for DeepSeek on Android/iOS).
 - `lib/data/`: Child, JournalEntry, JournalEntryAsset; JournalRepository (Supabase CRUD), ChildrenRepository; JournalCache (Hive).
 - `lib/features/auth/`: AuthGuard, LoginScreen, SignUpScreen.
 - `lib/features/journal/`: JournalListScreen, JournalEntryScreen.
 - `lib/features/children/`: ChildrenListScreen, ChildEditScreen.
 - `lib/features/import/`: BatchImportScreen.
-- `lib/features/settings/`: SettingsScreen.
+- `lib/features/settings/`: SettingsScreen, AiProviderSettingsScreen.
 
 ### Routes
 
@@ -128,6 +132,7 @@ RLS: users can access only their own rows.
 - `/login` — login
 - `/signup` — signup
 - `/settings` — settings
+- `/settings-ai-providers` — AI provider API keys and default provider
 - `/children` — children list
 - `/import` — batch import
 
@@ -175,6 +180,10 @@ Table `journal_entries` and API are described in [docs/backend.md](docs/backend.
 
 In the app: **Settings → Immich**: set your Immich server URL and API key (create the key in your Immich instance). All photo/video uploads and thumbnails use this connection.
 
+### AI descriptions (optional)
+
+To use "Generate description" in journal entries, go to **Settings → AI providers**: add one or more API keys (OpenAI, Gemini, Claude, DeepSeek) and select the default provider. Keys are stored only on device. See [docs/ai-providers.md](docs/ai-providers.md) for details and how DeepSeek uses on-device labels.
+
 ### Run
 
 Copy `.env.example` to `.env`, fill in your Supabase URL and anon key, then:
@@ -200,11 +209,11 @@ When the app cannot reach Supabase, the journal list falls back to the last cach
 
 - `lib/` — Flutter app
   - `main.dart` — entry, Supabase init, Hive cache init
-  - `core/` — config, Immich client, secure storage
+  - `core/` — config, Immich client, secure storage, AI provider storage & vision service, on-device image labels (ML Kit)
   - `data/` — models, Supabase repository, local cache (Hive)
-  - `features/` — auth, journal list/detail, settings, batch import
+  - `features/` — auth, journal list/detail, settings, AI provider settings, batch import
 - `supabase/migrations/` — SQL for `journal_entries` and RLS
-- `docs/backend.md` — schema and API description
+- `docs/` — [backend.md](docs/backend.md) (schema, API), [ai-providers.md](docs/ai-providers.md) (AI descriptions), [immich-api.md](docs/immich-api.md), [edge-function-setup.md](docs/edge-function-setup.md)
 
 ### Legal URLs (App Store / Google Play)
 
