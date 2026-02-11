@@ -17,6 +17,7 @@ Journal entries (date, text, and references to Immich assets) are stored in Supa
 | `name`            | `text`       | Child's name |
 | `date_of_birth`   | `date`       | Optional |
 | `immich_album_id` | `uuid`       | Optional; Immich album for this child (created by app) |
+| `immich_person_id` | `uuid`      | Optional; Immich person for face recognition (Suggestions from Immich People API) |
 | `created_at`      | `timestamptz`| |
 | `updated_at`      | `timestamptz`| |
 

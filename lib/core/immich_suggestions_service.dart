@@ -1,5 +1,4 @@
 import '../data/child.dart';
-import 'immich_client.dart';
 import 'immich_service.dart';
 import 'photo_library_scanner.dart';
 
