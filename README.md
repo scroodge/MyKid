@@ -13,6 +13,12 @@
 </p>
 
 <p align="center">
+  <a href="https://scroodge.github.io/MyKid/">English</a> •
+  <a href="https://scroodge.github.io/MyKid/ru.html">Русский</a> •
+  <a href="https://scroodge.github.io/MyKid/be.html">Беларуская</a>
+</p>
+
+<p align="center">
   <a href="#screenshots">Screenshots</a> •
   <a href="#features">Features</a> •
   <a href="#quick-start">Quick Start</a> •

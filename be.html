@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="be">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyKid — Дзённік жыцця вашага дзіцяці</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; max-width: 720px; margin: 0 auto; padding: 24px; color: #333; }
+    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.25rem; margin-top: 2rem; }
+    .center { text-align: center; }
+    .screenshots img { width: 200px; margin: 8px; border-radius: 8px; }
+    a { color: #0969da; }
+    ul { margin: 0.5rem 0; }
+    code { background: #f6f8fa; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+    pre { background: #f6f8fa; padding: 16px; border-radius: 8px; overflow-x: auto; }
+    .lang-switch { margin-bottom: 1.5rem; color: #666; }
+  </style>
+</head>
+<body>
+  <p class="lang-switch center">
+    <a href="https://scroodge.github.io/MyKid/">English</a> •
+    <a href="https://scroodge.github.io/MyKid/ru.html">Русский</a> •
+    <strong>Беларуская</strong>
+  </p>
+
+  <div class="center">
+    <img src="assets/brand/logo/mykid_logo_text_only.png" alt="MyKid" height="64">
+    <h1>MyKid</h1>
+    <p><strong>Дзённік жыцця вашага дзіцяці</strong></p>
+    <p>Фота, відэа, моманты — захоўваюцца ў <em>вашым</em> <a href="https://immich.app">Immich</a>. Дзённік сінхранізуецца праз <a href="https://supabase.com">Supabase</a>.</p>
+    <p>
+      <a href="#скрыншоты">Скрыншоты</a> •
+      <a href="#магчымасці">Магчымасці</a> •
+      <a href="#хуткі-старт">Хуткі старт</a> •
+      <a href="#налада">Налада</a> •
+      <a href="#ліцэнзія">Ліцэнзія</a>
+    </p>
+    <p>
+      <img src="https://img.shields.io/badge/Platform-Android%20%7C%20iOS-3DDC84?logo=android&logoColor=white" alt="Платформа">
+      <img src="https://img.shields.io/badge/Flutter-3.5+-02569B?logo=flutter" alt="Flutter">
+      <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="Ліцэнзія">
+    </p>
+  </div>
+
+  <hr>
+
+  <h2 id="скрыншоты">Скрыншоты</h2>
+  <div class="center screenshots">
+    <img src="assets/screenshots/01-select-child.png" alt="Выбар дзіцяці">
+    <img src="assets/screenshots/03-timeline-empty.png" alt="Стужка пустая">
+    <img src="assets/screenshots/04-timeline-with-entry.png" alt="Стужка з запісам"><br>
+    <img src="assets/screenshots/02-suggestions-empty.png" alt="Рэкамендацыі">
+    <img src="assets/screenshots/05-add-entry-modal.png" alt="Дадаць запіс">
+    <img src="assets/screenshots/06-entry-view.png" alt="Прагляд запісу">
+    <img src="assets/screenshots/07-new-entry-form.png" alt="Форма новага запісу">
+  </div>
+
+  <h2 id="магчымасці">Магчымасці</h2>
+  <ul>
+    <li><strong>Уласны хостинг</strong> — фота ў вашым Immich, даныя ў вашым Supabase</li>
+    <li><strong>Сямейны доступ</strong> — запрашайце членаў сям'і, дзяліцеся дзецьмі і запісамі</li>
+    <li><strong>Магія EXIF</strong> — дата і месца аўтаматычна падстаўляюцца з метаданых фота</li>
+    <li><strong>AI-апісанні</strong> — генерацыя тэксту дзённіка з фота (OpenAI, Gemini, Claude або DeepSeek); гл. <a href="docs/ai-providers.html">docs/ai-providers.md</a></li>
+    <li><strong>Афлайн-рэжым</strong> — кэшаваны спіс запісаў пры адсутнасці сеткі</li>
+    <li><strong>Масавы імпорт</strong> — даданне мноства фота за раз</li>
+  </ul>
+
+  <h2 id="хуткі-старт">Хуткі старт</h2>
+  <pre><code>flutter pub get
+flutter run --dart-define-from-file=.env</code></pre>
+  <p>Гл. <a href="#налада">Налада</a> для канфігурацыі Supabase і Immich.</p>
+
+  <h2 id="налада">Налада</h2>
+  <h3>Патрабаванні</h3>
+  <ul>
+    <li>Flutter SDK (stable)</li>
+    <li>Android Studio / Xcode</li>
+    <li>Праект Supabase</li>
+    <li>Уласны Immich або публічны сервер</li>
+  </ul>
+  <h3>Пераменныя асяроддзя</h3>
+  <p>Стварыце <code>.env</code>. Не каміцьце рэальныя ключы.</p>
+  <ul>
+    <li><code>SUPABASE_URL</code> — URL вашага праекта Supabase</li>
+    <li><code>SUPABASE_ANON_KEY</code> — ананімны ключ Supabase</li>
+  </ul>
+  <h3>Backend (Supabase)</h3>
+  <p>Стварыце праект на <a href="https://supabase.com">supabase.com</a>, прымяніце схему <a href="docs/full_schema.sql">docs/full_schema.sql</a>, уключыце Email у Authentication.</p>
+  <h3>Immich</h3>
+  <p>У дадатку: <strong>Налады → Immich</strong>: пакажыце URL сервера і API-ключ.</p>
+  <h3>AI-апісанні (опцыянальна)</h3>
+  <p><strong>Налады → AI-правайдеры</strong> — дадайце API-ключы і выберыце правайдера па змаўчанні. Падрабязней у <a href="docs/ai-providers.html">docs/ai-providers.md</a>.</p>
+
+  <h2>Удзельнікі</h2>
+  <p>Дзякуй усім, хто ўносіць уклад у MyKid. Гл. <a href="CONTRIBUTING.md">CONTRIBUTING.md</a>.</p>
+
+  <h2>Падтрымка развіцця</h2>
+  <ul>
+    <li><a href="https://github.com/sponsors/scroodge">GitHub Sponsors</a></li>
+    <li>Або падзяліцеся і пастаўце зорку <a href="https://github.com/scroodge/MyKid">рэпазіторыю</a></li>
+  </ul>
+
+  <h2 id="ліцэнзія">Ліцэнзія</h2>
+  <p><a href="LICENSE">MIT License</a></p>
+
+  <p><a href="https://scroodge.github.io/MyKid/">← На галоўную</a> · <a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms</a></p>
+</body>
+</html>
