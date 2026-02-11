@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://scroodge.github.io/MyKid/">English</a> •
+  <a href="https://scroodge.github.io/MyKid/ru.html">Русский</a> •
+  <a href="https://scroodge.github.io/MyKid/be.html">Беларуская</a>
+</p>
+
 # MyKid
 
 <p align="center">
@@ -10,12 +16,6 @@
 
 <p align="center">
   Photos, videos, moments — stored in <em>your</em> <a href="https://immich.app">Immich</a>. Journal syncs via <a href="https://supabase.com">Supabase</a>.
-</p>
-
-<p align="center">
-  <a href="https://scroodge.github.io/MyKid/">English</a> •
-  <a href="https://scroodge.github.io/MyKid/ru.html">Русский</a> •
-  <a href="https://scroodge.github.io/MyKid/be.html">Беларуская</a>
 </p>
 
 <p align="center">
