@@ -241,6 +241,8 @@
   "sourceCode": "Зыходны код",
   "supportDevelopment": "Падтрымаць распрацоўку",
   "licenses": "Ліцэнзіі адкрытага ПЗ",
+  "requestAccountDeletionInstructions": "Запытаць выдаленне акаўнта",
+  "requestAccountDeletionInstructionsSubtitle": "Інструкцыя і звесткі аб выдаленні даных",
   "deleteAccount": "Выдаліць акаўнт",
   "deleteAccountConfirm": "Выдаліць акаўнт? Усе вашы даныя будуць беззваротна выдалены. Гэта дзеянне нельга адмяніць.",
   "deleteAccountConfirmSubtitle": "Вы таксама можаце запытаць выдаленне па email.",

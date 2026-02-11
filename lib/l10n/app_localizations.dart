@@ -1318,6 +1318,18 @@ abstract class AppLocalizations {
   /// **'Open Source Licenses'**
   String get licenses;
 
+  /// No description provided for @requestAccountDeletionInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Request account deletion'**
+  String get requestAccountDeletionInstructions;
+
+  /// No description provided for @requestAccountDeletionInstructionsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions and data deletion details'**
+  String get requestAccountDeletionInstructionsSubtitle;
+
   /// No description provided for @deleteAccount.
   ///
   /// In en, this message translates to:

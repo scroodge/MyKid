@@ -672,6 +672,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get licenses => 'Лицензии открытого ПО';
 
   @override
+  String get requestAccountDeletionInstructions =>
+      'Запросить удаление аккаунта';
+
+  @override
+  String get requestAccountDeletionInstructionsSubtitle =>
+      'Инструкция и сведения об удалении данных';
+
+  @override
   String get deleteAccount => 'Удалить аккаунт';
 
   @override

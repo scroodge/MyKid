@@ -670,6 +670,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get licenses => 'Open Source Licenses';
 
   @override
+  String get requestAccountDeletionInstructions => 'Request account deletion';
+
+  @override
+  String get requestAccountDeletionInstructionsSubtitle =>
+      'Instructions and data deletion details';
+
+  @override
   String get deleteAccount => 'Delete account';
 
   @override

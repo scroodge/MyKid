@@ -241,6 +241,8 @@
   "sourceCode": "Исходный код",
   "supportDevelopment": "Поддержать разработку",
   "licenses": "Лицензии открытого ПО",
+  "requestAccountDeletionInstructions": "Запросить удаление аккаунта",
+  "requestAccountDeletionInstructionsSubtitle": "Инструкция и сведения об удалении данных",
   "deleteAccount": "Удалить аккаунт",
   "deleteAccountConfirm": "Удалить аккаунт? Все ваши данные будут безвозвратно удалены. Это действие нельзя отменить.",
   "deleteAccountConfirmSubtitle": "Вы также можете запросить удаление по email.",

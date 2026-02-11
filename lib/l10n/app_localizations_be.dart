@@ -670,6 +670,13 @@ class AppLocalizationsBe extends AppLocalizations {
   String get licenses => 'Ліцэнзіі адкрытага ПЗ';
 
   @override
+  String get requestAccountDeletionInstructions => 'Запытаць выдаленне акаўнта';
+
+  @override
+  String get requestAccountDeletionInstructionsSubtitle =>
+      'Інструкцыя і звесткі аб выдаленні даных';
+
+  @override
   String get deleteAccount => 'Выдаліць акаўнт';
 
   @override

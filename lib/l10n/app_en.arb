@@ -301,6 +301,8 @@
   "sourceCode": "Source Code",
   "supportDevelopment": "Support development",
   "licenses": "Open Source Licenses",
+  "requestAccountDeletionInstructions": "Request account deletion",
+  "requestAccountDeletionInstructionsSubtitle": "Instructions and data deletion details",
   "deleteAccount": "Delete account",
   "deleteAccountConfirm": "Delete your account? All your data will be permanently removed. This cannot be undone.",
   "deleteAccountConfirmSubtitle": "You can also request deletion by email.",
