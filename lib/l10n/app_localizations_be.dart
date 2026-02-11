@@ -695,15 +695,15 @@ class AppLocalizationsBe extends AppLocalizations {
 
   @override
   String get inviteAcceptedDataNotRefreshed =>
-      'Запрашэнне прынята, але даныя не абнавіліся. Паспрабуйце перазапуściць праграму.';
+      'Запрашэнне прынята, але даныя не абнавіліся. Паспрабуйце перазапусьціць праграму.';
 
   @override
   String get inviteAcceptErrorRetry =>
-      'Памылка пры прыняцці запрашэння. Паспрабуйце яшчэ раз або перазапуściць праграму.';
+      'Памылка пры прыняцці запрашэння. Паспрабуйце яшчэ раз або перазапусьціць праграму.';
 
   @override
   String get inviteAcceptErrorRestart =>
-      'Памылка пры прыняцці запрашэння. Паспрабуйце перазапуściць праграму.';
+      'Памылка пры прыняцці запрашэння. Паспрабуйце перазапусьціць праграму.';
 
   @override
   String createHouseholdFailedWithReason(String message, String reason) {

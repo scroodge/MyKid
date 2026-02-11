@@ -205,9 +205,9 @@
   "cancelInviteFailed": "Не ўдалося адмяніць запрашэнне",
   "expired": "Скончылася",
   "searching": "Пошук…",
-  "inviteAcceptedDataNotRefreshed": "Запрашэнне прынята, але даныя не абнавіліся. Паспрабуйце перазапуściць праграму.",
-  "inviteAcceptErrorRetry": "Памылка пры прыняцці запрашэння. Паспрабуйце яшчэ раз або перазапуściць праграму.",
-  "inviteAcceptErrorRestart": "Памылка пры прыняцці запрашэння. Паспрабуйце перазапуściць праграму.",
+  "inviteAcceptedDataNotRefreshed": "Запрашэнне прынята, але даныя не абнавіліся. Паспрабуйце перазапусьціць праграму.",
+  "inviteAcceptErrorRetry": "Памылка пры прыняцці запрашэння. Паспрабуйце яшчэ раз або перазапусьціць праграму.",
+  "inviteAcceptErrorRestart": "Памылка пры прыняцці запрашэння. Паспрабуйце перазапусьціць праграму.",
   "createHouseholdFailedWithReason": "{message}: {reason}",
   "@createHouseholdFailedWithReason": {
     "placeholders": {
