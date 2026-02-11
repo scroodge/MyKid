@@ -237,6 +237,55 @@ class _ChildEditScreenState extends State<ChildEditScreen> {
     );
   }
 
+  Future<void> _pickImmichPerson() async {
+    final client = await _immich.getClient();
+    if (client == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.configureImmichFirst)),
+        );
+      }
+      return;
+    }
+    final people = await client.getAllPeople();
+    if (!mounted) return;
+    if (people.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.noSuggestions),
+        ),
+      );
+      return;
+    }
+    final picked = await showModalBottomSheet<ImmichPerson>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                AppLocalizations.of(context)!.selectImmichPerson,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+            ...people.map((p) => ListTile(
+                  title: Text(p.name),
+                  onTap: () => Navigator.pop(context, p),
+                )),
+          ],
+        ),
+      ),
+    );
+    if (picked != null && mounted) {
+      setState(() {
+        _immichPersonId = picked.id;
+        _immichPersonName = picked.name;
+      });
+    }
+  }
+
   Future<void> _save() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) return;

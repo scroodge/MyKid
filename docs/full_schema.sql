@@ -44,6 +44,7 @@ create table if not exists public.children (
   name text not null,
   date_of_birth date,
   immich_album_id uuid,
+  immich_person_id uuid,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

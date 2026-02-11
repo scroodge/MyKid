@@ -1,7 +1,7 @@
 name: mykid_app
 description: "Baby diary & child moments"
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.1.0+2
 
 environment:
   sdk: ^3.5.0
@@ -30,6 +30,10 @@ dependencies:
   exif: ^3.1.1
   # On-device image labels (for DeepSeek path)
   google_mlkit_image_labeling: ^0.14.1
+  # Photo library & face recognition
+  photo_manager: ^3.8.3
+  google_mlkit_face_detection: ^0.13.2
+  tflite_flutter: ^0.11.0
   geocoding: ^3.0.0
   geolocator: ^13.0.2
   # UI
@@ -55,6 +59,7 @@ flutter:
   assets:
     - assets/supabase/setup.sql
     - assets/brand/app_icon/
+    - assets/models/
     - assets/brand/logo/
     - assets/fonts/Manrope/
     - assets/fonts/Inter/

@@ -250,7 +250,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get suggestionsTab => 'Предложения';
 
   @override
-  String get scanningPhotos => 'Сканирование фото…';
+  String get scanningPhotos => 'Сканирование фотографий…';
 
   @override
   String foundPhotosWithChild(int count, String childName) {
@@ -264,16 +264,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get noSuggestions => 'Нет предложений';
 
   @override
-  String get scanNow => 'Сканировать';
+  String get scanNow => 'Сканировать сейчас';
 
   @override
-  String get stopScan => 'Стоп';
+  String get stopScan => 'Остановить';
 
   @override
   String get scanNowHint => 'Нажмите кнопку выше для поиска фото';
 
   @override
-  String get scanLimitHint => 'Сканируется до 500 последних фото';
+  String get scanLimitHint => 'Сканируем до 500 последних фото';
 
   @override
   String get addReferencePhotosPrompt =>
@@ -312,7 +312,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get replaceReferencePhotosConfirmMessage =>
-      'Все текущие эталонные фото будут удалены. Затем выберите новые.';
+      'Все текущие эталонные фото будут удалены. Затем выберите новые фото.';
 
   @override
   String get replaceReferencePhotosDone =>
@@ -665,47 +665,47 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get inviteOpenLinkHint =>
-      'Откройте ссылку-приглашение из письма или сообщения.';
+      'Open the invite link you received in your email or message.';
 
   @override
-  String get orEnterCodeManually => 'Или введите код вручную';
+  String get orEnterCodeManually => 'Or enter code manually';
 
   @override
-  String get enterInviteCodeHint => 'Введите 8-символьный код';
+  String get enterInviteCodeHint => 'Enter 8-character code';
 
   @override
-  String get searchByCode => 'Найти по коду';
+  String get searchByCode => 'Search by code';
 
   @override
-  String get invitedBy => 'Пригласил(а):';
+  String get invitedBy => 'Invited by:';
 
   @override
   String get signInToAcceptInvite =>
-      'Войдите или создайте аккаунт, чтобы принять приглашение.';
+      'You need to sign in or create an account to accept this invitation.';
 
   @override
-  String get signUpToAccept => 'Зарегистрироваться для принятия';
+  String get signUpToAccept => 'Sign up to accept';
 
   @override
-  String get cancelInviteFailed => 'Не удалось отменить приглашение';
+  String get cancelInviteFailed => 'Failed to cancel invite';
 
   @override
-  String get expired => 'Истекло';
+  String get expired => 'Expired';
 
   @override
-  String get searching => 'Поиск…';
+  String get searching => 'Searching...';
 
   @override
   String get inviteAcceptedDataNotRefreshed =>
-      'Приглашение принято, но данные не обновились. Попробуйте перезапустить приложение.';
+      'Invite accepted, but data didn\'t refresh. Try restarting the app.';
 
   @override
   String get inviteAcceptErrorRetry =>
-      'Ошибка при принятии приглашения. Попробуйте еще раз или перезапустите приложение.';
+      'Error accepting invite. Please try again or restart the app.';
 
   @override
   String get inviteAcceptErrorRestart =>
-      'Ошибка при принятии приглашения. Попробуйте перезапустить приложение.';
+      'Error accepting invite. Please restart the app.';
 
   @override
   String createHouseholdFailedWithReason(String message, String reason) {
@@ -713,10 +713,10 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get supportEmailCopied => 'Email скопирован в буфер обмена';
+  String get supportEmailCopied => 'Email copied to clipboard';
 
   @override
-  String get noHouseholdIdReturned => 'ID семьи не возвращён';
+  String get noHouseholdIdReturned => 'No household ID returned';
 
   @override
   String get inviteAccepted => 'Вы присоединились к семье';
@@ -799,12 +799,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get licenses => 'Лицензии открытого ПО';
 
   @override
-  String get requestAccountDeletionInstructions =>
-      'Запросить удаление аккаунта';
+  String get requestAccountDeletionInstructions => 'Request account deletion';
 
   @override
   String get requestAccountDeletionInstructionsSubtitle =>
-      'Инструкция и сведения об удалении данных';
+      'Instructions and data deletion details';
 
   @override
   String get deleteAccount => 'Удалить аккаунт';
@@ -885,10 +884,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get customAi => 'Custom AI (API Gateway)';
 
   @override
-  String get customAiDescription => 'Свой API Gateway с X-Gateway-Token';
+  String get customAiDescription => 'Your own API Gateway with X-Gateway-Token';
 
   @override
-  String get customAiBaseUrl => 'URL сервера';
+  String get customAiBaseUrl => 'Server URL';
 
   @override
   String get customAiBaseUrlHint => 'http://144.91.127.194';

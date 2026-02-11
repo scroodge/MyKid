@@ -263,16 +263,16 @@ class AppLocalizationsBe extends AppLocalizations {
   String get noSuggestions => 'Няма прапаноў';
 
   @override
-  String get scanNow => 'Сканаваць';
+  String get scanNow => 'Сканаваць зараз';
 
   @override
-  String get stopScan => 'Стоп';
+  String get stopScan => 'Спыніць';
 
   @override
   String get scanNowHint => 'Націсніце кнопку вышэй для пошуку фота';
 
   @override
-  String get scanLimitHint => 'Скануецца да 500 апошніх фота';
+  String get scanLimitHint => 'Сканаванне да 500 апошніх фота';
 
   @override
   String get addReferencePhotosPrompt =>
@@ -311,7 +311,7 @@ class AppLocalizationsBe extends AppLocalizations {
 
   @override
   String get replaceReferencePhotosConfirmMessage =>
-      'Усе бягучыя эталонныя фота будуць выдалены. Затым выберыце новыя.';
+      'Усе бягучыя эталонныя фота будуць выдалены. Затым выберыце новыя фота.';
 
   @override
   String get replaceReferencePhotosDone =>
@@ -663,47 +663,47 @@ class AppLocalizationsBe extends AppLocalizations {
 
   @override
   String get inviteOpenLinkHint =>
-      'Адкрыйце спасылку-запрашэнне з ліста або паведамлення.';
+      'Open the invite link you received in your email or message.';
 
   @override
-  String get orEnterCodeManually => 'Ці ўвядзіце код уручную';
+  String get orEnterCodeManually => 'Or enter code manually';
 
   @override
-  String get enterInviteCodeHint => 'Увядзіце 8-сімвольны код';
+  String get enterInviteCodeHint => 'Enter 8-character code';
 
   @override
-  String get searchByCode => 'Знайсці па коду';
+  String get searchByCode => 'Search by code';
 
   @override
-  String get invitedBy => 'Запрасіў(ла):';
+  String get invitedBy => 'Invited by:';
 
   @override
   String get signInToAcceptInvite =>
-      'Увайдзіце або стварыце акаўнт, каб прыняць запрашэнне.';
+      'You need to sign in or create an account to accept this invitation.';
 
   @override
-  String get signUpToAccept => 'Зарэгістравацца для прыняцця';
+  String get signUpToAccept => 'Sign up to accept';
 
   @override
-  String get cancelInviteFailed => 'Не ўдалося адмяніць запрашэнне';
+  String get cancelInviteFailed => 'Failed to cancel invite';
 
   @override
-  String get expired => 'Скончылася';
+  String get expired => 'Expired';
 
   @override
-  String get searching => 'Пошук…';
+  String get searching => 'Searching...';
 
   @override
   String get inviteAcceptedDataNotRefreshed =>
-      'Запрашэнне прынята, але даныя не абнавіліся. Паспрабуйце перазапусьціць праграму.';
+      'Invite accepted, but data didn\'t refresh. Try restarting the app.';
 
   @override
   String get inviteAcceptErrorRetry =>
-      'Памылка пры прыняцці запрашэння. Паспрабуйце яшчэ раз або перазапусьціць праграму.';
+      'Error accepting invite. Please try again or restart the app.';
 
   @override
   String get inviteAcceptErrorRestart =>
-      'Памылка пры прыняцці запрашэння. Паспрабуйце перазапусьціць праграму.';
+      'Error accepting invite. Please restart the app.';
 
   @override
   String createHouseholdFailedWithReason(String message, String reason) {
@@ -711,10 +711,10 @@ class AppLocalizationsBe extends AppLocalizations {
   }
 
   @override
-  String get supportEmailCopied => 'Email скапіяваны ў буфер абмену';
+  String get supportEmailCopied => 'Email copied to clipboard';
 
   @override
-  String get noHouseholdIdReturned => 'ID сям\'і не вернуты';
+  String get noHouseholdIdReturned => 'No household ID returned';
 
   @override
   String get inviteAccepted => 'Вы далучыліся да сям\'і';
@@ -797,11 +797,11 @@ class AppLocalizationsBe extends AppLocalizations {
   String get licenses => 'Ліцэнзіі адкрытага ПЗ';
 
   @override
-  String get requestAccountDeletionInstructions => 'Запытаць выдаленне акаўнта';
+  String get requestAccountDeletionInstructions => 'Request account deletion';
 
   @override
   String get requestAccountDeletionInstructionsSubtitle =>
-      'Інструкцыя і звесткі аб выдаленні даных';
+      'Instructions and data deletion details';
 
   @override
   String get deleteAccount => 'Выдаліць акаўнт';
@@ -881,10 +881,10 @@ class AppLocalizationsBe extends AppLocalizations {
   String get customAi => 'Custom AI (API Gateway)';
 
   @override
-  String get customAiDescription => 'Уласны API Gateway з X-Gateway-Token';
+  String get customAiDescription => 'Your own API Gateway with X-Gateway-Token';
 
   @override
-  String get customAiBaseUrl => 'URL сервера';
+  String get customAiBaseUrl => 'Server URL';
 
   @override
   String get customAiBaseUrlHint => 'http://144.91.127.194';

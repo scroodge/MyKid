@@ -17,6 +17,7 @@ import '../../core/format_age.dart';
 import '../../data/local/journal_cache.dart';
 import '../../l10n/app_localizations.dart';
 import '../journal/journal_entry_screen.dart';
+import '../suggestions/suggestions_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -44,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 1, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
     _loadChildrenAndSelection();
     _loadImmichClient();
   }
@@ -354,6 +355,23 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     if (result != null) _loadEntries();
   }
 
+  void _openNewEntryFromSuggestion(
+    JournalEntry entry, {
+    List<({Uint8List bytes, String filename})>? initialPendingAttachments,
+  }) {
+    Navigator.of(context).push<Object?>(
+      MaterialPageRoute(
+        builder: (context) => JournalEntryScreen(
+          entry: entry,
+          isNew: true,
+          initialPendingAttachments: initialPendingAttachments,
+        ),
+      ),
+    ).then((result) {
+      if (result != null) _loadEntries();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -374,6 +392,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           controller: _tabController,
           tabs: [
             Tab(text: AppLocalizations.of(context)!.timeline),
+            Tab(text: AppLocalizations.of(context)!.suggestionsTab),
           ],
         ),
       ),
@@ -385,6 +404,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               controller: _tabController,
               children: [
                 _buildTimelineContent(),
+                SuggestionsScreen(
+                  onOpenNewEntry: _openNewEntryFromSuggestion,
+                ),
               ],
             ),
           ),

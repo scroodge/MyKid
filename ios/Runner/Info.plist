@@ -27,7 +27,7 @@
 		<key>NSCameraUsageDescription</key>
 		<string>MyKid Journal needs camera access to take photos for journal entries.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>MyKid Journal needs photo library access to add photos and videos to your journal.</string>
+		<string>MyKid Journal needs full access to your photo library to automatically find photos of your child and suggest creating journal entries.</string>
 		<key>NSPhotoLibraryAddUsageDescription</key>
 		<string>MyKid Journal needs permission to save photos.</string>
 		<key>NSLocationWhenInUseUsageDescription</key>

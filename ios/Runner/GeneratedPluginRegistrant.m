@@ -48,6 +48,12 @@
 @import google_mlkit_commons;
 #endif
 
+#if __has_include(<google_mlkit_face_detection/GoogleMlKitFaceDetectionPlugin.h>)
+#import <google_mlkit_face_detection/GoogleMlKitFaceDetectionPlugin.h>
+#else
+@import google_mlkit_face_detection;
+#endif
+
 #if __has_include(<google_mlkit_image_labeling/GoogleMlKitImageLabelingPlugin.h>)
 #import <google_mlkit_image_labeling/GoogleMlKitImageLabelingPlugin.h>
 #else
@@ -64,6 +70,12 @@
 #import <image_picker_ios/FLTImagePickerPlugin.h>
 #else
 @import image_picker_ios;
+#endif
+
+#if __has_include(<photo_manager/PhotoManagerPlugin.h>)
+#import <photo_manager/PhotoManagerPlugin.h>
+#else
+@import photo_manager;
 #endif
 
 #if __has_include(<share_plus/FPPSharePlusPlugin.h>)
@@ -100,9 +112,11 @@
   [GeocodingPlugin registerWithRegistrar:[registry registrarForPlugin:@"GeocodingPlugin"]];
   [GeolocatorPlugin registerWithRegistrar:[registry registrarForPlugin:@"GeolocatorPlugin"]];
   [GoogleMlKitCommonsPlugin registerWithRegistrar:[registry registrarForPlugin:@"GoogleMlKitCommonsPlugin"]];
+  [GoogleMlKitFaceDetectionPlugin registerWithRegistrar:[registry registrarForPlugin:@"GoogleMlKitFaceDetectionPlugin"]];
   [GoogleMlKitImageLabelingPlugin registerWithRegistrar:[registry registrarForPlugin:@"GoogleMlKitImageLabelingPlugin"]];
   [FLTImageCropperPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTImageCropperPlugin"]];
   [FLTImagePickerPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTImagePickerPlugin"]];
+  [PhotoManagerPlugin registerWithRegistrar:[registry registrarForPlugin:@"PhotoManagerPlugin"]];
   [FPPSharePlusPlugin registerWithRegistrar:[registry registrarForPlugin:@"FPPSharePlusPlugin"]];
   [SharedPreferencesPlugin registerWithRegistrar:[registry registrarForPlugin:@"SharedPreferencesPlugin"]];
   [SqflitePlugin registerWithRegistrar:[registry registrarForPlugin:@"SqflitePlugin"]];
