@@ -4,6 +4,8 @@ const _kOpenAiKeyKey = 'ai_provider_openai_key';
 const _kGeminiKeyKey = 'ai_provider_gemini_key';
 const _kClaudeKeyKey = 'ai_provider_claude_key';
 const _kDeepSeekKeyKey = 'ai_provider_deepseek_key';
+const _kCustomAiKeyKey = 'ai_provider_custom_ai_key';
+const _kCustomAiBaseUrlKey = 'ai_provider_custom_ai_base_url';
 const _kSelectedProviderKey = 'ai_provider_selected';
 
 /// Persist AI provider API keys securely.
@@ -51,6 +53,24 @@ class AiProviderStorage {
     }
   }
 
+  Future<String?> getCustomAiKey() => _storage.read(key: _kCustomAiKeyKey);
+  Future<void> setCustomAiKey(String? value) async {
+    if (value == null) {
+      await _storage.delete(key: _kCustomAiKeyKey);
+    } else {
+      await _storage.write(key: _kCustomAiKeyKey, value: value.trim());
+    }
+  }
+
+  Future<String?> getCustomAiBaseUrl() => _storage.read(key: _kCustomAiBaseUrlKey);
+  Future<void> setCustomAiBaseUrl(String? value) async {
+    if (value == null || value.trim().isEmpty) {
+      await _storage.delete(key: _kCustomAiBaseUrlKey);
+    } else {
+      await _storage.write(key: _kCustomAiBaseUrlKey, value: value.trim());
+    }
+  }
+
   Future<String?> getSelectedProvider() => _storage.read(key: _kSelectedProviderKey);
   Future<void> setSelectedProvider(String? value) async {
     if (value == null) {
@@ -65,6 +85,8 @@ class AiProviderStorage {
     await _storage.delete(key: _kGeminiKeyKey);
     await _storage.delete(key: _kClaudeKeyKey);
     await _storage.delete(key: _kDeepSeekKeyKey);
+    await _storage.delete(key: _kCustomAiKeyKey);
+    await _storage.delete(key: _kCustomAiBaseUrlKey);
     await _storage.delete(key: _kSelectedProviderKey);
   }
 }

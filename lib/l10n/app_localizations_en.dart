@@ -878,6 +878,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deepSeekDescription => 'Text only, no photo analysis';
 
   @override
+  String get customAi => 'Custom AI (API Gateway)';
+
+  @override
+  String get customAiDescription => 'Your own API Gateway with X-Gateway-Token';
+
+  @override
+  String get customAiBaseUrl => 'Server URL';
+
+  @override
+  String get customAiBaseUrlHint => 'http://144.91.127.194';
+
+  @override
   String get apiKeys => 'API Keys';
 
   @override

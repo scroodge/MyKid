@@ -882,6 +882,18 @@ class AppLocalizationsRu extends AppLocalizations {
   String get deepSeekDescription => 'Только текст, без анализа фото';
 
   @override
+  String get customAi => 'Custom AI (API Gateway)';
+
+  @override
+  String get customAiDescription => 'Свой API Gateway с X-Gateway-Token';
+
+  @override
+  String get customAiBaseUrl => 'URL сервера';
+
+  @override
+  String get customAiBaseUrlHint => 'http://144.91.127.194';
+
+  @override
   String get apiKeys => 'API Ключи';
 
   @override

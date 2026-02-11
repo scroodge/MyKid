@@ -878,6 +878,18 @@ class AppLocalizationsBe extends AppLocalizations {
   String get deepSeekDescription => 'Толькі тэкст, без аналізу фота';
 
   @override
+  String get customAi => 'Custom AI (API Gateway)';
+
+  @override
+  String get customAiDescription => 'Уласны API Gateway з X-Gateway-Token';
+
+  @override
+  String get customAiBaseUrl => 'URL сервера';
+
+  @override
+  String get customAiBaseUrlHint => 'http://144.91.127.194';
+
+  @override
   String get apiKeys => 'API Ключы';
 
   @override

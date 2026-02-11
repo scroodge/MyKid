@@ -28,6 +28,11 @@ class AiVisionService {
       case 'deepseek':
         final key = await _storage.getDeepSeekKey();
         return key != null && key.trim().isNotEmpty;
+      case 'customai':
+        final key = await _storage.getCustomAiKey();
+        final baseUrl = await _storage.getCustomAiBaseUrl();
+        return key != null && key.trim().isNotEmpty &&
+            baseUrl != null && baseUrl.trim().isNotEmpty;
       default:
         return false;
     }
@@ -59,6 +64,9 @@ class AiVisionService {
       case 'deepseek':
         apiKey = await _storage.getDeepSeekKey();
         break;
+      case 'customai':
+        apiKey = await _storage.getCustomAiKey();
+        break;
       default:
         return (text: null, error: 'Unknown provider: $selectedProvider');
     }
@@ -80,6 +88,12 @@ class AiVisionService {
         return await _callClaudeVision(apiKey, base64Image);
       case 'deepseek':
         return await _analyzeImageWithDeepSeek(apiKey, imageBytes);
+      case 'customai':
+        final baseUrl = await _storage.getCustomAiBaseUrl();
+        if (baseUrl == null || baseUrl.trim().isEmpty) {
+          return (text: null, error: 'Custom AI base URL not configured');
+        }
+        return await _analyzeImageWithCustomAi(apiKey, baseUrl.trim(), imageBytes);
       default:
         return (text: null, error: 'Unknown provider: $selectedProvider');
     }
@@ -326,6 +340,63 @@ class AiVisionService {
     }
   }
 
+  /// Custom AI (Gateway, text-only): get on-device labels via ML Kit, then ask Gateway to write a journal entry.
+  Future<({String? text, String? error})> _analyzeImageWithCustomAi(String apiKey, String baseUrl, Uint8List imageBytes) async {
+    final labelsText = await getImageLabelsDescription(imageBytes);
+    if (labelsText == null || labelsText.isEmpty) {
+      return (text: null, error: 'Could not analyze photo on this device. Use Gemini, OpenAI or Claude for direct photo analysis, or describe the photo yourself.');
+    }
+    return _callCustomAiText(apiKey, baseUrl, labelsText);
+  }
+
+  Future<({String? text, String? error})> _callCustomAiText(String apiKey, String baseUrl, String labelsText) async {
+    try {
+      final url = Uri.parse('${baseUrl.replaceAll(RegExp(r'/$'), '')}/v1/chat');
+      final userMessage = 'По фото из дневника ребёнка определили такие объекты и сцены: $labelsText. '
+          'Напиши тёплое, короткое описание этого момента для детского дневника: 2–3 предложения на русском.';
+      final response = await http.post(
+        url,
+        headers: {
+          'X-Gateway-Token': apiKey,
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'input': userMessage,
+          'stream': false,
+          'max_output_tokens': 300,
+        }),
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final choices = data['choices'] as List?;
+        if (choices != null && choices.isNotEmpty) {
+          final choice = choices[0] as Map<String, dynamic>?;
+          final finishReason = choice?['finish_reason'] as String?;
+          if (finishReason == 'content_filter') {
+            return (text: null, error: 'Custom AI blocked the response. Try a different provider or describe the photo yourself.');
+          }
+          final message = choice?['message'] as Map<String, dynamic>?;
+          final content = message?['content'] as String?;
+          if (content != null && content.trim().isNotEmpty) {
+            final lowerContent = content.toLowerCase();
+            if (lowerContent.contains('извини') && (lowerContent.contains('не могу помочь') || lowerContent.contains('не могу'))) {
+              return (text: null, error: 'AI refused. Try a different provider or describe the photo yourself.');
+            }
+            return (text: content.trim(), error: null);
+          }
+        }
+        return (text: null, error: 'Empty response from Custom AI');
+      } else {
+        final errorData = jsonDecode(response.body) as Map<String, dynamic>?;
+        final errorMessage = errorData?['detail'] as String? ?? response.body;
+        return (text: null, error: 'Custom AI API error: $errorMessage');
+      }
+    } catch (e) {
+      return (text: null, error: 'Failed to call Custom AI: $e');
+    }
+  }
+
   /// DeepSeek (text-only API): get on-device labels via ML Kit, then ask DeepSeek to write a journal entry from them.
   Future<({String? text, String? error})> _analyzeImageWithDeepSeek(String apiKey, Uint8List imageBytes) async {
     final labelsText = await getImageLabelsDescription(imageBytes);
@@ -405,6 +476,9 @@ class AiVisionService {
       case 'deepseek':
         apiKey = await _storage.getDeepSeekKey();
         break;
+      case 'customai':
+        apiKey = await _storage.getCustomAiKey();
+        break;
       default:
         return (success: false, error: 'Unknown provider');
     }
@@ -413,7 +487,7 @@ class AiVisionService {
       return (success: false, error: 'API key not configured');
     }
 
-    // DeepSeek does not support images; test with text-only request.
+    // DeepSeek and Custom AI do not support images; test with text-only request.
     if (provider == 'deepseek') {
       try {
         final response = await http.post(
@@ -435,6 +509,34 @@ class AiVisionService {
         }
         final err = jsonDecode(response.body) as Map<String, dynamic>?;
         return (success: false, error: err?['error']?['message'] as String? ?? response.body);
+      } catch (e) {
+        return (success: false, error: e.toString());
+      }
+    }
+
+    if (provider == 'customai') {
+      final baseUrl = await _storage.getCustomAiBaseUrl();
+      if (baseUrl == null || baseUrl.trim().isEmpty) {
+        return (success: false, error: 'Base URL not configured');
+      }
+      try {
+        final url = Uri.parse('${baseUrl.replaceAll(RegExp(r'/$'), '')}/v1/chat');
+        final response = await http.post(
+          url,
+          headers: {
+            'X-Gateway-Token': apiKey,
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'input': 'Say OK',
+            'stream': false,
+          }),
+        ).timeout(const Duration(seconds: 15));
+        if (response.statusCode == 200) {
+          return (success: true, error: null);
+        }
+        final err = jsonDecode(response.body) as Map<String, dynamic>?;
+        return (success: false, error: err?['detail'] as String? ?? response.body);
       } catch (e) {
         return (success: false, error: e.toString());
       }

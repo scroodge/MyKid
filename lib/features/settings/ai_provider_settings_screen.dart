@@ -19,6 +19,8 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
   final _geminiController = TextEditingController();
   final _claudeController = TextEditingController();
   final _deepSeekController = TextEditingController();
+  final _customAiController = TextEditingController();
+  final _customAiBaseUrlController = TextEditingController();
   String? _selectedProvider;
   bool _loading = false;
   String? _message;
@@ -26,6 +28,7 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
   bool _obscureGemini = true;
   bool _obscureClaude = true;
   bool _obscureDeepSeek = true;
+  bool _obscureCustomAi = true;
 
   @override
   void initState() {
@@ -35,6 +38,8 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
     _geminiController.addListener(_onFieldsChanged);
     _claudeController.addListener(_onFieldsChanged);
     _deepSeekController.addListener(_onFieldsChanged);
+    _customAiController.addListener(_onFieldsChanged);
+    _customAiBaseUrlController.addListener(_onFieldsChanged);
   }
 
   void _onFieldsChanged() => setState(() {});
@@ -44,12 +49,16 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
     final geminiKey = await _storage.getGeminiKey();
     final claudeKey = await _storage.getClaudeKey();
     final deepSeekKey = await _storage.getDeepSeekKey();
+    final customAiKey = await _storage.getCustomAiKey();
+    final customAiBaseUrl = await _storage.getCustomAiBaseUrl();
     final selected = await _storage.getSelectedProvider();
     if (mounted) {
       _openAiController.text = openAiKey ?? '';
       _geminiController.text = geminiKey ?? '';
       _claudeController.text = claudeKey ?? '';
       _deepSeekController.text = deepSeekKey ?? '';
+      _customAiController.text = customAiKey ?? '';
+      _customAiBaseUrlController.text = customAiBaseUrl ?? '';
       _selectedProvider = selected ?? 'gemini'; // Default to Gemini (has free tier)
       setState(() {});
     }
@@ -69,6 +78,9 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
         break;
       case 'deepseek':
         apiKey = _deepSeekController.text.trim();
+        break;
+      case 'customai':
+        apiKey = _customAiController.text.trim();
         break;
     }
 
@@ -90,6 +102,10 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
         break;
       case 'deepseek':
         await _storage.setDeepSeekKey(apiKey);
+        break;
+      case 'customai':
+        await _storage.setCustomAiKey(apiKey);
+        await _storage.setCustomAiBaseUrl(_customAiBaseUrlController.text.trim());
         break;
     }
 
@@ -125,6 +141,10 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
         _claudeController.text.trim().isEmpty ? null : _claudeController.text.trim());
     await _storage.setDeepSeekKey(
         _deepSeekController.text.trim().isEmpty ? null : _deepSeekController.text.trim());
+    await _storage.setCustomAiKey(
+        _customAiController.text.trim().isEmpty ? null : _customAiController.text.trim());
+    await _storage.setCustomAiBaseUrl(
+        _customAiBaseUrlController.text.trim().isEmpty ? null : _customAiBaseUrlController.text.trim());
     await _storage.setSelectedProvider(_selectedProvider);
     if (mounted && showSnackBar) {
       ScaffoldMessenger.of(context)
@@ -145,10 +165,14 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
     _geminiController.removeListener(_onFieldsChanged);
     _claudeController.removeListener(_onFieldsChanged);
     _deepSeekController.removeListener(_onFieldsChanged);
+    _customAiController.removeListener(_onFieldsChanged);
+    _customAiBaseUrlController.removeListener(_onFieldsChanged);
     _openAiController.dispose();
     _geminiController.dispose();
     _claudeController.dispose();
     _deepSeekController.dispose();
+    _customAiController.dispose();
+    _customAiBaseUrlController.dispose();
     super.dispose();
   }
 
@@ -207,6 +231,13 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
             title: Text(l10n.deepSeek),
             subtitle: Text(l10n.deepSeekDescription),
             value: 'deepseek',
+            groupValue: _selectedProvider,
+            onChanged: (value) => setState(() => _selectedProvider = value),
+          ),
+          RadioListTile<String>(
+            title: Text(l10n.customAi),
+            subtitle: Text(l10n.customAiDescription),
+            value: 'customai',
             groupValue: _selectedProvider,
             onChanged: (value) => setState(() => _selectedProvider = value),
           ),
@@ -352,6 +383,45 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
                     onPressed: () => _openUrl('https://platform.deepseek.com/api_keys'),
                     icon: const Icon(Icons.open_in_new, size: 18),
                     label: Text(l10n.getApiKey),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    l10n.customAi,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _customAiBaseUrlController,
+                    decoration: InputDecoration(
+                      labelText: l10n.customAiBaseUrl,
+                      hintText: l10n.customAiBaseUrlHint,
+                    ),
+                    autocorrect: false,
+                    keyboardType: TextInputType.url,
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _customAiController,
+                    decoration: InputDecoration(
+                      labelText: l10n.apiKey,
+                      hintText: l10n.enterApiKey,
+                      suffixIcon: IconButton(
+                        icon: Icon(_obscureCustomAi ? Icons.visibility : Icons.visibility_off),
+                        onPressed: () => setState(() => _obscureCustomAi = !_obscureCustomAi),
+                      ),
+                    ),
+                    obscureText: _obscureCustomAi,
+                    autocorrect: false,
                   ),
                 ],
               ),

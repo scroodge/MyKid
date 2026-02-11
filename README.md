@@ -13,6 +13,7 @@
 </p>
 
 <p align="center">
+  <a href="#screenshots">Screenshots</a> •
   <a href="#features">Features</a> •
   <a href="#quick-start">Quick Start</a> •
   <a href="#setup">Setup</a> •
@@ -23,6 +24,22 @@
   <img src="https://img.shields.io/badge/Platform-Android%20%7C%20iOS-3DDC84?logo=android&logoColor=white" alt="Platform">
   <img src="https://img.shields.io/badge/Flutter-3.5+-02569B?logo=flutter" alt="Flutter">
   <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
+</p>
+
+---
+
+## Screenshots
+
+<p align="center">
+  <img src="assets/screenshots/01-select-child.png" alt="Select child" width="200">
+  <img src="assets/screenshots/03-timeline-empty.png" alt="Timeline empty" width="200">
+  <img src="assets/screenshots/04-timeline-with-entry.png" alt="Timeline with entry" width="200">
+</p>
+<p align="center">
+  <img src="assets/screenshots/02-suggestions-empty.png" alt="Suggestions" width="200">
+  <img src="assets/screenshots/05-add-entry-modal.png" alt="Add entry modal" width="200">
+  <img src="assets/screenshots/06-entry-view.png" alt="Entry view" width="200">
+  <img src="assets/screenshots/07-new-entry-form.png" alt="New entry form" width="200">
 </p>
 
 ---

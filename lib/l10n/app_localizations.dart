@@ -1690,6 +1690,30 @@ abstract class AppLocalizations {
   /// **'Text only, no photo analysis'**
   String get deepSeekDescription;
 
+  /// No description provided for @customAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom AI (API Gateway)'**
+  String get customAi;
+
+  /// No description provided for @customAiDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Your own API Gateway with X-Gateway-Token'**
+  String get customAiDescription;
+
+  /// No description provided for @customAiBaseUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Server URL'**
+  String get customAiBaseUrl;
+
+  /// No description provided for @customAiBaseUrlHint.
+  ///
+  /// In en, this message translates to:
+  /// **'http://144.91.127.194'**
+  String get customAiBaseUrlHint;
+
   /// No description provided for @apiKeys.
   ///
   /// In en, this message translates to:
