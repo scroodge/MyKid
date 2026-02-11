@@ -6,6 +6,8 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/immich_client.dart';
+import '../../core/immich_service.dart';
 import '../../data/child.dart';
 import '../../data/children_repository.dart';
 import '../../l10n/app_localizations.dart';
@@ -23,12 +25,15 @@ class ChildEditScreen extends StatefulWidget {
 
 class _ChildEditScreenState extends State<ChildEditScreen> {
   final _repo = ChildrenRepository();
+  final _immich = ImmichService();
   final _nameController = TextEditingController();
   DateTime? _dateOfBirth;
   bool _saving = false;
   bool _uploadingAvatar = false;
   String? _error;
   String? _avatarUrl;
+  String? _immichPersonId;
+  String? _immichPersonName;
   Uint8List? _pendingAvatarBytes;
 
   @override
@@ -38,6 +43,70 @@ class _ChildEditScreenState extends State<ChildEditScreen> {
       _nameController.text = widget.child!.name;
       _dateOfBirth = widget.child!.dateOfBirth;
       _avatarUrl = widget.child!.avatarUrl;
+      _immichPersonId = widget.child!.immichPersonId;
+      if (_immichPersonId != null) _loadImmichPersonName();
+    }
+  }
+
+  Future<void> _loadImmichPersonName() async {
+    if (_immichPersonId == null) return;
+    final client = await _immich.getClient();
+    if (client == null) return;
+    final people = await client.getAllPeople();
+    for (final p in people) {
+      if (p.id == _immichPersonId) {
+        if (mounted) setState(() => _immichPersonName = p.name);
+        return;
+      }
+    }
+  }
+
+  Future<void> _pickImmichPerson() async {
+    final client = await _immich.getClient();
+    if (client == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.configureImmichFirst)),
+        );
+      }
+      return;
+    }
+    final people = await client.getAllPeople();
+    if (!mounted) return;
+    if (people.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.noSuggestions),
+        ),
+      );
+      return;
+    }
+    final picked = await showModalBottomSheet<ImmichPerson>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                AppLocalizations.of(context)!.selectImmichPerson,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+            ...people.map((p) => ListTile(
+                  title: Text(p.name),
+                  onTap: () => Navigator.pop(context, p),
+                )),
+          ],
+        ),
+      ),
+    );
+    if (picked != null && mounted) {
+      setState(() {
+        _immichPersonId = picked.id;
+        _immichPersonName = picked.name;
+      });
     }
   }
 
@@ -198,10 +267,14 @@ class _ChildEditScreenState extends State<ChildEditScreen> {
         if (mounted) Navigator.of(context).pop(created);
       }
     } else {
+      final hadPersonId = widget.child!.immichPersonId != null;
+      final cleared = hadPersonId && _immichPersonId == null;
       final updated = await _repo.update(
         widget.child!.id,
         name: name,
         dateOfBirth: _dateOfBirth,
+        immichPersonId: _immichPersonId,
+        clearImmichPersonId: cleared,
       );
       if (mounted) {
         setState(() => _saving = false);
@@ -354,6 +427,29 @@ class _ChildEditScreenState extends State<ChildEditScreen> {
               if (picked != null) setState(() => _dateOfBirth = picked);
             },
           ),
+          if (widget.child != null) ...[
+            const SizedBox(height: 8),
+            ListTile(
+              leading: const Icon(Icons.face),
+              title: Text(AppLocalizations.of(context)!.linkToImmichPerson),
+              subtitle: Text(
+                _immichPersonId != null
+                    ? AppLocalizations.of(context)!.immichPersonLinked(
+                        _immichPersonName ?? '?')
+                    : AppLocalizations.of(context)!.linkToImmichPersonSubtitle,
+              ),
+              trailing: _immichPersonId != null
+                  ? TextButton(
+                      onPressed: () => setState(() {
+                        _immichPersonId = null;
+                        _immichPersonName = null;
+                      }),
+                      child: Text(AppLocalizations.of(context)!.unlinkImmichPerson),
+                    )
+                  : const Icon(Icons.chevron_right),
+              onTap: _pickImmichPerson,
+            ),
+          ],
           if (_error != null) ...[
             const SizedBox(height: 16),
             Text(

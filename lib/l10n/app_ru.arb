@@ -75,6 +75,38 @@
   "batchImport": "Массовый импорт",
   "batchImportTooltip": "Массовый импорт",
   "timeline": "Лента",
+  "suggestionsTab": "Предложения",
+  "scanningPhotos": "Сканирование фото…",
+  "foundPhotosWithChild": "Найдено {count} фото с {childName}",
+  "@foundPhotosWithChild": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "childName": {"type": "String"}
+    }
+  },
+  "createEntryFromSuggestion": "Создать запись",
+  "noSuggestions": "Нет предложений",
+  "scanNow": "Сканировать",
+  "stopScan": "Стоп",
+  "scanNowHint": "Нажмите кнопку выше для поиска фото",
+  "scanLimitHint": "Сканируется до 500 последних фото",
+  "addReferencePhotosPrompt": "Добавьте эталонные фото детей для распознавания",
+  "addReferencePhotosButton": "Добавить эталонные фото",
+  "linkChildToImmichPersonHint": "Или привяжите ребёнка к персоне в Immich (Настройки → Дети → Редактировать), чтобы использовать распознавание лиц Immich.",
+  "linkToImmichPerson": "Привязать к персоне Immich",
+  "linkToImmichPersonSubtitle": "Использовать распознавание лиц Immich для предложений",
+  "selectImmichPerson": "Выбрать персону",
+  "immichPersonLinked": "Привязан к {name}",
+  "@immichPersonLinked": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "unlinkImmichPerson": "Отвязать",
+  "replaceReferencePhotos": "Заменить все",
+  "replaceReferencePhotosConfirm": "Заменить эталонные фото?",
+  "replaceReferencePhotosConfirmMessage": "Все текущие эталонные фото будут удалены. Затем выберите новые.",
+  "replaceReferencePhotosDone": "Эталонные фото удалены. Выберите новые.",
   "addChildPrompt": "Добавить ребёнка",
   "addChildPromptSubtitle": "Нажмите, чтобы создать профиль",
   "selectChildAbove": "Выберите ребёнка выше",
@@ -163,6 +195,28 @@
   "acceptInviteDescription": "Вас пригласили в семью. Примите приглашение, чтобы получить доступ к общим детям и записям дневника.",
   "inviteNotFound": "Приглашение не найдено или истекло",
   "inviteCodeTooShort": "Введите не менее 8 символов",
+  "inviteOpenLinkHint": "Откройте ссылку-приглашение из письма или сообщения.",
+  "orEnterCodeManually": "Или введите код вручную",
+  "enterInviteCodeHint": "Введите 8-символьный код",
+  "searchByCode": "Найти по коду",
+  "invitedBy": "Пригласил(а):",
+  "signInToAcceptInvite": "Войдите или создайте аккаунт, чтобы принять приглашение.",
+  "signUpToAccept": "Зарегистрироваться для принятия",
+  "cancelInviteFailed": "Не удалось отменить приглашение",
+  "expired": "Истекло",
+  "searching": "Поиск…",
+  "inviteAcceptedDataNotRefreshed": "Приглашение принято, но данные не обновились. Попробуйте перезапустить приложение.",
+  "inviteAcceptErrorRetry": "Ошибка при принятии приглашения. Попробуйте еще раз или перезапустите приложение.",
+  "inviteAcceptErrorRestart": "Ошибка при принятии приглашения. Попробуйте перезапустить приложение.",
+  "createHouseholdFailedWithReason": "{message}: {reason}",
+  "@createHouseholdFailedWithReason": {
+    "placeholders": {
+      "message": {"type": "String"},
+      "reason": {"type": "String"}
+    }
+  },
+  "supportEmailCopied": "Email скопирован в буфер обмена",
+  "noHouseholdIdReturned": "ID семьи не возвращён",
   "inviteAccepted": "Вы присоединились к семье",
   "alreadyMember": "Вы уже являетесь членом этой семьи",
   "inviteAcceptFailed": "Не удалось принять приглашение",

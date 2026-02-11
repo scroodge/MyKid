@@ -550,6 +550,132 @@ abstract class AppLocalizations {
   /// **'Timeline'**
   String get timeline;
 
+  /// No description provided for @suggestionsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestions'**
+  String get suggestionsTab;
+
+  /// No description provided for @scanningPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning photos…'**
+  String get scanningPhotos;
+
+  /// No description provided for @foundPhotosWithChild.
+  ///
+  /// In en, this message translates to:
+  /// **'Found {count} photos with {childName}'**
+  String foundPhotosWithChild(int count, String childName);
+
+  /// No description provided for @createEntryFromSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Create entry'**
+  String get createEntryFromSuggestion;
+
+  /// No description provided for @noSuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'No suggestions'**
+  String get noSuggestions;
+
+  /// No description provided for @scanNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan now'**
+  String get scanNow;
+
+  /// No description provided for @stopScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get stopScan;
+
+  /// No description provided for @scanNowHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Press the button above to search for photos'**
+  String get scanNowHint;
+
+  /// No description provided for @scanLimitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Scans up to 500 most recent photos'**
+  String get scanLimitHint;
+
+  /// No description provided for @addReferencePhotosPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Add reference photos of your children for recognition'**
+  String get addReferencePhotosPrompt;
+
+  /// No description provided for @addReferencePhotosButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add reference photos'**
+  String get addReferencePhotosButton;
+
+  /// No description provided for @linkChildToImmichPersonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Or link a child to an Immich person (Settings → Manage children → Edit child) to use Immich\'s face recognition.'**
+  String get linkChildToImmichPersonHint;
+
+  /// No description provided for @linkToImmichPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Link to Immich person'**
+  String get linkToImmichPerson;
+
+  /// No description provided for @linkToImmichPersonSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Immich\'s face recognition for suggestions'**
+  String get linkToImmichPersonSubtitle;
+
+  /// No description provided for @selectImmichPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Select person'**
+  String get selectImmichPerson;
+
+  /// No description provided for @immichPersonLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked to {name}'**
+  String immichPersonLinked(String name);
+
+  /// No description provided for @unlinkImmichPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink'**
+  String get unlinkImmichPerson;
+
+  /// No description provided for @replaceReferencePhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace all'**
+  String get replaceReferencePhotos;
+
+  /// No description provided for @replaceReferencePhotosConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace reference photos?'**
+  String get replaceReferencePhotosConfirm;
+
+  /// No description provided for @replaceReferencePhotosConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'All current reference photos will be removed. Then select new photos.'**
+  String get replaceReferencePhotosConfirmMessage;
+
+  /// No description provided for @replaceReferencePhotosDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference photos removed. Select new ones.'**
+  String get replaceReferencePhotosDone;
+
   /// No description provided for @addChildPrompt.
   ///
   /// In en, this message translates to:
@@ -1173,6 +1299,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter at least 8 characters'**
   String get inviteCodeTooShort;
+
+  /// No description provided for @inviteOpenLinkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the invite link you received in your email or message.'**
+  String get inviteOpenLinkHint;
+
+  /// No description provided for @orEnterCodeManually.
+  ///
+  /// In en, this message translates to:
+  /// **'Or enter code manually'**
+  String get orEnterCodeManually;
+
+  /// No description provided for @enterInviteCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 8-character code'**
+  String get enterInviteCodeHint;
+
+  /// No description provided for @searchByCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by code'**
+  String get searchByCode;
+
+  /// No description provided for @invitedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Invited by:'**
+  String get invitedBy;
+
+  /// No description provided for @signInToAcceptInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'You need to sign in or create an account to accept this invitation.'**
+  String get signInToAcceptInvite;
+
+  /// No description provided for @signUpToAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up to accept'**
+  String get signUpToAccept;
+
+  /// No description provided for @cancelInviteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to cancel invite'**
+  String get cancelInviteFailed;
+
+  /// No description provided for @expired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get expired;
+
+  /// No description provided for @searching.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching...'**
+  String get searching;
+
+  /// No description provided for @inviteAcceptedDataNotRefreshed.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite accepted, but data didn\'t refresh. Try restarting the app.'**
+  String get inviteAcceptedDataNotRefreshed;
+
+  /// No description provided for @inviteAcceptErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Error accepting invite. Please try again or restart the app.'**
+  String get inviteAcceptErrorRetry;
+
+  /// No description provided for @inviteAcceptErrorRestart.
+  ///
+  /// In en, this message translates to:
+  /// **'Error accepting invite. Please restart the app.'**
+  String get inviteAcceptErrorRestart;
+
+  /// No description provided for @createHouseholdFailedWithReason.
+  ///
+  /// In en, this message translates to:
+  /// **'{message}: {reason}'**
+  String createHouseholdFailedWithReason(String message, String reason);
+
+  /// No description provided for @supportEmailCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Email copied to clipboard'**
+  String get supportEmailCopied;
+
+  /// No description provided for @noHouseholdIdReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'No household ID returned'**
+  String get noHouseholdIdReturned;
 
   /// No description provided for @inviteAccepted.
   ///

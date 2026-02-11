@@ -176,7 +176,7 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
               } else {
                 setState(() {
                   _loading = false;
-                  _error = 'Приглашение принято, но данные не обновились. Попробуйте перезапустить приложение.';
+                  _error = l10n.inviteAcceptedDataNotRefreshed;
                 });
               }
             } else {
@@ -205,7 +205,7 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
               } else {
                 setState(() {
                   _loading = false;
-                  _error = 'Ошибка при принятии приглашения. Попробуйте еще раз или перезапустите приложение.';
+                  _error = l10n.inviteAcceptErrorRetry;
                 });
               }
             } else {
@@ -241,7 +241,7 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
                 } else {
                   setState(() {
                     _loading = false;
-                    _error = 'Ошибка при принятии приглашения. Попробуйте перезапустить приложение.';
+                    _error = AppLocalizations.of(context)!.inviteAcceptErrorRestart;
                   });
                 }
               } else {
@@ -330,13 +330,13 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
                     ),
                     const SizedBox(height: 32),
                     Text(
-                      'Open the invite link you received in your email or message.',
+                      l10n.inviteOpenLinkHint,
                       style: Theme.of(context).textTheme.bodyMedium,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
                     ExpansionTile(
-                      title: Text('Or enter code manually'),
+                      title: Text(l10n.orEnterCodeManually),
                       children: [
                         Padding(
                           padding: const EdgeInsets.all(16.0),
@@ -346,7 +346,7 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
                                 controller: _codeController,
                                 decoration: InputDecoration(
                                   labelText: l10n.inviteCode,
-                                  hintText: 'Enter 8-character code',
+                                  hintText: l10n.enterInviteCodeHint,
                                   prefixIcon: const Icon(Icons.tag),
                                 ),
                                 textCapitalization: TextCapitalization.characters,
@@ -362,7 +362,7 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
                               ],
                               FilledButton(
                                 onPressed: _loading ? null : _searchByCode,
-                                child: Text(_loading ? l10n.testing : 'Search by code'),
+                                child: Text(_loading ? l10n.searching : l10n.searchByCode),
                               ),
                             ],
                           ),
@@ -395,7 +395,7 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Invited by:',
+                              l10n.invitedBy,
                               style: Theme.of(context).textTheme.labelMedium,
                             ),
                             const SizedBox(height: 4),
@@ -417,7 +417,7 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
                     ],
                     if (!_isAuthenticated) ...[
                       Text(
-                        'You need to sign in or create an account to accept this invitation.',
+                        l10n.signInToAcceptInvite,
                         style: Theme.of(context).textTheme.bodyMedium,
                         textAlign: TextAlign.center,
                       ),
@@ -436,7 +436,7 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
                             _checkAuthAndAccept();
                           }
                         },
-                        child: Text('Sign up to accept'),
+                        child: Text(l10n.signUpToAccept),
                       ),
                       const SizedBox(height: 8),
                       TextButton(
@@ -453,7 +453,7 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
                             _checkAuthAndAccept();
                           }
                         },
-                        child: Text('Already have an account? Sign in'),
+                        child: Text(l10n.alreadyHaveAccount),
                       ),
                     ] else ...[
                       FilledButton(

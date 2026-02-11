@@ -246,6 +246,78 @@ class AppLocalizationsEn extends AppLocalizations {
   String get timeline => 'Timeline';
 
   @override
+  String get suggestionsTab => 'Suggestions';
+
+  @override
+  String get scanningPhotos => 'Scanning photos…';
+
+  @override
+  String foundPhotosWithChild(int count, String childName) {
+    return 'Found $count photos with $childName';
+  }
+
+  @override
+  String get createEntryFromSuggestion => 'Create entry';
+
+  @override
+  String get noSuggestions => 'No suggestions';
+
+  @override
+  String get scanNow => 'Scan now';
+
+  @override
+  String get stopScan => 'Stop';
+
+  @override
+  String get scanNowHint => 'Press the button above to search for photos';
+
+  @override
+  String get scanLimitHint => 'Scans up to 500 most recent photos';
+
+  @override
+  String get addReferencePhotosPrompt =>
+      'Add reference photos of your children for recognition';
+
+  @override
+  String get addReferencePhotosButton => 'Add reference photos';
+
+  @override
+  String get linkChildToImmichPersonHint =>
+      'Or link a child to an Immich person (Settings → Manage children → Edit child) to use Immich\'s face recognition.';
+
+  @override
+  String get linkToImmichPerson => 'Link to Immich person';
+
+  @override
+  String get linkToImmichPersonSubtitle =>
+      'Use Immich\'s face recognition for suggestions';
+
+  @override
+  String get selectImmichPerson => 'Select person';
+
+  @override
+  String immichPersonLinked(String name) {
+    return 'Linked to $name';
+  }
+
+  @override
+  String get unlinkImmichPerson => 'Unlink';
+
+  @override
+  String get replaceReferencePhotos => 'Replace all';
+
+  @override
+  String get replaceReferencePhotosConfirm => 'Replace reference photos?';
+
+  @override
+  String get replaceReferencePhotosConfirmMessage =>
+      'All current reference photos will be removed. Then select new photos.';
+
+  @override
+  String get replaceReferencePhotosDone =>
+      'Reference photos removed. Select new ones.';
+
+  @override
   String get addChildPrompt => 'Add child';
 
   @override
@@ -588,6 +660,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inviteCodeTooShort => 'Enter at least 8 characters';
+
+  @override
+  String get inviteOpenLinkHint =>
+      'Open the invite link you received in your email or message.';
+
+  @override
+  String get orEnterCodeManually => 'Or enter code manually';
+
+  @override
+  String get enterInviteCodeHint => 'Enter 8-character code';
+
+  @override
+  String get searchByCode => 'Search by code';
+
+  @override
+  String get invitedBy => 'Invited by:';
+
+  @override
+  String get signInToAcceptInvite =>
+      'You need to sign in or create an account to accept this invitation.';
+
+  @override
+  String get signUpToAccept => 'Sign up to accept';
+
+  @override
+  String get cancelInviteFailed => 'Failed to cancel invite';
+
+  @override
+  String get expired => 'Expired';
+
+  @override
+  String get searching => 'Searching...';
+
+  @override
+  String get inviteAcceptedDataNotRefreshed =>
+      'Invite accepted, but data didn\'t refresh. Try restarting the app.';
+
+  @override
+  String get inviteAcceptErrorRetry =>
+      'Error accepting invite. Please try again or restart the app.';
+
+  @override
+  String get inviteAcceptErrorRestart =>
+      'Error accepting invite. Please restart the app.';
+
+  @override
+  String createHouseholdFailedWithReason(String message, String reason) {
+    return '$message: $reason';
+  }
+
+  @override
+  String get supportEmailCopied => 'Email copied to clipboard';
+
+  @override
+  String get noHouseholdIdReturned => 'No household ID returned';
 
   @override
   String get inviteAccepted => 'You\'ve joined the family';

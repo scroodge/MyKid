@@ -246,6 +246,78 @@ class AppLocalizationsBe extends AppLocalizations {
   String get timeline => 'Стужка';
 
   @override
+  String get suggestionsTab => 'Прапановы';
+
+  @override
+  String get scanningPhotos => 'Сканаванне фота…';
+
+  @override
+  String foundPhotosWithChild(int count, String childName) {
+    return 'Знойдзена $count фота з $childName';
+  }
+
+  @override
+  String get createEntryFromSuggestion => 'Стварыць запіс';
+
+  @override
+  String get noSuggestions => 'Няма прапаноў';
+
+  @override
+  String get scanNow => 'Сканаваць';
+
+  @override
+  String get stopScan => 'Стоп';
+
+  @override
+  String get scanNowHint => 'Націсніце кнопку вышэй для пошуку фота';
+
+  @override
+  String get scanLimitHint => 'Скануецца да 500 апошніх фота';
+
+  @override
+  String get addReferencePhotosPrompt =>
+      'Дадайце эталонныя фота дзяцей для распазнавання';
+
+  @override
+  String get addReferencePhotosButton => 'Дадаць эталонныя фота';
+
+  @override
+  String get linkChildToImmichPersonHint =>
+      'Або прывяжыце дзіця да персоны ў Immich (Налады → Дзеці → Рэдагаваць), каб выкарыстоўваць распазнаванне твараў Immich.';
+
+  @override
+  String get linkToImmichPerson => 'Прывязаць да персоны Immich';
+
+  @override
+  String get linkToImmichPersonSubtitle =>
+      'Выкарыстоўваць распазнаванне твараў Immich для прапаноў';
+
+  @override
+  String get selectImmichPerson => 'Выбраць персону';
+
+  @override
+  String immichPersonLinked(String name) {
+    return 'Прывязаны да $name';
+  }
+
+  @override
+  String get unlinkImmichPerson => 'Адвязаць';
+
+  @override
+  String get replaceReferencePhotos => 'Замяніць усё';
+
+  @override
+  String get replaceReferencePhotosConfirm => 'Замяніць эталонныя фота?';
+
+  @override
+  String get replaceReferencePhotosConfirmMessage =>
+      'Усе бягучыя эталонныя фота будуць выдалены. Затым выберыце новыя.';
+
+  @override
+  String get replaceReferencePhotosDone =>
+      'Эталонныя фота выдалены. Выберыце новыя.';
+
+  @override
   String get addChildPrompt => 'Дадаць дзіця';
 
   @override
@@ -588,6 +660,61 @@ class AppLocalizationsBe extends AppLocalizations {
 
   @override
   String get inviteCodeTooShort => 'Увядзіце не менш за 8 сімвалаў';
+
+  @override
+  String get inviteOpenLinkHint =>
+      'Адкрыйце спасылку-запрашэнне з ліста або паведамлення.';
+
+  @override
+  String get orEnterCodeManually => 'Ці ўвядзіце код уручную';
+
+  @override
+  String get enterInviteCodeHint => 'Увядзіце 8-сімвольны код';
+
+  @override
+  String get searchByCode => 'Знайсці па коду';
+
+  @override
+  String get invitedBy => 'Запрасіў(ла):';
+
+  @override
+  String get signInToAcceptInvite =>
+      'Увайдзіце або стварыце акаўнт, каб прыняць запрашэнне.';
+
+  @override
+  String get signUpToAccept => 'Зарэгістравацца для прыняцця';
+
+  @override
+  String get cancelInviteFailed => 'Не ўдалося адмяніць запрашэнне';
+
+  @override
+  String get expired => 'Скончылася';
+
+  @override
+  String get searching => 'Пошук…';
+
+  @override
+  String get inviteAcceptedDataNotRefreshed =>
+      'Запрашэнне прынята, але даныя не абнавіліся. Паспрабуйце перазапуściць праграму.';
+
+  @override
+  String get inviteAcceptErrorRetry =>
+      'Памылка пры прыняцці запрашэння. Паспрабуйце яшчэ раз або перазапуściць праграму.';
+
+  @override
+  String get inviteAcceptErrorRestart =>
+      'Памылка пры прыняцці запрашэння. Паспрабуйце перазапуściць праграму.';
+
+  @override
+  String createHouseholdFailedWithReason(String message, String reason) {
+    return '$message: $reason';
+  }
+
+  @override
+  String get supportEmailCopied => 'Email скапіяваны ў буфер абмену';
+
+  @override
+  String get noHouseholdIdReturned => 'ID сям\'і не вернуты';
 
   @override
   String get inviteAccepted => 'Вы далучыліся да сям\'і';

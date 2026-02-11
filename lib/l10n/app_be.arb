@@ -75,6 +75,38 @@
   "batchImport": "Масавы імпорт",
   "batchImportTooltip": "Масавы імпорт",
   "timeline": "Стужка",
+  "suggestionsTab": "Прапановы",
+  "scanningPhotos": "Сканаванне фота…",
+  "foundPhotosWithChild": "Знойдзена {count} фота з {childName}",
+  "@foundPhotosWithChild": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "childName": {"type": "String"}
+    }
+  },
+  "createEntryFromSuggestion": "Стварыць запіс",
+  "noSuggestions": "Няма прапаноў",
+  "scanNow": "Сканаваць",
+  "stopScan": "Стоп",
+  "scanNowHint": "Націсніце кнопку вышэй для пошуку фота",
+  "scanLimitHint": "Скануецца да 500 апошніх фота",
+  "addReferencePhotosPrompt": "Дадайце эталонныя фота дзяцей для распазнавання",
+  "addReferencePhotosButton": "Дадаць эталонныя фота",
+  "linkChildToImmichPersonHint": "Або прывяжыце дзіця да персоны ў Immich (Налады → Дзеці → Рэдагаваць), каб выкарыстоўваць распазнаванне твараў Immich.",
+  "linkToImmichPerson": "Прывязаць да персоны Immich",
+  "linkToImmichPersonSubtitle": "Выкарыстоўваць распазнаванне твараў Immich для прапаноў",
+  "selectImmichPerson": "Выбраць персону",
+  "immichPersonLinked": "Прывязаны да {name}",
+  "@immichPersonLinked": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "unlinkImmichPerson": "Адвязаць",
+  "replaceReferencePhotos": "Замяніць усё",
+  "replaceReferencePhotosConfirm": "Замяніць эталонныя фота?",
+  "replaceReferencePhotosConfirmMessage": "Усе бягучыя эталонныя фота будуць выдалены. Затым выберыце новыя.",
+  "replaceReferencePhotosDone": "Эталонныя фота выдалены. Выберыце новыя.",
   "addChildPrompt": "Дадаць дзіця",
   "addChildPromptSubtitle": "Націсніце, каб стварыць профіль",
   "selectChildAbove": "Выберыце дзіця вышэй",
@@ -163,6 +195,28 @@
   "acceptInviteDescription": "Вас запрасілі ў сям'ю. Прыміце запрашэнне, каб атрымаць доступ да агульных дзяцей і запісаў дзённіка.",
   "inviteNotFound": "Запрашэнне не знойдзена або скончылася",
   "inviteCodeTooShort": "Увядзіце не менш за 8 сімвалаў",
+  "inviteOpenLinkHint": "Адкрыйце спасылку-запрашэнне з ліста або паведамлення.",
+  "orEnterCodeManually": "Ці ўвядзіце код уручную",
+  "enterInviteCodeHint": "Увядзіце 8-сімвольны код",
+  "searchByCode": "Знайсці па коду",
+  "invitedBy": "Запрасіў(ла):",
+  "signInToAcceptInvite": "Увайдзіце або стварыце акаўнт, каб прыняць запрашэнне.",
+  "signUpToAccept": "Зарэгістравацца для прыняцця",
+  "cancelInviteFailed": "Не ўдалося адмяніць запрашэнне",
+  "expired": "Скончылася",
+  "searching": "Пошук…",
+  "inviteAcceptedDataNotRefreshed": "Запрашэнне прынята, але даныя не абнавіліся. Паспрабуйце перазапуściць праграму.",
+  "inviteAcceptErrorRetry": "Памылка пры прыняцці запрашэння. Паспрабуйце яшчэ раз або перазапуściць праграму.",
+  "inviteAcceptErrorRestart": "Памылка пры прыняцці запрашэння. Паспрабуйце перазапуściць праграму.",
+  "createHouseholdFailedWithReason": "{message}: {reason}",
+  "@createHouseholdFailedWithReason": {
+    "placeholders": {
+      "message": {"type": "String"},
+      "reason": {"type": "String"}
+    }
+  },
+  "supportEmailCopied": "Email скапіяваны ў буфер абмену",
+  "noHouseholdIdReturned": "ID сям'і не вернуты",
   "inviteAccepted": "Вы далучыліся да сям'і",
   "alreadyMember": "Вы ўжо з'яўляецеся членам гэтай сям'і",
   "inviteAcceptFailed": "Не ўдалося прыняць запрашэнне",

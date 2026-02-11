@@ -237,7 +237,7 @@ class _HouseholdInvitesScreenState extends State<HouseholdInvitesScreen> {
       } else if (mounted) {
         setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${l10n.createHouseholdFailed}: No household ID returned')),
+          SnackBar(content: Text(l10n.createHouseholdFailedWithReason(l10n.createHouseholdFailed, l10n.noHouseholdIdReturned))),
         );
       }
     } catch (e) {
@@ -246,7 +246,7 @@ class _HouseholdInvitesScreenState extends State<HouseholdInvitesScreen> {
         final errorMsg = e.toString();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${l10n.createHouseholdFailed}: $errorMsg'),
+            content: Text(l10n.createHouseholdFailedWithReason(l10n.createHouseholdFailed, errorMsg)),
             duration: const Duration(seconds: 5),
           ),
         );
@@ -279,7 +279,7 @@ class _HouseholdInvitesScreenState extends State<HouseholdInvitesScreen> {
       await _load();
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to cancel invite')),
+        SnackBar(content: Text(l10n.cancelInviteFailed)),
       );
     }
   }
@@ -368,7 +368,7 @@ class _HouseholdInvitesScreenState extends State<HouseholdInvitesScreen> {
                             title: Text(invite.email),
                             subtitle: Text(
                               expired
-                                  ? 'Expired'
+                                  ? l10n.expired
                                   : l10n.inviteExpires(expiresStr),
                               style: TextStyle(
                                 color: expired

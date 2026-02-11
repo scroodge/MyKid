@@ -180,7 +180,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.profileUpdated)),
         );
         Navigator.of(context).pop(true);
       }

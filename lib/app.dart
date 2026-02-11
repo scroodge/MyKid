@@ -100,34 +100,40 @@ class _MyKidAppState extends State<MyKidApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorKey: _navigatorKey,
-      title: 'MyKid Journal',
-      theme: MyKidTheme.lightTheme,
-      darkTheme: MyKidTheme.darkTheme,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      initialRoute: widget.supabaseInitialized ? '/' : '/onboarding',
-      routes: {
-        '/': (context) => const AuthGuard(child: HomeScreen()),
-        '/login': (context) => const LoginScreen(),
-        '/signup': (context) => const SignUpScreen(),
-        '/onboarding': (context) => const OnboardingScreen(),
-        '/settings': (context) => const SettingsScreen(),
-        '/profile': (context) => const ProfileScreen(),
-        '/settings-immich': (context) => const ImmichSettingsScreen(),
-        '/settings-ai-providers': (context) => const AiProviderSettingsScreen(),
-        '/household-invites': (context) => const HouseholdInvitesScreen(),
-        '/my-family': (context) => const MyFamilyScreen(),
-        '/accept-invite': (context) {
-          final args = ModalRoute.of(context)?.settings.arguments;
-          final token = args is String ? args : null;
-          return AcceptInviteScreen(token: token);
-        },
-        '/children': (context) => const ChildrenListScreen(),
-        '/import': (context) => const BatchImportScreen(),
-        '/licenses': (context) => const LicensesScreen(),
-      },
+    return Localizations(
+      locale: WidgetsBinding.instance.platformDispatcher.locale,
+      delegates: AppLocalizations.localizationsDelegates,
+      child: Builder(
+        builder: (context) => MaterialApp(
+          navigatorKey: _navigatorKey,
+          title: AppLocalizations.of(context)!.appTitle,
+          theme: MyKidTheme.lightTheme,
+          darkTheme: MyKidTheme.darkTheme,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          initialRoute: widget.supabaseInitialized ? '/' : '/onboarding',
+          routes: {
+            '/': (context) => const AuthGuard(child: HomeScreen()),
+            '/login': (context) => const LoginScreen(),
+            '/signup': (context) => const SignUpScreen(),
+            '/onboarding': (context) => const OnboardingScreen(),
+            '/settings': (context) => const SettingsScreen(),
+            '/profile': (context) => const ProfileScreen(),
+            '/settings-immich': (context) => const ImmichSettingsScreen(),
+            '/settings-ai-providers': (context) => const AiProviderSettingsScreen(),
+            '/household-invites': (context) => const HouseholdInvitesScreen(),
+            '/my-family': (context) => const MyFamilyScreen(),
+            '/accept-invite': (context) {
+              final args = ModalRoute.of(context)?.settings.arguments;
+              final token = args is String ? args : null;
+              return AcceptInviteScreen(token: token);
+            },
+            '/children': (context) => const ChildrenListScreen(),
+            '/import': (context) => const BatchImportScreen(),
+            '/licenses': (context) => const LicensesScreen(),
+          },
+        ),
+      ),
     );
   }
 }

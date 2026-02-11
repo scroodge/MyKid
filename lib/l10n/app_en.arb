@@ -96,6 +96,38 @@
   "batchImport": "Batch import",
   "batchImportTooltip": "Batch import",
   "timeline": "Timeline",
+  "suggestionsTab": "Suggestions",
+  "scanningPhotos": "Scanning photos…",
+  "foundPhotosWithChild": "Found {count} photos with {childName}",
+  "@foundPhotosWithChild": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "childName": {"type": "String"}
+    }
+  },
+  "createEntryFromSuggestion": "Create entry",
+  "noSuggestions": "No suggestions",
+  "scanNow": "Scan now",
+  "stopScan": "Stop",
+  "scanNowHint": "Press the button above to search for photos",
+  "scanLimitHint": "Scans up to 500 most recent photos",
+  "addReferencePhotosPrompt": "Add reference photos of your children for recognition",
+  "addReferencePhotosButton": "Add reference photos",
+  "linkChildToImmichPersonHint": "Or link a child to an Immich person (Settings → Manage children → Edit child) to use Immich's face recognition.",
+  "linkToImmichPerson": "Link to Immich person",
+  "linkToImmichPersonSubtitle": "Use Immich's face recognition for suggestions",
+  "selectImmichPerson": "Select person",
+  "immichPersonLinked": "Linked to {name}",
+  "@immichPersonLinked": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "unlinkImmichPerson": "Unlink",
+  "replaceReferencePhotos": "Replace all",
+  "replaceReferencePhotosConfirm": "Replace reference photos?",
+  "replaceReferencePhotosConfirmMessage": "All current reference photos will be removed. Then select new photos.",
+  "replaceReferencePhotosDone": "Reference photos removed. Select new ones.",
   "addChildPrompt": "Add child",
   "addChildPromptSubtitle": "Tap to create profile",
   "selectChildAbove": "Select child above",
@@ -253,6 +285,28 @@
   "acceptInviteDescription": "You've been invited to join a family. Accept to access shared children and journal entries.",
   "inviteNotFound": "Invite not found or expired",
   "inviteCodeTooShort": "Enter at least 8 characters",
+  "inviteOpenLinkHint": "Open the invite link you received in your email or message.",
+  "orEnterCodeManually": "Or enter code manually",
+  "enterInviteCodeHint": "Enter 8-character code",
+  "searchByCode": "Search by code",
+  "invitedBy": "Invited by:",
+  "signInToAcceptInvite": "You need to sign in or create an account to accept this invitation.",
+  "signUpToAccept": "Sign up to accept",
+  "cancelInviteFailed": "Failed to cancel invite",
+  "expired": "Expired",
+  "searching": "Searching...",
+  "inviteAcceptedDataNotRefreshed": "Invite accepted, but data didn't refresh. Try restarting the app.",
+  "inviteAcceptErrorRetry": "Error accepting invite. Please try again or restart the app.",
+  "inviteAcceptErrorRestart": "Error accepting invite. Please restart the app.",
+  "createHouseholdFailedWithReason": "{message}: {reason}",
+  "@createHouseholdFailedWithReason": {
+    "placeholders": {
+      "message": {"type": "String"},
+      "reason": {"type": "String"}
+    }
+  },
+  "supportEmailCopied": "Email copied to clipboard",
+  "noHouseholdIdReturned": "No household ID returned",
   "inviteAccepted": "You've joined the family",
   "alreadyMember": "You're already a member of this family",
   "inviteAcceptFailed": "Failed to accept invite",

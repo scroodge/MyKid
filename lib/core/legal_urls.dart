@@ -21,6 +21,9 @@ class LegalUrls {
         defaultValue: 'mailto:scroodgemac@gmail.com',
       );
 
+  /// Support email for display/copy when mailto fails.
+  static const String supportEmail = 'scroodgemac@gmail.com';
+
   static String get accountDeletion =>
       const String.fromEnvironment(
         'ACCOUNT_DELETION_URL',

@@ -165,6 +165,43 @@ class ImmichClient {
     return '$baseUrl/api/assets/$assetId/thumbnail?${q.query}';
   }
 
+  /// List all people (faces) recognized by Immich. Requires person.read permission.
+  Future<List<ImmichPerson>> getAllPeople({int size = 100}) async {
+    try {
+      final res = await http.get(
+        Uri.parse('$baseUrl/api/people').replace(
+          queryParameters: {'size': size.toString()},
+        ),
+        headers: _headers,
+      );
+      if (res.statusCode != 200) return [];
+      final data = jsonDecode(res.body) as Map<String, dynamic>?;
+      final list = data?['people'] as List<dynamic>? ?? [];
+      return list
+          .map((e) => ImmichPerson.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Get assets for a person (photos where this person appears). Requires person.read and asset.read.
+  Future<List<ImmichAsset>> getPersonAssets(String personId) async {
+    try {
+      final res = await http.get(
+        Uri.parse('$baseUrl/api/people/$personId/assets'),
+        headers: _headers,
+      );
+      if (res.statusCode != 200) return [];
+      final list = jsonDecode(res.body) as List<dynamic>? ?? [];
+      return list
+          .map((e) => ImmichAsset.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
   /// Download full asset bytes (for fullscreen view). Immich v2 API: GET /api/assets/:id/original.
   Future<List<int>?> downloadAsset(String assetId) async {
     final url = '$baseUrl/api/assets/$assetId/original';
@@ -182,6 +219,20 @@ class ImmichClient {
       debugPrint('[Immich] $st');
       return null;
     }
+  }
+}
+
+class ImmichPerson {
+  ImmichPerson({required this.id, required this.name});
+
+  final String id;
+  final String name;
+
+  factory ImmichPerson.fromJson(Map<String, dynamic> json) {
+    return ImmichPerson(
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+    );
   }
 }
 
