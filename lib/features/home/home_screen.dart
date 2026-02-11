@@ -144,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
-                'Выберите ребёнка',
+                AppLocalizations.of(context)!.selectAChild,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
@@ -188,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             ),
             ListTile(
               leading: const Icon(Icons.settings),
-              title: const Text('Управление детьми'),
+              title: Text(AppLocalizations.of(context)!.manageChildren),
               onTap: () {
                 Navigator.pop(c);
                 Navigator.of(context).pushNamed('/children').then((_) => _loadChildrenAndSelection());
