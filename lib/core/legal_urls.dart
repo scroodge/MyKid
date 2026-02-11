@@ -24,7 +24,7 @@ class LegalUrls {
   static String get accountDeletion =>
       const String.fromEnvironment(
         'ACCOUNT_DELETION_URL',
-        defaultValue: 'mailto:scroodgemac@gmail.com?subject=Account%20Deletion%20Request',
+        defaultValue: 'https://scroodge.github.io/MyKid/account-deletion.html',
       );
 
   static String get dataExport =>
