@@ -19,7 +19,7 @@ class HouseholdRepository {
         .eq('user_id', uid)
         .limit(1)
         .maybeSingle();
-    final map = res as Map<String, dynamic>?;
+    final map = res;
     return map?['household_id'] as String?;
   }
 
@@ -58,7 +58,7 @@ class HouseholdRepository {
             .insert({'owner_id': uid, if (name != null && name.isNotEmpty) 'name': name})
             .select('id')
             .single();
-        final householdId = insertRes['id'] as String?;
+        final householdId = insertRes['id'];
         if (householdId == null) throw Exception('Failed to create household: no ID returned');
         
         await _client.from('household_members').insert({
@@ -100,7 +100,7 @@ class HouseholdRepository {
         .select('name')
         .eq('id', householdId)
         .maybeSingle();
-    final map = res as Map<String, dynamic>?;
+    final map = res;
     final name = map?['name'] as String?;
     return (name != null && name.trim().isNotEmpty) ? name.trim() : null;
   }
@@ -115,7 +115,7 @@ class HouseholdRepository {
         .eq('household_id', householdId)
         .eq('user_id', uid)
         .maybeSingle();
-    final map = res as Map<String, dynamic>?;
+    final map = res;
     return map?['role'] == 'owner';
   }
 

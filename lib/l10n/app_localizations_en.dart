@@ -496,6 +496,26 @@ class AppLocalizationsEn extends AppLocalizations {
       'Create your own Immich and Supabase';
 
   @override
+  String get onboardingHostingQuestion => 'Will you set up your own hosting?';
+
+  @override
+  String get onboardingHostingQuestionSubtitle =>
+      'Choose whether to configure your own servers or use our managed backend';
+
+  @override
+  String get onboardingHostingYes => 'Yes, I\'ll set it up';
+
+  @override
+  String get onboardingHostingYesSubtitle =>
+      'I\'ll configure Immich and Supabase myself';
+
+  @override
+  String get onboardingHostingNo => 'No, use managed backend';
+
+  @override
+  String get onboardingHostingNoSubtitle => 'Use our paid managed service';
+
+  @override
   String get onboardingExistingAccount => 'I already have an account';
 
   @override
@@ -536,6 +556,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingSupabaseTitle => 'Supabase';
 
   @override
+  String get onboardingSupabaseQuestion =>
+      'Do you have your own Supabase project?';
+
+  @override
+  String get onboardingSupabaseManaged => 'Use managed backend';
+
+  @override
+  String get onboardingSupabaseManagedSubtitle =>
+      'We\'ll handle everything for you';
+
+  @override
+  String get onboardingSupabaseSelfHosted => 'Use my own Supabase';
+
+  @override
+  String get onboardingSupabaseSelfHostedSubtitle =>
+      'I\'ll provide URL and anon key';
+
+  @override
   String get onboardingSupabaseDescription =>
       'Create a project at supabase.com, run migrations, then copy URL and anon key from Settings → API.';
 
@@ -550,6 +588,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingSkipImmich => 'Skip for now';
+
+  @override
+  String get onboardingSkipSupabase => 'Use managed backend';
 
   @override
   String get onboardingTestAndContinue => 'Test connection and continue';
@@ -831,6 +872,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aiProvidersSubtitle => 'Configure AI for photo analysis';
 
   @override
+  String get subscription => 'Subscription';
+
+  @override
+  String get subscriptionSubtitle => 'Managed Immich & AI';
+
+  @override
+  String get planBasic => 'Basic';
+
+  @override
+  String get planBasicPrice => '\$6/month';
+
+  @override
+  String get planPremium => 'Premium';
+
+  @override
+  String get planPremiumPrice => '\$13/month';
+
+  @override
+  String get startTrial7Days => '7 days free';
+
+  @override
+  String get subscriptionSuccess => 'Trial started';
+
+  @override
+  String get subscriptionCancel => 'Subscription canceled';
+
+  @override
+  String get premiumRequiredForAi => 'Premium subscription required for AI';
+
+  @override
+  String get sessionExpiredSignInAgain =>
+      'Session expired. Please sign out and sign in again.';
+
+  @override
+  String get sessionExpiredCheckProject =>
+      'Session invalid. Sign out, then sign in again. If it persists, in Settings use the same Supabase project where Edge Functions are deployed.';
+
+  @override
   String get changeSupabase => 'Change Supabase';
 
   @override
@@ -888,6 +967,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get customAiBaseUrlHint => 'http://144.91.127.194';
+
+  @override
+  String get aiGatewayToken => 'AI Gateway Token';
+
+  @override
+  String get aiGatewayTokenSubtitle => 'Usage stats for AI requests';
+
+  @override
+  String get createGatewayToken => 'Create token';
+
+  @override
+  String get createGatewayTokenHint =>
+      'Save this token securely. It will not be shown again.';
+
+  @override
+  String get aiGatewayUsage => 'Usage';
+
+  @override
+  String get aiGatewayUsageSubtitle => 'Tokens used for AI requests';
+
+  @override
+  String aiGatewayUsageStats(String input, String output, String total) {
+    return 'Input: $input | Output: $output | Total: $total';
+  }
 
   @override
   String get apiKeys => 'API Keys';

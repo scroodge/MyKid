@@ -17,8 +17,6 @@ Future<({DateTime? date, String? location})> readPhotoMetadataFromBytes(Uint8Lis
 
 /// Read date and location from image file (EXIF). Returns (date, location string or null).
 Future<({DateTime? date, String? location})> readPhotoMetadata(String filePath) async {
-  DateTime? date;
-  String? location;
   try {
     final bytes = await File(filePath).readAsBytes();
     final data = await readExifFromBytes(bytes);

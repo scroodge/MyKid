@@ -994,6 +994,42 @@ abstract class AppLocalizations {
   /// **'Create your own Immich and Supabase'**
   String get onboardingNewAccountSubtitle;
 
+  /// No description provided for @onboardingHostingQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Will you set up your own hosting?'**
+  String get onboardingHostingQuestion;
+
+  /// No description provided for @onboardingHostingQuestionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose whether to configure your own servers or use our managed backend'**
+  String get onboardingHostingQuestionSubtitle;
+
+  /// No description provided for @onboardingHostingYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, I\'ll set it up'**
+  String get onboardingHostingYes;
+
+  /// No description provided for @onboardingHostingYesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ll configure Immich and Supabase myself'**
+  String get onboardingHostingYesSubtitle;
+
+  /// No description provided for @onboardingHostingNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No, use managed backend'**
+  String get onboardingHostingNo;
+
+  /// No description provided for @onboardingHostingNoSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use our paid managed service'**
+  String get onboardingHostingNoSubtitle;
+
   /// No description provided for @onboardingExistingAccount.
   ///
   /// In en, this message translates to:
@@ -1066,6 +1102,36 @@ abstract class AppLocalizations {
   /// **'Supabase'**
   String get onboardingSupabaseTitle;
 
+  /// No description provided for @onboardingSupabaseQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you have your own Supabase project?'**
+  String get onboardingSupabaseQuestion;
+
+  /// No description provided for @onboardingSupabaseManaged.
+  ///
+  /// In en, this message translates to:
+  /// **'Use managed backend'**
+  String get onboardingSupabaseManaged;
+
+  /// No description provided for @onboardingSupabaseManagedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll handle everything for you'**
+  String get onboardingSupabaseManagedSubtitle;
+
+  /// No description provided for @onboardingSupabaseSelfHosted.
+  ///
+  /// In en, this message translates to:
+  /// **'Use my own Supabase'**
+  String get onboardingSupabaseSelfHosted;
+
+  /// No description provided for @onboardingSupabaseSelfHostedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ll provide URL and anon key'**
+  String get onboardingSupabaseSelfHostedSubtitle;
+
   /// No description provided for @onboardingSupabaseDescription.
   ///
   /// In en, this message translates to:
@@ -1095,6 +1161,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Skip for now'**
   String get onboardingSkipImmich;
+
+  /// No description provided for @onboardingSkipSupabase.
+  ///
+  /// In en, this message translates to:
+  /// **'Use managed backend'**
+  String get onboardingSkipSupabase;
 
   /// No description provided for @onboardingTestAndContinue.
   ///
@@ -1600,6 +1672,78 @@ abstract class AppLocalizations {
   /// **'Configure AI for photo analysis'**
   String get aiProvidersSubtitle;
 
+  /// No description provided for @subscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription'**
+  String get subscription;
+
+  /// No description provided for @subscriptionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Managed Immich & AI'**
+  String get subscriptionSubtitle;
+
+  /// No description provided for @planBasic.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic'**
+  String get planBasic;
+
+  /// No description provided for @planBasicPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'\$6/month'**
+  String get planBasicPrice;
+
+  /// No description provided for @planPremium.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium'**
+  String get planPremium;
+
+  /// No description provided for @planPremiumPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'\$13/month'**
+  String get planPremiumPrice;
+
+  /// No description provided for @startTrial7Days.
+  ///
+  /// In en, this message translates to:
+  /// **'7 days free'**
+  String get startTrial7Days;
+
+  /// No description provided for @subscriptionSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial started'**
+  String get subscriptionSuccess;
+
+  /// No description provided for @subscriptionCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription canceled'**
+  String get subscriptionCancel;
+
+  /// No description provided for @premiumRequiredForAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium subscription required for AI'**
+  String get premiumRequiredForAi;
+
+  /// No description provided for @sessionExpiredSignInAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired. Please sign out and sign in again.'**
+  String get sessionExpiredSignInAgain;
+
+  /// No description provided for @sessionExpiredCheckProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Session invalid. Sign out, then sign in again. If it persists, in Settings use the same Supabase project where Edge Functions are deployed.'**
+  String get sessionExpiredCheckProject;
+
   /// No description provided for @changeSupabase.
   ///
   /// In en, this message translates to:
@@ -1713,6 +1857,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'http://144.91.127.194'**
   String get customAiBaseUrlHint;
+
+  /// No description provided for @aiGatewayToken.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Gateway Token'**
+  String get aiGatewayToken;
+
+  /// No description provided for @aiGatewayTokenSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage stats for AI requests'**
+  String get aiGatewayTokenSubtitle;
+
+  /// No description provided for @createGatewayToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Create token'**
+  String get createGatewayToken;
+
+  /// No description provided for @createGatewayTokenHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Save this token securely. It will not be shown again.'**
+  String get createGatewayTokenHint;
+
+  /// No description provided for @aiGatewayUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage'**
+  String get aiGatewayUsage;
+
+  /// No description provided for @aiGatewayUsageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokens used for AI requests'**
+  String get aiGatewayUsageSubtitle;
+
+  /// No description provided for @aiGatewayUsageStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Input: {input} | Output: {output} | Total: {total}'**
+  String aiGatewayUsageStats(String input, String output, String total);
 
   /// No description provided for @apiKeys.
   ///

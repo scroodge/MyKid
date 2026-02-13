@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Household invite model.
@@ -60,7 +61,7 @@ class HouseholdInviteRepository {
       'email': email.trim().toLowerCase(),
       'invited_by': uid,
     }).select().single();
-    final invite = HouseholdInvite.fromJson(res as Map<String, dynamic>);
+    final invite = HouseholdInvite.fromJson(res);
     
     // Send email via Edge Function if requested
     if (sendEmail) {
@@ -68,7 +69,7 @@ class HouseholdInviteRepository {
         // Ensure session is valid before calling Edge Function
         final session = _client.auth.currentSession;
         if (session == null) {
-          print('No active session, skipping email send');
+          debugPrint('No active session, skipping email send');
         } else {
           final inviteCode = invite.token.substring(0, 8).toUpperCase();
           
@@ -89,18 +90,18 @@ class HouseholdInviteRepository {
             if (response.data != null) {
               final data = response.data as Map<String, dynamic>?;
               if (data?['success'] == false) {
-                print('Email service not configured or failed: ${data?['message']}');
+                debugPrint('Email service not configured or failed: ${data?['message']}');
               }
             }
           } catch (e) {
             // Email sending failed, but invite was created - log error but don't fail
-            print('Failed to send invite email: $e');
+            debugPrint('Failed to send invite email: $e');
           }
         }
       } catch (e) {
         // Email sending failed, but invite was created - log error but don't fail
         // The invite is still valid and can be shared manually
-        print('Failed to send invite email: $e');
+        debugPrint('Failed to send invite email: $e');
       }
     }
     
@@ -115,7 +116,7 @@ class HouseholdInviteRepository {
         .eq('household_id', householdId)
         .order('created_at', ascending: false);
     return (res as List)
-        .map((e) => HouseholdInvite.fromJson(e as Map<String, dynamic>))
+        .map((e) => HouseholdInvite.fromJson(e))
         .toList();
   }
 
@@ -130,7 +131,7 @@ class HouseholdInviteRepository {
           .eq('token', cleanToken)
           .maybeSingle();
       if (res == null) return null;
-      return HouseholdInvite.fromJson(res as Map<String, dynamic>);
+      return HouseholdInvite.fromJson(res);
     } catch (e) {
       return null;
     }
@@ -189,7 +190,7 @@ class HouseholdInviteRepository {
   Future<({bool success, String? error, String? householdId})> acceptInvite(String token) async {
     try {
       final res = await _client.rpc('accept_household_invite', params: {'p_token': token});
-      final map = res as Map<String, dynamic>;
+      final map = res;
       final success = map['success'] as bool? ?? false;
       if (success) {
         return (success: true, error: null, householdId: map['household_id'] as String?);

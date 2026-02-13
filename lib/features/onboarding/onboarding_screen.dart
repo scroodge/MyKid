@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/config.dart';
 import '../../core/immich_client.dart';
 import '../../core/immich_storage.dart';
 import '../../core/supabase_storage.dart';
@@ -20,12 +21,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int _step = 0;
   // 0 = new account, 1 = family, 2 = existing account (sign in)
   int _accountType = 0;
+  bool? _willSetupHosting; // null = not chosen, true = self-hosted, false = managed
 
   // Immich
   final _immichUrlController = TextEditingController();
   final _immichApiKeyController = TextEditingController();
 
   // Supabase
+  bool? _supabaseHostingChoice; // null = not chosen, true = self-hosted, false = managed
   final _supabaseUrlController = TextEditingController();
   final _supabaseAnonKeyController = TextEditingController();
   bool _supabaseSchemaOk = false; // true if journal_entries table exists
@@ -65,11 +68,36 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _prevStep() {
     setState(() {
+      // Special handling for managed backend - go back to hosting choice
+      if (_accountType == 0 && _willSetupHosting == false && _step == 5) {
+        _step = 1;
+        _willSetupHosting = null;
+        _error = null;
+        return;
+      }
       _step = (_step - 1).clamp(0, 10);
       _error = null;
-      if (_step < 2) {
-        _supabaseSchemaOk = false;
-        _showSupabaseMigrationHelp = false;
+      // Reset Supabase state when going back from input step
+      if (_accountType == 2) {
+        // Existing account: reset if going back from step 2 (input) to step 1 (choice)
+        if (_step == 1) {
+          _supabaseSchemaOk = false;
+          _showSupabaseMigrationHelp = false;
+          _supabaseHostingChoice = null;
+        }
+      } else {
+        // New account: reset hosting choice if going back to step 1
+        if (_step == 1) {
+          _willSetupHosting = null;
+          _supabaseSchemaOk = false;
+          _showSupabaseMigrationHelp = false;
+          _supabaseHostingChoice = null;
+        } else if (_step == 3) {
+          // Reset Supabase choice if going back from step 4 (input) to step 3 (choice)
+          _supabaseSchemaOk = false;
+          _showSupabaseMigrationHelp = false;
+          _supabaseHostingChoice = null;
+        }
       }
     });
   }
@@ -108,6 +136,76 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _skipImmichAndContinue() async {
+    _nextStep();
+  }
+
+  Future<void> _useManagedBackend() async {
+    // Use managed backend (default values) - skip all setup
+    setState(() {
+      _loading = true;
+      _error = null;
+      _willSetupHosting = false;
+    });
+    try {
+      final url = AppConfig.defaultSupabaseUrl;
+      final key = AppConfig.defaultSupabaseAnonKey;
+      await _supabaseStorage.setUrl(url);
+      await _supabaseStorage.setAnonKey(key);
+      await Supabase.initialize(url: url, anonKey: key);
+      if (mounted) {
+        // Skip to sign up step
+        setState(() {
+          _step = 5;
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _loading = false;
+        });
+      }
+    }
+  }
+
+  void _chooseSelfHosting() {
+    setState(() {
+      _willSetupHosting = true;
+    });
+    _nextStep();
+  }
+
+  Future<void> _useManagedSupabase() async {
+    // Use managed backend (default values)
+    setState(() {
+      _loading = true;
+      _error = null;
+      _supabaseHostingChoice = false;
+    });
+    try {
+      final url = AppConfig.defaultSupabaseUrl;
+      final key = AppConfig.defaultSupabaseAnonKey;
+      await _supabaseStorage.setUrl(url);
+      await _supabaseStorage.setAnonKey(key);
+      await Supabase.initialize(url: url, anonKey: key);
+      if (mounted) {
+        if (_accountType == 2) {
+          Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
+        } else {
+          _nextStep();
+        }
+      }
+    } catch (e) {
+      if (mounted) setState(() => _error = e.toString());
+    }
+    if (mounted) setState(() => _loading = false);
+  }
+
+  void _chooseSelfHostedSupabase() {
+    setState(() {
+      _supabaseHostingChoice = true;
+    });
     _nextStep();
   }
 
@@ -234,9 +332,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _loading = true);
     try {
+      // Use Edge Function for email confirmation redirect
+      // It will detect mobile device and redirect to deep link, or show instructions for desktop
+      final config = await AppConfig.load();
+      final redirectUrl = '${config.supabaseUrl}/functions/v1/auth-confirm';
+      
       await Supabase.instance.client.auth.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text,
+        emailRedirectTo: redirectUrl,
       );
       if (mounted) {
         final session = Supabase.instance.client.auth.currentSession;
@@ -288,12 +392,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (_step == 0) return _buildAccountTypeStep(l10n);
     if (_accountType == 1) return _buildFamilyComingSoon(l10n);
     if (_accountType == 2) {
-      // Existing account: Supabase only, then login
-      return _buildSupabaseStep(l10n);
+      // Existing account: Supabase choice, then input (if self-hosted), then login
+      if (_step == 1) return _buildSupabaseChoiceStep(l10n);
+      if (_step == 2 && _supabaseHostingChoice == true) return _buildSupabaseStep(l10n);
+      return _buildSupabaseChoiceStep(l10n);
     }
-    if (_step == 1) return _buildImmichStep(l10n);
-    if (_step == 2) return _buildSupabaseStep(l10n);
-    if (_step == 3) return _buildSignUpStep(l10n);
+    // New account flow
+    if (_step == 1) return _buildHostingChoiceStep(l10n);
+    if (_willSetupHosting == false) {
+      // Managed backend - skip to sign up
+      return _buildSignUpStep(l10n);
+    }
+    // Self-hosted flow
+    if (_step == 2) return _buildImmichStep(l10n);
+    if (_step == 3) return _buildSupabaseChoiceStep(l10n);
+    if (_step == 4 && _supabaseHostingChoice == true) return _buildSupabaseStep(l10n);
+    if (_step == 4 && _supabaseHostingChoice == false) return _buildSignUpStep(l10n);
+    if (_step == 5) return _buildSignUpStep(l10n);
     return _buildAccountTypeStep(l10n);
   }
 
@@ -334,6 +449,49 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           onPressed: () => _nextStep(),
           child: Text(l10n.onboardingContinue),
         ),
+      ],
+    );
+  }
+
+  Widget _buildHostingChoiceStep(AppLocalizations l10n) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.onboardingHostingQuestion,
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          l10n.onboardingHostingQuestionSubtitle,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+        ),
+        const SizedBox(height: 32),
+        _AccountTypeCard(
+          title: l10n.onboardingHostingYes,
+          subtitle: l10n.onboardingHostingYesSubtitle,
+          icon: Icons.settings,
+          selected: _willSetupHosting == true,
+          onTap: _loading ? null : _chooseSelfHosting,
+        ),
+        const SizedBox(height: 16),
+        _AccountTypeCard(
+          title: l10n.onboardingHostingNo,
+          subtitle: l10n.onboardingHostingNoSubtitle,
+          icon: Icons.cloud,
+          selected: _willSetupHosting == false,
+          onTap: _loading ? null : _useManagedBackend,
+        ),
+        if (_error != null) ...[
+          const SizedBox(height: 16),
+          Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+        ],
+        if (_loading) ...[
+          const SizedBox(height: 16),
+          const Center(child: CircularProgressIndicator()),
+        ],
       ],
     );
   }
@@ -420,6 +578,43 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           onPressed: _loading ? null : _skipImmichAndContinue,
           child: Text(l10n.onboardingSkipImmich),
         ),
+      ],
+    );
+  }
+
+  Widget _buildSupabaseChoiceStep(AppLocalizations l10n) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.onboardingSupabaseTitle,
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          l10n.onboardingSupabaseQuestion,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 32),
+        _AccountTypeCard(
+          title: l10n.onboardingSupabaseManaged,
+          subtitle: l10n.onboardingSupabaseManagedSubtitle,
+          icon: Icons.cloud,
+          selected: _supabaseHostingChoice == false,
+          onTap: _loading ? null : _useManagedSupabase,
+        ),
+        const SizedBox(height: 16),
+        _AccountTypeCard(
+          title: l10n.onboardingSupabaseSelfHosted,
+          subtitle: l10n.onboardingSupabaseSelfHostedSubtitle,
+          icon: Icons.storage,
+          selected: _supabaseHostingChoice == true,
+          onTap: _loading ? null : _chooseSelfHostedSupabase,
+        ),
+        if (_error != null) ...[
+          const SizedBox(height: 16),
+          Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+        ],
       ],
     );
   }
@@ -651,7 +846,7 @@ class _AccountTypeCard extends StatelessWidget {
   final String subtitle;
   final IconData icon;
   final bool selected;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {

@@ -11,7 +11,7 @@ import '../../data/household_repository.dart';
 import '../../l10n/app_localizations.dart';
 
 /// Opens URL: in-app WebView for http/https (Privacy, Terms), external for mailto etc.
-/// On Android 11+ canLaunchUrl may return false without <queries> in manifest; we try launchUrl anyway.
+/// On Android 11+ canLaunchUrl may return false without `<queries>` in manifest; we try launchUrl anyway.
 Future<bool> _openUrl(String url, {bool inApp = false}) async {
   final uri = Uri.tryParse(url);
   if (uri == null) return false;
@@ -229,6 +229,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Column(
               children: [
                 ListTile(
+                  leading: Icon(Icons.card_membership_outlined, color: Theme.of(context).colorScheme.secondary),
+                  title: Text(AppLocalizations.of(context)!.subscription),
+                  subtitle: Text(AppLocalizations.of(context)!.subscriptionSubtitle),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).pushNamed('/subscription'),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   leading: Icon(Icons.cloud_outlined, color: Theme.of(context).colorScheme.secondary),
                   title: Text(AppLocalizations.of(context)!.immich),
                   subtitle: Text(AppLocalizations.of(context)!.immichSubtitle),
@@ -242,6 +250,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   subtitle: Text(AppLocalizations.of(context)!.aiProvidersSubtitle),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => Navigator.of(context).pushNamed('/settings-ai-providers'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: Icon(Icons.token, color: Theme.of(context).colorScheme.secondary),
+                  title: Text(AppLocalizations.of(context)!.aiGatewayToken),
+                  subtitle: Text(AppLocalizations.of(context)!.aiGatewayTokenSubtitle),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).pushNamed('/settings-ai-gateway-token'),
                 ),
                 const Divider(height: 1),
                 ListTile(
@@ -268,7 +284,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     );
                     if (ok != true || !context.mounted) return;
-                    await SupabaseStorage().clear();
+                    await SupabaseStorage().clearForCustomBackend();
                     await Supabase.instance.client.auth.signOut();
                     if (context.mounted) {
                       SystemNavigator.pop();

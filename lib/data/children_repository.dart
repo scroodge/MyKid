@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'child.dart';
@@ -18,7 +19,7 @@ class ChildrenRepository {
         .from('children')
         .select()
         .order('name');
-    return (res as List).map((e) => Child.fromJson(e as Map<String, dynamic>)).toList();
+    return (res as List).map((e) => Child.fromJson(e)).toList();
   }
 
   Future<Child?> get(String id) async {
@@ -29,7 +30,7 @@ class ChildrenRepository {
         .eq('id', id)
         .maybeSingle();
     if (res == null) return null;
-    return Child.fromJson(res as Map<String, dynamic>);
+    return Child.fromJson(res);
   }
 
   Future<Child?> create({
@@ -49,13 +50,13 @@ class ChildrenRepository {
     };
     try {
       final res = await _client.from('children').insert(payload).select().single();
-      return Child.fromJson(res as Map<String, dynamic>);
+      return Child.fromJson(res);
     } catch (e) {
       // Log error for debugging
-      print('Error creating child: $e');
-      print('Payload: $payload');
-      print('User ID: $uid');
-      print('Household ID: $householdId');
+      debugPrint('Error creating child: $e');
+      debugPrint('Payload: $payload');
+      debugPrint('User ID: $uid');
+      debugPrint('Household ID: $householdId');
       rethrow;
     }
   }
@@ -69,7 +70,7 @@ class ChildrenRepository {
         .eq('user_id', uid)
         .limit(1)
         .maybeSingle();
-    final map = res as Map<String, dynamic>?;
+    final map = res;
     return map?['household_id'] as String?;
   }
 
@@ -103,7 +104,7 @@ class ChildrenRepository {
         .select()
         .maybeSingle();
     if (res == null) return null;
-    return Child.fromJson(res as Map<String, dynamic>);
+    return Child.fromJson(res);
   }
 
   Future<bool> delete(String id) async {

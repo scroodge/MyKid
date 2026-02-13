@@ -497,6 +497,26 @@ class AppLocalizationsRu extends AppLocalizations {
   String get onboardingNewAccountSubtitle => 'Создайте свой Immich и Supabase';
 
   @override
+  String get onboardingHostingQuestion => 'Будете настраивать свой хостинг?';
+
+  @override
+  String get onboardingHostingQuestionSubtitle =>
+      'Выберите, настраивать ли свои серверы или использовать наш managed backend';
+
+  @override
+  String get onboardingHostingYes => 'Да, буду настраивать';
+
+  @override
+  String get onboardingHostingYesSubtitle => 'Я сам настрою Immich и Supabase';
+
+  @override
+  String get onboardingHostingNo => 'Нет, использовать managed backend';
+
+  @override
+  String get onboardingHostingNoSubtitle =>
+      'Использовать наш платный managed сервис';
+
+  @override
   String get onboardingExistingAccount => 'У меня уже есть аккаунт';
 
   @override
@@ -538,6 +558,23 @@ class AppLocalizationsRu extends AppLocalizations {
   String get onboardingSupabaseTitle => 'Supabase';
 
   @override
+  String get onboardingSupabaseQuestion =>
+      'Есть ли у вас свой проект Supabase?';
+
+  @override
+  String get onboardingSupabaseManaged => 'Использовать managed backend';
+
+  @override
+  String get onboardingSupabaseManagedSubtitle => 'Мы всё настроим за вас';
+
+  @override
+  String get onboardingSupabaseSelfHosted => 'Использовать свой Supabase';
+
+  @override
+  String get onboardingSupabaseSelfHostedSubtitle =>
+      'Я предоставлю URL и anon key';
+
+  @override
   String get onboardingSupabaseDescription =>
       'Создайте проект на supabase.com, выполните миграции, затем скопируйте URL и anon key из Settings → API.';
 
@@ -552,6 +589,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboardingSkipImmich => 'Пропустить';
+
+  @override
+  String get onboardingSkipSupabase => 'Использовать managed backend';
 
   @override
   String get onboardingTestAndContinue => 'Проверить подключение и продолжить';
@@ -833,6 +873,44 @@ class AppLocalizationsRu extends AppLocalizations {
   String get aiProvidersSubtitle => 'Настроить AI для анализа фото';
 
   @override
+  String get subscription => 'Подписка';
+
+  @override
+  String get subscriptionSubtitle => 'Immich и AI без настроек';
+
+  @override
+  String get planBasic => 'Базовый';
+
+  @override
+  String get planBasicPrice => '\$6/мес';
+
+  @override
+  String get planPremium => 'Премиум';
+
+  @override
+  String get planPremiumPrice => '\$13/мес';
+
+  @override
+  String get startTrial7Days => '7 дней бесплатно';
+
+  @override
+  String get subscriptionSuccess => 'Триал активирован';
+
+  @override
+  String get subscriptionCancel => 'Подписка отменена';
+
+  @override
+  String get premiumRequiredForAi => 'Для AI нужна подписка Премиум';
+
+  @override
+  String get sessionExpiredSignInAgain =>
+      'Сессия истекла. Выйдите и войдите снова.';
+
+  @override
+  String get sessionExpiredCheckProject =>
+      'Сессия недействительна. Выйдите и войдите снова. Если не поможет — в Настройках укажите тот же проект Supabase, где задеплоены Edge Functions.';
+
+  @override
   String get changeSupabase => 'Изменить Supabase';
 
   @override
@@ -884,13 +962,37 @@ class AppLocalizationsRu extends AppLocalizations {
   String get customAi => 'Custom AI (API Gateway)';
 
   @override
-  String get customAiDescription => 'Your own API Gateway with X-Gateway-Token';
+  String get customAiDescription => 'Свой API Gateway с X-Gateway-Token';
 
   @override
-  String get customAiBaseUrl => 'Server URL';
+  String get customAiBaseUrl => 'URL сервера';
 
   @override
   String get customAiBaseUrlHint => 'http://144.91.127.194';
+
+  @override
+  String get aiGatewayToken => 'AI Gateway Токен';
+
+  @override
+  String get aiGatewayTokenSubtitle => 'Статистика использования AI';
+
+  @override
+  String get createGatewayToken => 'Создать токен';
+
+  @override
+  String get createGatewayTokenHint =>
+      'Сохраните этот токен. Он больше не будет показан.';
+
+  @override
+  String get aiGatewayUsage => 'Использование';
+
+  @override
+  String get aiGatewayUsageSubtitle => 'Токены использованы для AI запросов';
+
+  @override
+  String aiGatewayUsageStats(String input, String output, String total) {
+    return 'Вход: $input | Выход: $output | Всего: $total';
+  }
 
   @override
   String get apiKeys => 'API Ключи';

@@ -27,10 +27,12 @@ class _ChildrenListScreenState extends State<ChildrenListScreen> {
   Future<void> _load() async {
     setState(() => _loading = true);
     final list = await _repo.getAll();
-    if (mounted) setState(() {
-      _children = list;
-      _loading = false;
-    });
+    if (mounted) {
+      setState(() {
+        _children = list;
+        _loading = false;
+      });
+    }
   }
 
   Future<void> _openEdit([Child? child]) async {

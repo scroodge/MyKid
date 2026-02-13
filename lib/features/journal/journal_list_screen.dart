@@ -9,7 +9,6 @@ import '../../l10n/app_localizations.dart';
 import '../../data/journal_entry.dart';
 import '../../data/journal_repository.dart';
 import '../../data/local/journal_cache.dart';
-import '../import/batch_import_screen.dart';
 import 'journal_entry_screen.dart';
 
 class JournalListScreen extends StatefulWidget {
@@ -40,10 +39,12 @@ class _JournalListScreenState extends State<JournalListScreen> {
     try {
       final list = await _repo.getEntries(limit: 100);
       await JournalCache.putAll(list);
-      if (mounted) setState(() {
-        _entries = list;
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _entries = list;
+          _loading = false;
+        });
+      }
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -135,7 +136,7 @@ class _JournalListScreenState extends State<JournalListScreen> {
         date: DateTime.now(),
         assets: [],
         location: location,
-        initialPendingAttachments: [(bytes: bytes!, filename: filename)],
+        initialPendingAttachments: [(bytes: bytes, filename: filename)],
       );
       return;
     }
@@ -167,7 +168,7 @@ class _JournalListScreenState extends State<JournalListScreen> {
       date: date,
       assets: [],
       location: location,
-      initialPendingAttachments: [(bytes: bytes!, filename: filename)],
+      initialPendingAttachments: [(bytes: bytes, filename: filename)],
     );
   }
 

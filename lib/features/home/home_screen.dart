@@ -285,7 +285,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         date: DateTime.now(),
         assets: [],
         location: location,
-        initialPendingAttachments: [(bytes: bytes!, filename: filename)],
+        initialPendingAttachments: [(bytes: bytes, filename: filename)],
       );
       return;
     }
@@ -320,7 +320,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       date: date,
       assets: [],
       location: location,
-      initialPendingAttachments: [(bytes: bytes!, filename: filename)],
+      initialPendingAttachments: [(bytes: bytes, filename: filename)],
     );
   }
 

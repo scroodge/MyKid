@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/config.dart';
 import '../../core/immich_storage.dart';
 import '../../core/supabase_storage.dart';
 import '../../l10n/app_localizations.dart';
@@ -33,12 +34,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
       // Get invite token from route arguments
       final inviteToken = ModalRoute.of(context)?.settings.arguments as String?;
       
+      // Use Edge Function for email confirmation redirect
+      // It will detect mobile device and redirect to deep link, or show instructions for desktop
+      final config = await AppConfig.load();
+      var redirectUrl = '${config.supabaseUrl}/functions/v1/auth-confirm';
+      if (inviteToken != null) {
+        redirectUrl += '?invite_token=$inviteToken';
+      }
+      
       await Supabase.instance.client.auth.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text,
-        emailRedirectTo: inviteToken != null 
-            ? 'mykid://auth/confirm?invite_token=$inviteToken'
-            : 'mykid://auth/confirm',
+        emailRedirectTo: redirectUrl,
       );
       
       if (mounted) {

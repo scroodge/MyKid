@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'ai_provider_storage.dart';
 import 'on_device_image_labels.dart';
@@ -39,45 +40,55 @@ class AiVisionService {
   }
 
   /// Analyze image and generate description. Returns generated text or error message.
+  /// If no provider/key is configured, tries Premium managed AI (ai-proxy Edge Function).
   Future<({String? text, String? error})> analyzeImage(
     Uint8List imageBytes, {
     String? provider,
   }) async {
     // Determine which provider to use
     final selectedProvider = provider ?? await _storage.getSelectedProvider();
-    if (selectedProvider == null) {
-      return (text: null, error: 'No AI provider selected');
-    }
 
     // Get API key for selected provider
     String? apiKey;
-    switch (selectedProvider) {
-      case 'openai':
-        apiKey = await _storage.getOpenAiKey();
-        break;
-      case 'gemini':
-        apiKey = await _storage.getGeminiKey();
-        break;
-      case 'claude':
-        apiKey = await _storage.getClaudeKey();
-        break;
-      case 'deepseek':
-        apiKey = await _storage.getDeepSeekKey();
-        break;
-      case 'customai':
-        apiKey = await _storage.getCustomAiKey();
-        break;
-      default:
-        return (text: null, error: 'Unknown provider: $selectedProvider');
+    if (selectedProvider != null) {
+      switch (selectedProvider) {
+        case 'openai':
+          apiKey = await _storage.getOpenAiKey();
+          break;
+        case 'gemini':
+          apiKey = await _storage.getGeminiKey();
+          break;
+        case 'claude':
+          apiKey = await _storage.getClaudeKey();
+          break;
+        case 'deepseek':
+          apiKey = await _storage.getDeepSeekKey();
+          break;
+        case 'customai':
+          apiKey = await _storage.getCustomAiKey();
+          break;
+        default:
+          break;
+      }
     }
 
-    if (apiKey == null || apiKey.trim().isEmpty) {
+    final hasOwnKey = apiKey != null && apiKey.trim().isNotEmpty;
+    if (!hasOwnKey) {
+      final managed = await _callManagedAiProxy(imageBytes);
+      if (managed.text != null) return managed;
+      if (managed.error != null && !managed.error!.contains('Premium')) return managed;
+    }
+
+    if (selectedProvider == null) {
+      return (text: null, error: 'No AI provider selected');
+    }
+    if (!hasOwnKey) {
       return (text: null, error: 'API key not configured for $selectedProvider');
     }
 
     // Convert image to base64
     final base64Image = base64Encode(imageBytes);
-    
+
     // Call appropriate provider
     switch (selectedProvider) {
       case 'openai':
@@ -168,6 +179,56 @@ class AiVisionService {
       }
     } catch (e) {
       return (text: null, error: 'Failed to call OpenAI: $e');
+    }
+  }
+
+  /// Premium managed AI: calls ai-proxy Edge Function, which uses gateway (GATEWAY_URL + GATEWAY_TOKEN) on the server.
+  /// No user keys in the app; token usage goes through your gateway. Returns result or 403 if not Premium.
+  Future<({String? text, String? error})> _callManagedAiProxy(Uint8List imageBytes) async {
+    try {
+      final base64Image = base64Encode(imageBytes);
+      const prompt = 'This is a photo from a family journal app for documenting a child\'s life. As a parent, I want to create a warm, personal description of this moment for my child\'s memory book. Please describe what you see in the photo - what the child is doing, the setting, and any notable details. Write in Russian, keep it warm and positive, 2-3 sentences.';
+      final body = {
+        'model': 'gpt-4o',
+        'messages': [
+          {
+            'role': 'system',
+            'content': 'You are a helpful assistant that helps parents create journal entries for their children. You describe photos in a warm, positive, and age-appropriate manner.',
+          },
+          {
+            'role': 'user',
+            'content': [
+              {'type': 'text', 'text': prompt},
+              {
+                'type': 'image_url',
+                'image_url': {'url': 'data:image/jpeg;base64,$base64Image'},
+              },
+            ],
+          },
+        ],
+        'max_tokens': 300,
+      };
+      final res = await Supabase.instance.client.functions.invoke(
+        'ai-proxy',
+        body: body,
+      );
+      if (res.status != 200) {
+        final err = res.data?['error'] as String? ?? 'Managed AI failed';
+        return (text: null, error: err);
+      }
+      final data = res.data as Map<String, dynamic>?;
+      final choices = data?['choices'] as List?;
+      if (choices != null && choices.isNotEmpty) {
+        final choice = choices[0] as Map<String, dynamic>?;
+        final message = choice?['message'] as Map<String, dynamic>?;
+        final content = message?['content'] as String?;
+        if (content != null && content.trim().isNotEmpty) {
+          return (text: content.trim(), error: null);
+        }
+      }
+      return (text: null, error: 'Empty response from AI');
+    } catch (e) {
+      return (text: null, error: 'Managed AI: $e');
     }
   }
 

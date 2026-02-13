@@ -33,7 +33,7 @@ class JournalRepository {
     final res = await query
         .order('date', ascending: false)
         .range(offset, offset + limit - 1);
-    return (res as List).map((e) => JournalEntry.fromJson(e as Map<String, dynamic>)).toList();
+    return (res as List).map((e) => JournalEntry.fromJson(e)).toList();
   }
 
   Future<JournalEntry?> getEntry(String id) async {
@@ -44,7 +44,7 @@ class JournalRepository {
         .eq('id', id)
         .maybeSingle();
     if (res == null) return null;
-    return JournalEntry.fromJson(res as Map<String, dynamic>);
+    return JournalEntry.fromJson(res);
   }
 
   Future<JournalEntry?> createEntry({
@@ -65,7 +65,7 @@ class JournalRepository {
       if (location != null && location.isNotEmpty) 'location': location,
     };
     final res = await _client.from('journal_entries').insert(payload).select().single();
-    return JournalEntry.fromJson(res as Map<String, dynamic>);
+    return JournalEntry.fromJson(res);
   }
 
   Future<JournalEntry?> updateEntry(
@@ -92,7 +92,7 @@ class JournalRepository {
         .select()
         .maybeSingle();
     if (res == null) return null;
-    return JournalEntry.fromJson(res as Map<String, dynamic>);
+    return JournalEntry.fromJson(res);
   }
 
   Future<bool> deleteEntry(String id) async {
