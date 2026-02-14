@@ -16,13 +16,13 @@ void main() async {
   // Only initialize Supabase if we have valid credentials (user-stored or .env)
   final hasValidConfig =
       config.supabaseUrl.isNotEmpty &&
-      config.supabaseAnonKey.isNotEmpty &&
+      config.supabasePublishableKey.isNotEmpty &&
       !config.supabaseUrl.contains('your-project') &&
-      config.supabaseAnonKey != 'your-anon-key';
+      config.supabasePublishableKey != 'your-publishable-key';
   if (hasValidConfig) {
     await Supabase.initialize(
       url: config.supabaseUrl,
-      anonKey: config.supabaseAnonKey,
+      anonKey: config.supabasePublishableKey,
     );
   }
   runApp(MyKidApp(supabaseInitialized: hasValidConfig));

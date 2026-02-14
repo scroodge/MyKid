@@ -1039,7 +1039,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingExistingAccountSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Sign in with Supabase URL and anon key'**
+  /// **'Sign in with Supabase URL and publishable key'**
   String get onboardingExistingAccountSubtitle;
 
   /// No description provided for @onboardingFamily.
@@ -1129,13 +1129,13 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingSupabaseSelfHostedSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'I\'ll provide URL and anon key'**
+  /// **'I\'ll provide URL and publishable key'**
   String get onboardingSupabaseSelfHostedSubtitle;
 
   /// No description provided for @onboardingSupabaseDescription.
   ///
   /// In en, this message translates to:
-  /// **'Create a project at supabase.com, run migrations, then copy URL and anon key from Settings → API.'**
+  /// **'Create a project at supabase.com, run migrations, then copy URL and publishable key from Settings → API.'**
   String get onboardingSupabaseDescription;
 
   /// No description provided for @onboardingSupabaseUrlHint.
@@ -1144,11 +1144,11 @@ abstract class AppLocalizations {
   /// **'https://xxxx.supabase.co'**
   String get onboardingSupabaseUrlHint;
 
-  /// No description provided for @onboardingAnonKey.
+  /// No description provided for @onboardingPublishableKey.
   ///
   /// In en, this message translates to:
-  /// **'Anon key'**
-  String get onboardingAnonKey;
+  /// **'Publishable key'**
+  String get onboardingPublishableKey;
 
   /// No description provided for @onboardingContinue.
   ///

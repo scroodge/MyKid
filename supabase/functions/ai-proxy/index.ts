@@ -1,5 +1,5 @@
 // Edge Function: AI proxy for Premium subscribers. Verifies JWT and plan_id=premium, then forwards to your AI Gateway.
-// Requires: GATEWAY_URL, GATEWAY_TOKEN (or legacy OPENAI_API_KEY for direct OpenAI), SUPABASE_SERVICE_ROLE_KEY.
+// Requires: PUBLISHABLE_KEY (user verification), SUPABASE_SERVICE_ROLE_KEY (subscription/DB), and either GATEWAY_URL+GATEWAY_TOKEN or OPENAI_API_KEY.
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -23,12 +23,12 @@ serve(async (req) => {
       )
     }
 
+    const publishableKey = Deno.env.get('PUBLISHABLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      publishableKey,
       { global: { headers: { Authorization: authHeader } } }
     )
-
     const { data: { user }, error: userError } = await supabase.auth.getUser()
     if (userError || !user) {
       return new Response(

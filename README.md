@@ -161,7 +161,7 @@ RLS: users can access only their own rows.
 
 ### Environment
 
-- `SUPABASE_URL`, `SUPABASE_ANON_KEY` — from `.env` or `--dart-define-from-file=.env`.
+- `SUPABASE_URL`, `PUBLISHABLE_KEY` — from `.env` or `--dart-define-from-file=.env`.
 
 ---
 
@@ -176,16 +176,18 @@ RLS: users can access only their own rows.
 
 ### Environment
 
-Create a `.env` or use `--dart-define` so the app can reach Supabase. **Do not commit real keys.**
+Create a `.env` or use `--dart-define` (or `./run_with_env.sh`) so the app can reach Supabase. **Do not commit real keys.** If you see "Failed host lookup: 'your_project.supabase.co'", the app is using placeholder config — run with `./run_with_env.sh` or pass `SUPABASE_URL` and `PUBLISHABLE_KEY` via `--dart-define`.
 
 - `SUPABASE_URL` — your Supabase project URL (e.g. `https://xxxx.supabase.co`)
-- `SUPABASE_ANON_KEY` — Supabase anonymous (public) key
+- `PUBLISHABLE_KEY` — Supabase publishable key (safe for client when RLS is enabled).
 
-Example `.env.example`:
+The **Secret key** is for backend (Edge Functions, servers) only — do not use it in the app.
+
+Example `.env`:
 
 ```env
 SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_ANON_KEY=your-anon-key
+PUBLISHABLE_KEY=your-publishable-key
 ```
 
 The app also supports loading these from a config file or build-time defines; see `lib/core/config.dart`.
@@ -208,18 +210,22 @@ To use "Generate description" in journal entries, go to **Settings → AI provid
 
 ### Run
 
-Copy `.env.example` to `.env`, fill in your Supabase URL and anon key, then:
+Copy `.env.example` to `.env` (or create `.env`), fill in your Supabase URL and publishable key, then:
 
 ```bash
 flutter pub get
-flutter run --dart-define-from-file=.env
+./run_with_env.sh
 ```
+
+The script reads `SUPABASE_URL` and `PUBLISHABLE_KEY` from `.env` and passes them to `flutter run`. You can add device flags: `./run_with_env.sh -d macos`.
 
 Or pass defines explicitly:
 
 ```bash
-flutter run --dart-define=SUPABASE_URL=https://your-project.supabase.co --dart-define=SUPABASE_ANON_KEY=your-anon-key
+flutter run --dart-define=SUPABASE_URL=https://your-project.supabase.co --dart-define=PUBLISHABLE_KEY=your-publishable-key
 ```
+
+For `--dart-define-from-file` use a **JSON** file (e.g. `dart_defines.json` with `{"SUPABASE_URL":"https://...","PUBLISHABLE_KEY":"..."}`), not a `.env` file.
 
 (Use an Android device/emulator first; iOS requires a Mac and proper signing. If the `ios/` folder is incomplete, run `flutter create .` to regenerate platform files; camera/photo usage descriptions are already in `ios/Runner/Info.plist`.)
 
@@ -254,11 +260,13 @@ Or use `--dart-define=PRIVACY_POLICY_URL=...` etc. when building.
 
 ### Self-service account deletion
 
-The app calls the `delete-account` Edge Function, which removes the user and cascades to children, journal entries, household data. Deploy:
+The app calls the `delete-account` Edge Function, which removes the user and cascades to children, journal entries, household data. Deploy (this project uses Publishable/Secret keys — use `--no-verify-jwt`):
 
 ```bash
-supabase functions deploy delete-account
+supabase functions deploy delete-account --no-verify-jwt
 ```
+
+To deploy all Edge Functions: `supabase functions deploy --no-verify-jwt`. See [docs/edge-function-setup.md](docs/edge-function-setup.md).
 
 ### Open Source Licenses
 

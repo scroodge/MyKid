@@ -30,7 +30,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   // Supabase
   bool? _supabaseHostingChoice; // null = not chosen, true = self-hosted, false = managed
   final _supabaseUrlController = TextEditingController();
-  final _supabaseAnonKeyController = TextEditingController();
+  final _supabasePublishableKeyController = TextEditingController();
   bool _supabaseSchemaOk = false; // true if journal_entries table exists
   bool _showSupabaseMigrationHelp = false;
 
@@ -52,7 +52,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _immichUrlController.dispose();
     _immichApiKeyController.dispose();
     _supabaseUrlController.dispose();
-    _supabaseAnonKeyController.dispose();
+    _supabasePublishableKeyController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -148,9 +148,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     });
     try {
       final url = AppConfig.defaultSupabaseUrl;
-      final key = AppConfig.defaultSupabaseAnonKey;
+      final key = AppConfig.defaultSupabasePublishableKey;
       await _supabaseStorage.setUrl(url);
-      await _supabaseStorage.setAnonKey(key);
+      await _supabaseStorage.setPublishableKey(key);
       await Supabase.initialize(url: url, anonKey: key);
       if (mounted) {
         // Skip to sign up step
@@ -185,9 +185,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     });
     try {
       final url = AppConfig.defaultSupabaseUrl;
-      final key = AppConfig.defaultSupabaseAnonKey;
+      final key = AppConfig.defaultSupabasePublishableKey;
       await _supabaseStorage.setUrl(url);
-      await _supabaseStorage.setAnonKey(key);
+      await _supabaseStorage.setPublishableKey(key);
       await Supabase.initialize(url: url, anonKey: key);
       if (mounted) {
         if (_accountType == 2) {
@@ -211,7 +211,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _testSupabaseConnection() async {
     final url = _supabaseUrlController.text.trim();
-    final key = _supabaseAnonKeyController.text.trim();
+    final key = _supabasePublishableKeyController.text.trim();
     if (url.isEmpty || key.isEmpty) {
       setState(() => _error = AppLocalizations.of(context)!.enterUrlAndKey);
       return;
@@ -297,7 +297,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _saveSupabaseAndContinue() async {
     final url = _supabaseUrlController.text.trim();
-    final key = _supabaseAnonKeyController.text.trim();
+    final key = _supabasePublishableKeyController.text.trim();
     if (url.isEmpty || key.isEmpty) {
       setState(() => _error = AppLocalizations.of(context)!.enterUrlAndKey);
       return;
@@ -312,7 +312,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     });
     try {
       await _supabaseStorage.setUrl(url);
-      await _supabaseStorage.setAnonKey(key);
+      await _supabaseStorage.setPublishableKey(key);
       await Supabase.initialize(url: url, anonKey: key);
       if (mounted) {
         if (_accountType == 2) {
@@ -647,9 +647,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ),
         const SizedBox(height: 16),
         TextField(
-          controller: _supabaseAnonKeyController,
+          controller: _supabasePublishableKeyController,
           decoration: InputDecoration(
-            labelText: l10n.onboardingAnonKey,
+            labelText: l10n.onboardingPublishableKey,
             border: const OutlineInputBorder(),
           ),
           obscureText: true,

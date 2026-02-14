@@ -12,8 +12,9 @@ Self-service account deletion. The authenticated user can delete their own accou
 ## Deploy
 
 ```bash
-supabase functions deploy delete-account
+supabase functions deploy delete-account --no-verify-jwt
 ```
+(This project uses Publishable/Secret keys.)
 
 ## No secrets required
 

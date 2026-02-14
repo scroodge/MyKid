@@ -19,9 +19,9 @@ Optional paid plans: **Basic** (10 GB Immich, no AI) and **Premium** (20 GB Immi
    - `APP_URL` — Stripe Checkout redirect. Use **`mykid://`** (deeplink) so success/cancel open the app; or `https://mykid.app` for a web page.
 
 3. **Deploy functions**  
-   `supabase functions deploy create-checkout`  
-   `supabase functions deploy stripe-webhook`  
-   `supabase functions deploy ai-proxy`
+   Deploy all with **`--no-verify-jwt`** (project uses Publishable/Secret keys):
+   `supabase functions deploy --no-verify-jwt`
+   Or per function: `supabase functions deploy create-checkout --no-verify-jwt`, etc.
 
 ## Stripe
 
@@ -46,7 +46,7 @@ Optional paid plans: **Basic** (10 GB Immich, no AI) and **Premium** (20 GB Immi
 1. **Supabase**
    - Применить все три миграции (`supabase db push` или SQL Editor).
    - В Edge Functions → Secrets задать: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_BASIC`, `STRIPE_PRICE_PREMIUM`, `IMMICH_SERVER_URL`, `IMMICH_ADMIN_API_KEY`, `GATEWAY_URL`, `GATEWAY_TOKEN`, `APP_URL` (для деплинка — `mykid://`).
-   - Задеплоить: `create-checkout`, `stripe-webhook`, `ai-proxy`.
+   - Задеплоить с `--no-verify-jwt`: `supabase functions deploy --no-verify-jwt` (или по одной функции).
 
 2. **Stripe (Test mode)**
    - Два продукта с ежемесячными ценами (Basic, Premium).

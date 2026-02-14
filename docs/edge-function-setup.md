@@ -57,10 +57,11 @@ The `send-invite-email` Edge Function automatically sends email invitations when
    - Change `'MyKid <invites@mykid.app>'` to your verified domain
    - Or use Resend's test domain: `'onboarding@resend.dev'` (for testing)
 
-5. **Deploy Function**:
+5. **Deploy Function** (this project uses Publishable/Secret keys — always use `--no-verify-jwt`):
    ```bash
-   supabase functions deploy send-invite-email
+   supabase functions deploy send-invite-email --no-verify-jwt
    ```
+   To deploy all Edge Functions at once: `supabase functions deploy --no-verify-jwt`
 
 ### Option 2: Using Supabase SMTP
 
@@ -84,12 +85,26 @@ supabase functions invoke send-invite-email \
 
 Or test from the app: create an invite and check if email is sent.
 
+## Deploy with Publishable/Secret keys (required in this project)
+
+This project uses **Publishable** and **Secret** API keys. You **must** deploy every Edge Function with **`--no-verify-jwt`**, otherwise the gateway returns 401 Invalid JWT. Verification is done inside each function via `supabase.auth.getUser()`. See [Supabase: API keys](https://supabase.com/docs/guides/api/api-keys).
+
+**Always use:**
+```bash
+# Deploy all functions (recommended):
+supabase functions deploy --no-verify-jwt
+
+# Or deploy one function:
+supabase functions deploy <function-name> --no-verify-jwt
+```
+
 ## Environment Variables
 
 - `RESEND_API_KEY` - Required if using Resend
 - `APP_URL` - Optional, for web invite links (defaults to `https://mykid.app`)
 - `SUPABASE_URL` - Automatically set by Supabase
-- `SUPABASE_ANON_KEY` - Automatically set by Supabase
+- `PUBLISHABLE_KEY` - Set in Edge Function secrets (publishable key; used for user verification in functions)
+- `SUPABASE_SERVICE_ROLE_KEY` - Secret key for privileged server-side access (DB, admin). Use only in Edge Functions/servers, never in the app.
 
 ## Email Template
 

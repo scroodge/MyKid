@@ -1,0 +1,22 @@
+---
+description: Supabase Edge Functions deploy — always use --no-verify-jwt in this project
+globs: supabase/functions/**/*.ts, **/edge-function*.md, **/subscription.md
+---
+
+# Supabase Edge Functions (MyKidApp)
+
+This project uses **Publishable** and **Secret** API keys (not legacy JWT anon/service_role). The Edge Functions gateway does not verify user JWTs when using these keys.
+
+- **Always deploy with `--no-verify-jwt`**, or the gateway returns 401 Invalid JWT and requests never reach the function.
+- Verification is done inside each function via `supabase.auth.getUser()`.
+
+**Commands:**
+```bash
+# Deploy all functions
+supabase functions deploy --no-verify-jwt
+
+# Deploy one function
+supabase functions deploy <name> --no-verify-jwt
+```
+
+When adding new Edge Functions or updating docs that mention deploy, include `--no-verify-jwt` in the deploy command. Reference: [Supabase API keys](https://supabase.com/docs/guides/api/api-keys), [docs/edge-function-setup.md](docs/edge-function-setup.md).

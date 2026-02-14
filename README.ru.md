@@ -125,13 +125,15 @@ RLS: пользователи видят только свои данные.
 Создайте `.env` или используйте `--dart-define`. **Не коммитьте реальные ключи.**
 
 - `SUPABASE_URL` — URL вашего проекта Supabase
-- `SUPABASE_ANON_KEY` — анонимный ключ Supabase
+- `PUBLISHABLE_KEY` — publishable-ключ Supabase (безопасен в клиенте при включённом RLS).
 
-Пример `.env.example`:
+**Secret key** только для бэкенда (Edge Functions, серверов) — не используйте его в приложении.
+
+Пример `.env`:
 
 ```env
 SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_ANON_KEY=your-anon-key
+PUBLISHABLE_KEY=your-publishable-key
 ```
 
 ### Backend (Supabase)
@@ -183,11 +185,13 @@ SUPPORT_URL=mailto:scroodgemac@gmail.com
 
 ### Удаление аккаунта
 
-Приложение вызывает Edge Function `delete-account`. Деплой:
+Приложение вызывает Edge Function `delete-account`. Деплой (проект использует Publishable/Secret — всегда `--no-verify-jwt`):
 
 ```bash
-supabase functions deploy delete-account
+supabase functions deploy delete-account --no-verify-jwt
 ```
+
+Все функции: `supabase functions deploy --no-verify-jwt`. См. [docs/edge-function-setup.md](docs/edge-function-setup.md).
 
 ### Лицензии Open Source
 

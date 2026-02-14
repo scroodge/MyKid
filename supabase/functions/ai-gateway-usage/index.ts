@@ -16,16 +16,17 @@ serve(async (req) => {
 
   try {
     const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
+    if (!authHeader?.startsWith('Bearer ')) {
       return new Response(
         JSON.stringify({ error: 'Missing authorization header' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
+    const publishableKey = Deno.env.get('PUBLISHABLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      publishableKey,
       { global: { headers: { Authorization: authHeader } } }
     )
 
@@ -42,7 +43,7 @@ serve(async (req) => {
     if (!breakdown) {
       try {
         const body = await req.json().catch(() => ({}))
-        breakdown = body?.breakdown === true
+        breakdown = (body as { breakdown?: boolean })?.breakdown === true
       } catch {
         // ignore
       }

@@ -33,9 +33,9 @@ This Edge Function sends email invitations when a household invite is created.
    supabase secrets set APP_URL=https://your-app-domain.com
    ```
 
-5. **Deploy the function**:
+5. **Deploy the function** (use `--no-verify-jwt`; project uses Publishable/Secret keys):
    ```bash
-   supabase functions deploy send-invite-email
+   supabase functions deploy send-invite-email --no-verify-jwt
    ```
 
 ## Usage

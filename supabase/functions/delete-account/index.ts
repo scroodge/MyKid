@@ -24,13 +24,12 @@ serve(async (req) => {
       )
     }
 
-    // Client with user's JWT to verify identity
+    const publishableKey = Deno.env.get('PUBLISHABLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     const supabaseUser = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      publishableKey,
       { global: { headers: { Authorization: authHeader } } }
     )
-
     const {
       data: { user },
       error: userError,

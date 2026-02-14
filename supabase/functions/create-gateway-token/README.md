@@ -20,5 +20,5 @@ Response:
 
 ## Env
 
-- `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` – set by Supabase
+- `SUPABASE_URL`, `PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY` – set by Supabase or in secrets. Publishable key is used for user verification; use `SUPABASE_SERVICE_ROLE_KEY` only for privileged server-side operations.
 - `REQUIRE_PREMIUM` (optional) – if `true`, only premium subscribers can create tokens

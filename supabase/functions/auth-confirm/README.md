@@ -14,8 +14,9 @@ Handles email confirmation redirect from Supabase. Detects mobile devices and re
 Deploy this function to Supabase:
 
 ```bash
-supabase functions deploy auth-confirm
+supabase functions deploy auth-confirm --no-verify-jwt
 ```
+(This project uses Publishable/Secret keys; see [Supabase API keys](https://supabase.com/docs/guides/api/api-keys).)
 
 ## Usage
 

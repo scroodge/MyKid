@@ -521,7 +521,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboardingExistingAccountSubtitle =>
-      'Войти с URL и anon key Supabase';
+      'Войти с URL и publishable key Supabase';
 
   @override
   String get onboardingFamily => 'Семья';
@@ -572,17 +572,17 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboardingSupabaseSelfHostedSubtitle =>
-      'Я предоставлю URL и anon key';
+      'Я предоставлю URL и publishable key';
 
   @override
   String get onboardingSupabaseDescription =>
-      'Создайте проект на supabase.com, выполните миграции, затем скопируйте URL и anon key из Settings → API.';
+      'Создайте проект на supabase.com, выполните миграции, затем скопируйте URL и publishable key из Settings → API.';
 
   @override
   String get onboardingSupabaseUrlHint => 'https://xxxx.supabase.co';
 
   @override
-  String get onboardingAnonKey => 'Anon key';
+  String get onboardingPublishableKey => 'Publishable key';
 
   @override
   String get onboardingContinue => 'Далее';

@@ -26,17 +26,12 @@ serve(async (req) => {
       )
     }
 
+    const publishableKey = Deno.env.get('PUBLISHABLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: authHeader },
-        },
-      }
+      publishableKey,
+      { global: { headers: { Authorization: authHeader } } }
     )
-
-    // Verify user is authenticated
     const {
       data: { user },
       error: userError,
