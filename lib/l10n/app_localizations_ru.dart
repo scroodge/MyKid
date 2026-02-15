@@ -705,47 +705,47 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get inviteOpenLinkHint =>
-      'Open the invite link you received in your email or message.';
+      'Откройте ссылку приглашения из письма или сообщения.';
 
   @override
-  String get orEnterCodeManually => 'Or enter code manually';
+  String get orEnterCodeManually => 'Или введите код вручную';
 
   @override
-  String get enterInviteCodeHint => 'Enter 8-character code';
+  String get enterInviteCodeHint => 'Введите код из 8 символов';
 
   @override
-  String get searchByCode => 'Search by code';
+  String get searchByCode => 'Поиск по коду';
 
   @override
-  String get invitedBy => 'Invited by:';
+  String get invitedBy => 'Пригласил(а):';
 
   @override
   String get signInToAcceptInvite =>
-      'You need to sign in or create an account to accept this invitation.';
+      'Войдите или создайте аккаунт, чтобы принять приглашение.';
 
   @override
-  String get signUpToAccept => 'Sign up to accept';
+  String get signUpToAccept => 'Зарегистрироваться для принятия';
 
   @override
-  String get cancelInviteFailed => 'Failed to cancel invite';
+  String get cancelInviteFailed => 'Не удалось отменить приглашение';
 
   @override
-  String get expired => 'Expired';
+  String get expired => 'Истекло';
 
   @override
-  String get searching => 'Searching...';
+  String get searching => 'Поиск…';
 
   @override
   String get inviteAcceptedDataNotRefreshed =>
-      'Invite accepted, but data didn\'t refresh. Try restarting the app.';
+      'Приглашение принято, но данные не обновились. Попробуйте перезапустить приложение.';
 
   @override
   String get inviteAcceptErrorRetry =>
-      'Error accepting invite. Please try again or restart the app.';
+      'Ошибка при принятии приглашения. Попробуйте снова или перезапустите приложение.';
 
   @override
   String get inviteAcceptErrorRestart =>
-      'Error accepting invite. Please restart the app.';
+      'Ошибка при принятии приглашения. Перезапустите приложение.';
 
   @override
   String createHouseholdFailedWithReason(String message, String reason) {
@@ -753,10 +753,10 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get supportEmailCopied => 'Email copied to clipboard';
+  String get supportEmailCopied => 'Email скопирован в буфер';
 
   @override
-  String get noHouseholdIdReturned => 'No household ID returned';
+  String get noHouseholdIdReturned => 'Сервер не вернул ID семьи';
 
   @override
   String get inviteAccepted => 'Вы присоединились к семье';
@@ -839,11 +839,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get licenses => 'Лицензии открытого ПО';
 
   @override
-  String get requestAccountDeletionInstructions => 'Request account deletion';
+  String get requestAccountDeletionInstructions =>
+      'Запросить удаление аккаунта';
 
   @override
   String get requestAccountDeletionInstructionsSubtitle =>
-      'Instructions and data deletion details';
+      'Инструкция и сведения об удалении данных';
 
   @override
   String get deleteAccount => 'Удалить аккаунт';
@@ -865,6 +866,20 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get exportMyDataSubtitle => 'Запросить копию данных (GDPR)';
+
+  @override
+  String get clearLocalData => 'Очистить локальные данные';
+
+  @override
+  String get clearLocalDataSubtitle =>
+      'Удалить настройки Immich и AI с этого устройства';
+
+  @override
+  String get clearLocalDataConfirm =>
+      'Будут удалены URL и ключ Immich, а также все ключи AI-провайдеров с этого устройства. Вы остаётесь в аккаунте. Чтобы снова добавлять записи с фото или использовать AI, настройте Immich и AI в Настройках или активируйте подписку.';
+
+  @override
+  String get clearLocalDataDone => 'Локальные данные очищены';
 
   @override
   String get exportPreparing => 'Подготовка экспорта...';

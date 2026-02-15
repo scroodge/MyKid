@@ -1660,6 +1660,30 @@ abstract class AppLocalizations {
   /// **'Request a copy of your data (GDPR)'**
   String get exportMyDataSubtitle;
 
+  /// No description provided for @clearLocalData.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear local data'**
+  String get clearLocalData;
+
+  /// No description provided for @clearLocalDataSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Immich and AI provider settings from this device'**
+  String get clearLocalDataSubtitle;
+
+  /// No description provided for @clearLocalDataConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'This will clear Immich server URL, API key, and all AI provider keys stored on this device. You stay signed in. To add entries with photos or use AI again, you will need to configure Immich and AI in Settings or activate a subscription.'**
+  String get clearLocalDataConfirm;
+
+  /// No description provided for @clearLocalDataDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Local data cleared'**
+  String get clearLocalDataDone;
+
   /// No description provided for @exportPreparing.
   ///
   /// In en, this message translates to:

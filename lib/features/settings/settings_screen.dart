@@ -5,6 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 
+import '../../core/ai_provider_storage.dart';
+import '../../core/immich_storage.dart';
 import '../../core/legal_urls.dart';
 import '../../core/mykid_api_service.dart';
 import '../../core/supabase_storage.dart';
@@ -438,6 +440,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           );
                         }
                       }
+                    }
+                  },
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: Icon(Icons.delete_sweep_outlined, color: Theme.of(context).colorScheme.secondary),
+                  title: Text(AppLocalizations.of(context)!.clearLocalData),
+                  subtitle: Text(AppLocalizations.of(context)!.clearLocalDataSubtitle),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () async {
+                    final l10n = AppLocalizations.of(context)!;
+                    final ok = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text(l10n.clearLocalData),
+                        content: Text(l10n.clearLocalDataConfirm),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: Text(l10n.cancel),
+                          ),
+                          FilledButton(
+                            onPressed: () => Navigator.pop(ctx, true),
+                            child: Text(l10n.clearLocalData),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (ok != true || !context.mounted) return;
+                    await ImmichStorage().clear();
+                    await AiProviderStorage().clear();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.clearLocalDataDone)),
+                      );
                     }
                   },
                 ),

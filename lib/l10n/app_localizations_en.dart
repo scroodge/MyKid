@@ -866,6 +866,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exportMyDataSubtitle => 'Request a copy of your data (GDPR)';
 
   @override
+  String get clearLocalData => 'Clear local data';
+
+  @override
+  String get clearLocalDataSubtitle =>
+      'Remove Immich and AI provider settings from this device';
+
+  @override
+  String get clearLocalDataConfirm =>
+      'This will clear Immich server URL, API key, and all AI provider keys stored on this device. You stay signed in. To add entries with photos or use AI again, you will need to configure Immich and AI in Settings or activate a subscription.';
+
+  @override
+  String get clearLocalDataDone => 'Local data cleared';
+
+  @override
   String get exportPreparing => 'Preparing export...';
 
   @override
