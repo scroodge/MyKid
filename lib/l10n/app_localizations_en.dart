@@ -866,6 +866,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exportMyDataSubtitle => 'Request a copy of your data (GDPR)';
 
   @override
+  String get exportPreparing => 'Preparing export...';
+
+  @override
+  String get exportSuccess => 'Export ready';
+
+  @override
+  String get exportError => 'Export failed';
+
+  @override
+  String get exportLinkSent => 'Download link has been sent to your email';
+
+  @override
+  String get deleteAccountHintExport =>
+      'All data will be permanently deleted. We recommend downloading your data first.';
+
+  @override
+  String get deleteAccountDataLostWarning =>
+      'Data cannot be recovered after deletion.';
+
+  @override
   String get aiProviders => 'AI Providers';
 
   @override

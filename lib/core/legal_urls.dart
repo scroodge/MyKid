@@ -49,4 +49,11 @@ class LegalUrls {
         'SPONSOR_URL',
         defaultValue: 'https://github.com/sponsors/scroodge',
       );
+
+  /// MyKid API (AI Gateway) base URL for export and delete-account. Empty = use Edge Function fallback.
+  static String get mykidApiUrl =>
+      const String.fromEnvironment(
+        'MYKID_API_URL',
+        defaultValue: '',
+      );
 }

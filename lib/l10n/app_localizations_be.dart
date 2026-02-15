@@ -865,6 +865,27 @@ class AppLocalizationsBe extends AppLocalizations {
   String get exportMyDataSubtitle => 'Запытаць копію даных (GDPR)';
 
   @override
+  String get exportPreparing => 'Падрыхтоўка экспарту...';
+
+  @override
+  String get exportSuccess => 'Экспарт гатовы';
+
+  @override
+  String get exportError => 'Памылка экспарту';
+
+  @override
+  String get exportLinkSent =>
+      'Спасылка на спампаванне адпраўлена на вашу пошту';
+
+  @override
+  String get deleteAccountHintExport =>
+      'Усе даныя будуць выдалены беззваротна. Рэкамендуем спачатку спампаваць свае даныя.';
+
+  @override
+  String get deleteAccountDataLostWarning =>
+      'Пасля выдалення даныя аднавіць немагчыма.';
+
+  @override
   String get aiProviders => 'AI Правайдэры';
 
   @override

@@ -867,6 +867,26 @@ class AppLocalizationsRu extends AppLocalizations {
   String get exportMyDataSubtitle => 'Запросить копию данных (GDPR)';
 
   @override
+  String get exportPreparing => 'Подготовка экспорта...';
+
+  @override
+  String get exportSuccess => 'Экспорт готов';
+
+  @override
+  String get exportError => 'Ошибка экспорта';
+
+  @override
+  String get exportLinkSent => 'Ссылка на скачивание отправлена на вашу почту';
+
+  @override
+  String get deleteAccountHintExport =>
+      'Все данные будут удалены безвозвратно. Рекомендуем сначала скачать свои данные.';
+
+  @override
+  String get deleteAccountDataLostWarning =>
+      'После удаления данные восстановить нельзя.';
+
+  @override
   String get aiProviders => 'AI Провайдеры';
 
   @override

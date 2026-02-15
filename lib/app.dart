@@ -19,6 +19,7 @@ import 'features/settings/immich_settings_screen.dart';
 import 'features/settings/profile_screen.dart';
 import 'features/settings/licenses_screen.dart';
 import 'features/settings/settings_screen.dart';
+import 'features/settings/export_data_screen.dart';
 import 'features/settings/subscription_screen.dart';
 import 'features/settings/subscription_success_screen.dart';
 import 'l10n/app_localizations.dart';
@@ -186,6 +187,7 @@ class _MyKidAppState extends State<MyKidApp> {
             '/settings-immich': (context) => const ImmichSettingsScreen(),
             '/settings-ai-providers': (context) => const AiProviderSettingsScreen(),
             '/settings-ai-gateway-token': (context) => const AiGatewayTokensScreen(),
+            '/export-data': (context) => const ExportDataScreen(),
             '/subscription': (context) => const SubscriptionScreen(),
             '/subscription-success': (context) => const SubscriptionSuccessScreen(),
             '/household-invites': (context) => const HouseholdInvitesScreen(),

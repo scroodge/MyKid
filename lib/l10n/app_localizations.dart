@@ -1660,6 +1660,42 @@ abstract class AppLocalizations {
   /// **'Request a copy of your data (GDPR)'**
   String get exportMyDataSubtitle;
 
+  /// No description provided for @exportPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing export...'**
+  String get exportPreparing;
+
+  /// No description provided for @exportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Export ready'**
+  String get exportSuccess;
+
+  /// No description provided for @exportError.
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed'**
+  String get exportError;
+
+  /// No description provided for @exportLinkSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Download link has been sent to your email'**
+  String get exportLinkSent;
+
+  /// No description provided for @deleteAccountHintExport.
+  ///
+  /// In en, this message translates to:
+  /// **'All data will be permanently deleted. We recommend downloading your data first.'**
+  String get deleteAccountHintExport;
+
+  /// No description provided for @deleteAccountDataLostWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Data cannot be recovered after deletion.'**
+  String get deleteAccountDataLostWarning;
+
   /// No description provided for @aiProviders.
   ///
   /// In en, this message translates to:

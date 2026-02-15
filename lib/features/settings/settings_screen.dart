@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../core/legal_urls.dart';
+import '../../core/mykid_api_service.dart';
 import '../../core/supabase_storage.dart';
 import '../../data/household_repository.dart';
 import '../../data/subscription_repository.dart';
@@ -58,6 +59,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final _householdRepo = HouseholdRepository();
   final _subscriptionRepo = SubscriptionRepository();
+  final _mykidApi = MyKidApiService();
   String? _householdId;
   SubscriptionInfo? _subscription;
 
@@ -422,15 +424,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   leading: Icon(Icons.download_outlined, color: Theme.of(context).colorScheme.secondary),
                   title: Text(AppLocalizations.of(context)!.exportMyData),
                   subtitle: Text(AppLocalizations.of(context)!.exportMyDataSubtitle),
-                  trailing: const Icon(Icons.open_in_new),
+                  trailing: const Icon(Icons.chevron_right),
                   onTap: () async {
-                    final opened = await _openUrl(LegalUrls.dataExport);
-                    if (!opened && context.mounted) {
-                      await Clipboard.setData(ClipboardData(text: LegalUrls.supportEmail));
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(AppLocalizations.of(context)!.supportEmailCopied)),
-                        );
+                    if (_mykidApi.isConfigured) {
+                      await Navigator.of(context).pushNamed('/export-data');
+                    } else {
+                      final opened = await _openUrl(LegalUrls.dataExport);
+                      if (!opened && context.mounted) {
+                        await Clipboard.setData(const ClipboardData(text: LegalUrls.supportEmail));
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(AppLocalizations.of(context)!.supportEmailCopied)),
+                          );
+                        }
                       }
                     }
                   },
@@ -461,9 +467,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             Text(AppLocalizations.of(context)!.deleteAccountConfirm),
                             const SizedBox(height: 8),
                             Text(
-                              AppLocalizations.of(context)!.deleteAccountConfirmSubtitle,
+                              AppLocalizations.of(context)!.deleteAccountHintExport,
                               style: Theme.of(ctx).textTheme.bodySmall,
                             ),
+                            const SizedBox(height: 12),
+                            if (_mykidApi.isConfigured)
+                              TextButton.icon(
+                                onPressed: () {
+                                  Navigator.pop(ctx, false);
+                                  Navigator.of(ctx).pushNamed('/export-data');
+                                },
+                                icon: const Icon(Icons.download_outlined, size: 18),
+                                label: Text(AppLocalizations.of(context)!.exportMyData),
+                              ),
                           ],
                         ),
                         actions: [
@@ -483,31 +499,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     );
                     if (ok != true || !context.mounted) return;
                     try {
-                      final res = await Supabase.instance.client.functions.invoke('delete-account');
-                      if (!context.mounted) return;
-                      if (res.status == 200 && res.data?['success'] == true) {
-                        await Supabase.instance.client.auth.signOut();
-                        if (context.mounted) {
-                          Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
-                        }
+                      if (_mykidApi.isConfigured) {
+                        await _mykidApi.deleteAccount();
                       } else {
-                        final err = res.data?['error'] ?? res.data?['details'] ?? res.data?.toString() ?? '';
-                        final status = res.status;
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('${AppLocalizations.of(context)!.deleteAccountFailed} [$status] $err'),
-                              duration: const Duration(seconds: 5),
-                            ),
-                          );
+                        final res = await Supabase.instance.client.functions.invoke('delete-account');
+                        if (res.status != 200 || res.data?['success'] != true) {
+                          final err = res.data?['error'] ?? res.data?['details'] ?? res.data?.toString() ?? '';
+                          final status = res.status;
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${AppLocalizations.of(context)!.deleteAccountFailed} [$status] $err'),
+                                duration: const Duration(seconds: 5),
+                              ),
+                            );
+                          }
+                          return;
                         }
+                      }
+                      if (!context.mounted) return;
+                      await Supabase.instance.client.auth.signOut();
+                      if (context.mounted) {
+                        Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
                       }
                     } catch (e, st) {
                       debugPrint('delete-account error: $e\n$st');
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('${AppLocalizations.of(context)!.deleteAccountFailed} $e'),
+                            content: Text('${AppLocalizations.of(context)!.deleteAccountFailed} ${e is MyKidApiException ? e.message : e}'),
                             duration: const Duration(seconds: 5),
                           ),
                         );
