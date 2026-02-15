@@ -32,6 +32,16 @@ class ImmichStorage {
     return normalizeServerUrl(raw);
   }
 
+  /// If stored URL has a port or extra chars, overwrite with normalized (scheme + host only).
+  Future<void> ensureServerUrlNormalized() async {
+    final raw = await _storage.read(key: _kImmichUrlKey);
+    if (raw == null || raw.trim().isEmpty) return;
+    final normalized = normalizeServerUrl(raw);
+    if (normalized != null && raw.trim() != normalized) {
+      await setServerUrl(normalized);
+    }
+  }
+
   Future<void> setServerUrl(String? value) async {
     if (value == null) {
       await _storage.delete(key: _kImmichUrlKey);
