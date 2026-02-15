@@ -11,6 +11,14 @@ class AiVisionService {
 
   final AiProviderStorage _storage;
 
+  /// Ensures base URL has http(s) scheme so Uri.parse does not fail.
+  static String _ensureUrlScheme(String url) {
+    final t = url.trim().replaceAll(RegExp(r'/$'), '');
+    if (t.isEmpty) return t;
+    if (RegExp(r'^https?://', caseSensitive: false).hasMatch(t)) return t;
+    return 'https://$t';
+  }
+
   /// Check if any AI provider is configured
   Future<bool> isConfigured() async {
     final selectedProvider = await _storage.getSelectedProvider();
@@ -412,7 +420,8 @@ class AiVisionService {
 
   Future<({String? text, String? error})> _callCustomAiText(String apiKey, String baseUrl, String labelsText) async {
     try {
-      final url = Uri.parse('${baseUrl.replaceAll(RegExp(r'/$'), '')}/v1/chat');
+      final base = _ensureUrlScheme(baseUrl);
+      final url = Uri.parse('${base.replaceAll(RegExp(r'/$'), '')}/v1/chat');
       final userMessage = 'По фото из дневника ребёнка определили такие объекты и сцены: $labelsText. '
           'Напиши тёплое, короткое описание этого момента для детского дневника: 2–3 предложения на русском.';
       final response = await http.post(
@@ -581,7 +590,8 @@ class AiVisionService {
         return (success: false, error: 'Base URL not configured');
       }
       try {
-        final url = Uri.parse('${baseUrl.replaceAll(RegExp(r'/$'), '')}/v1/chat');
+        final base = _ensureUrlScheme(baseUrl);
+        final url = Uri.parse('${base.replaceAll(RegExp(r'/$'), '')}/v1/chat');
         final response = await http.post(
           url,
           headers: {

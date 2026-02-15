@@ -965,7 +965,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get setupRequiredMessage =>
-      'Чтобы добавлять записи с фото, активируйте подписку (триал) или настройте свой сервер Immich в Настройках.';
+      'Чтобы добавлять записи с фото, активируйте подписку (триал) или настройте свой сервер Immich в Настройках. Если подписка уже активна, зайдите в Настройки → Immich и нажмите «Использовать Immich семьи» — managed Immich подключится на этом устройстве.';
 
   @override
   String get activateSubscription => 'Активировать подписку';

@@ -963,7 +963,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get setupRequiredMessage =>
-      'To add entries with photos, activate a subscription (trial) or set up your own Immich server in Settings.';
+      'To add entries with photos, activate a subscription (trial) or set up your own Immich server in Settings. If you already have a subscription, go to Settings → Immich and tap «Use family\'s Immich» to connect managed Immich on this device.';
 
   @override
   String get activateSubscription => 'Activate subscription';

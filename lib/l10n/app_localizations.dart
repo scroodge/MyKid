@@ -1843,7 +1843,7 @@ abstract class AppLocalizations {
   /// No description provided for @setupRequiredMessage.
   ///
   /// In en, this message translates to:
-  /// **'To add entries with photos, activate a subscription (trial) or set up your own Immich server in Settings.'**
+  /// **'To add entries with photos, activate a subscription (trial) or set up your own Immich server in Settings. If you already have a subscription, go to Settings → Immich and tap «Use family\'s Immich» to connect managed Immich on this device.'**
   String get setupRequiredMessage;
 
   /// No description provided for @activateSubscription.

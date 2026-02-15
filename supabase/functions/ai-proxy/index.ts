@@ -91,7 +91,10 @@ serve(async (req) => {
       )
     }
 
-    const gatewayUrl = Deno.env.get('GATEWAY_URL')
+    let gatewayUrl = Deno.env.get('GATEWAY_URL') ?? ''
+    if (gatewayUrl && !/^https?:\/\//i.test(gatewayUrl)) {
+      gatewayUrl = `https://${gatewayUrl.replace(/^\/*/, '')}`
+    }
     const sharedGatewayToken = Deno.env.get('GATEWAY_TOKEN')
     const openaiKey = Deno.env.get('OPENAI_API_KEY')
 

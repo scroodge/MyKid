@@ -405,7 +405,7 @@
   "subscriptionCancel": "Subscription canceled",
   "premiumRequiredForAi": "Premium subscription required for AI",
   "setupRequiredTitle": "Setup needed",
-  "setupRequiredMessage": "To add entries with photos, activate a subscription (trial) or set up your own Immich server in Settings.",
+  "setupRequiredMessage": "To add entries with photos, activate a subscription (trial) or set up your own Immich server in Settings. If you already have a subscription, go to Settings → Immich and tap «Use family's Immich» to connect managed Immich on this device.",
   "activateSubscription": "Activate subscription",
   "setupOwnServers": "Set up my servers",
   "sessionExpiredSignInAgain": "Session expired. Please sign out and sign in again.",

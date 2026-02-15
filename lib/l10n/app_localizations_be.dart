@@ -963,7 +963,7 @@ class AppLocalizationsBe extends AppLocalizations {
 
   @override
   String get setupRequiredMessage =>
-      'Каб дадаваць запісы з фота, актывуйце падпіску (трыял) або наладзьце свой сервер Immich у Наладах.';
+      'Каб дадаваць запісы з фота, актывуйце падпіску (трыял) або наладзьце свой сервер Immich у Наладах. Калі падпіска ўжо актыўная, зайдзіце ў Налады → Immich і націсніце «Выкарыстоўваць Immich сям\'і» — managed Immich падключыцца на гэтай прыладзе.';
 
   @override
   String get activateSubscription => 'Актываваць падпіску';
