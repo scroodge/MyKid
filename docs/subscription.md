@@ -43,7 +43,7 @@ Optional paid plans: **Basic** (10 GB Immich, no AI) and **Premium** (20 GB Immi
 - User taps “Subscription” in Settings → chooses Basic or Premium → “7 days free” → Stripe Checkout (trial 7 days).
 - After checkout, Stripe sends webhooks; `stripe-webhook` upserts `subscriptions`, provisions an Immich user (quota 10/20 GB), then writes Immich URL + API key into `household_settings` via `set_household_immich_config_for_managed`. On upgrade (Basic→Premium), it updates the existing Immich user's quota from 10 to 20 GB. For Premium plan, it also creates an AI Gateway token (`ai_gateway_tokens` + Vault) so ai-proxy can forward per-user token to the gateway.
 - On cancel/expire, webhook sets `subscriptions.status = 'expired'`, deletes user data (journal, children, household), and deletes the Immich user via Admin API.
-- “Generate description” in the journal uses own AI keys if configured; otherwise, if the user has an active Premium subscription, it calls the `ai-proxy` Edge Function (which checks subscription and forwards to OpenAI).
+- “Generate description” in the journal uses own AI keys if configured; otherwise, if the user has an active Premium subscription, it calls the `ai-proxy` Edge Function. `ai-proxy` allows access if the user has an active Premium subscription **or** any household member has Premium (family sharing).
 - **Manage (cancel / change plan):** The “Manage” button on the subscription screen calls the `create-portal-session` Edge Function, which returns a Stripe Customer Portal URL. The app opens it in the browser; the user can cancel or change plan there. Configure the portal in [Stripe Dashboard → Billing → Customer portal](https://dashboard.stripe.com/settings/billing/portal).
 
 **Portal return to app:** Stripe Customer Portal requires an **https** `return_url`. If `APP_URL` is a deeplink (`mykid://`), the function uses `https://mykid.life/subscription` as return URL. So after upgrade/cancel in the portal the user lands on that page in the browser. To send them back to the app, host a page at `https://mykid.life/subscription` that redirects to the app, e.g.:
@@ -62,6 +62,25 @@ Optional paid plans: **Basic** (10 GB Immich, no AI) and **Premium** (20 GB Immi
 ```
 
 Alternatively, set up [Universal Links](https://developer.apple.com/documentation/xcode/supporting-universal-links-in-your-app) for `mykid.life` so that opening `https://mykid.life/subscription` opens the app.
+
+---
+
+## Организация тестирования (ветка стала основной)
+
+Когда подписка (managed Immich + Stripe) — часть основной ветки:
+
+1. **Регрессия перед релизом**  
+   Прогонять [пошаговое тестирование](#пошаговое-тестирование) (чекаут → Immich → AI → отмена) на тестовом проекте Supabase + Stripe Test перед каждым релизом или перед мержем в `main`.
+
+2. **Автотесты**  
+   - `flutter test` — юнит/виджет-тесты без Stripe (например, `SubscriptionRepository` с моком Supabase, экран подписки с моком).  
+   - В CI не нужны реальные Stripe/Immich: достаточно прогона `flutter test` и сборки.
+
+3. **Ручной чеклист**  
+   Держать чеклист в [Пошаговое тестирование](#пошаговое-тестирование) и при необходимости копировать в issue/PR (например: «Проверено: чекаут, Immich, AI, портал, отмена»).
+
+4. **Тестовые аккаунты**  
+   Иметь 1–2 тестовых пользователя Supabase (и при необходимости тестовые Stripe customers) для стабильного ручного прогона.
 
 ---
 
@@ -139,3 +158,24 @@ Alternatively, set up [Universal Links](https://developer.apple.com/documentatio
 2. Дождаться вебхука (или повторно отправить событие).
 3. В Supabase: в `subscriptions` статус должен стать `expired`.
 4. Данные пользователя (journal_entries, children, household) и пользователь в Immich должны быть удалены.
+
+---
+
+## Stripe vs Google Play / Apple IAP
+
+Текущая реализация — **только Stripe** (Checkout в браузере → webhook → Supabase/Immich/токены). Это нормальный вариант для MVP и тестирования, но для публикации в сторах есть нюансы.
+
+| | Только Stripe (как сейчас) | Google Play Billing / Apple IAP |
+|--|----------------------------|----------------------------------|
+| **Политики стора** | Google и Apple требуют использовать их биллинг для **внутриприложенных** покупок цифровых товаров/подписок. Только Stripe может привести к отказу или требованию добавить IAP. | Соответствует правилам Google Play и App Store. |
+| **Где удобно** | Внутреннее тестирование, TestFlight, возможно веб-версия или «подписка на сайте». | Продажа подписки прямо в мобильном приложении на Android/iOS. |
+| **Комиссия** | ~3% (Stripe). | ~15–30% (Google/Apple). |
+| **UX** | Открытие браузера, редирект обратно в приложение. | Нативный диалог оплаты в приложении. |
+
+**Рекомендация:**  
+- Оставлять Stripe для текущего флоу (быстрый старт, один бэкенд для всех платформ) — ок для беты и внутреннего использования.  
+- Для релиза в Google Play и App Store **добавить** Google Play Billing и Apple In-App Purchase и на бэкенде считать подписку активной, если есть валидная подписка либо в Stripe, либо в Google/Apple (по purchase token / receipt). Тогда не «вместо», а **в дополнение** к Stripe: один и тот же план Premium можно продавать через Stripe (например, с сайта) или через IAP в приложении.  
+- Пилить «сразу только Google подписку» имело бы смысл, если бы приложение было только под Android и только через стор; раз есть и iOS, и managed-сервис с Immich, текущий путь (сначала Stripe, при необходимости потом IAP) — разумный.
+
+**Публикация сначала в Google Play:**  
+Если первая публикация — в Google Play, **нужно добавить Google Play Billing** до выкладки в сторе. Stripe можно оставить для веба или как запасной канал; в приложении на Android подписку лучше продавать через Play Billing, и бэкенд (Supabase + webhook или Cloud Function) должен верифицировать покупку через Google Play Developer API и писать/обновлять запись в `subscriptions` так же, как это делает stripe-webhook (plan_id, status, provision Immich, AI token и т.д.).

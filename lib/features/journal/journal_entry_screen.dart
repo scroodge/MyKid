@@ -124,25 +124,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   }
 
   Future<void> _generateDescription() async {
-    // Check if AI provider is configured
-    final isConfigured = await _aiVision.isConfigured();
-    if (!isConfigured) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.apiKeyNotConfigured),
-            action: SnackBarAction(
-              label: AppLocalizations.of(context)!.settings,
-              onPressed: () => Navigator.of(context).pushNamed('/settings-ai-providers'),
-            ),
-            duration: const Duration(seconds: 5),
-          ),
-        );
-      }
-      return;
-    }
-
-    // Get first available photo
+    // Get first available photo (analyzeImage will try managed ai-proxy when no own keys; household premium works via family sharing)
     Uint8List? imageBytes;
     
     // Try pending assets first
