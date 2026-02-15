@@ -25,6 +25,7 @@ Optional paid plans: **Basic** (10 GB Immich, no AI) and **Premium** (20 GB Immi
    - **Gateway:** `GATEWAY_URL` and `GATEWAY_TOKEN` — `ai-proxy` forwards to your AI Gateway. Use **one shared token** (same as in Gateway .env) and/or **per-user tokens**: if a Premium user has a token in `ai_gateway_tokens` (created automatically by stripe-webhook when Premium is activated), ai-proxy sends that user’s token so the gateway can track usage per customer. Gateway must accept either the shared `GATEWAY_TOKEN` or validate per-user tokens (e.g. hash token and check `ai_gateway_tokens.token_hash` via an API).
    - **Or direct OpenAI:** `OPENAI_API_KEY` — `ai-proxy` calls OpenAI directly (no gateway).
    - `APP_URL` — Stripe Checkout redirect. Use **`mykid://`** (deeplink) so success/cancel open the app; or `https://mykid.life` for a web page.
+   - **Google Play (Android):** `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` (full JSON key), `GOOGLE_PLAY_PACKAGE_NAME` (app package name). See [Google Play Billing (Android)](#google-play-billing-android).
 
 3. **Deploy functions**  
    Deploy all with **`--no-verify-jwt`** (project uses Publishable/Secret keys):
@@ -37,6 +38,35 @@ Optional paid plans: **Basic** (10 GB Immich, no AI) and **Premium** (20 GB Immi
 2. Webhook endpoint: `https://<project-ref>.supabase.co/functions/v1/stripe-webhook`  
    Events: `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`
 3. Copy the webhook signing secret into Supabase secret `STRIPE_WEBHOOK_SECRET`.
+
+## Google Play Billing (Android)
+
+For publishing on Google Play, subscriptions are sold via Google Play Billing. The app uses the same `subscriptions` table; activation is done by the Edge Function `verify-google-play-purchase` after the app sends the purchase token.
+
+### Play Console setup
+
+1. **Subscription products**  
+   In [Google Play Console](https://play.google.com/console) → your app → **Monetize** → **Subscriptions**, create two subscriptions:
+   - **Product ID:** `mykid_basic` (Basic plan, 10 GB). Add a base plan (e.g. monthly) and optionally a free trial.
+   - **Product ID:** `mykid_premium` (Premium plan, 20 GB + AI). Same.
+
+2. **Service account for server-side verification**  
+   - In [Google Cloud Console](https://console.cloud.google.com/) (project linked to Play Console), create a **Service account** (IAM → Service accounts).
+   - Create a JSON key and download it.
+   - In **Google Play Console** → **Users and permissions** → invite the service account email with role **View app information** and **View financial data** (or **Admin** for testing).
+   - In Supabase Edge Functions → Secrets, add:
+     - `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` — paste the **entire** contents of the JSON key file (single line or multiline).
+     - `GOOGLE_PLAY_PACKAGE_NAME` — your app’s package name (e.g. `life.mykid.app`).
+
+3. **Deploy**  
+   `supabase functions deploy verify-google-play-purchase --no-verify-jwt`
+
+### Testing (Android)
+
+- Add your test Google account under Play Console → **Setup** → **License testing**.
+- Build the app and open **Settings → Subscription**. On Android, the app uses Google Play Billing when available; tap **7 days free** (or the plan) to start the native purchase flow.
+- Complete the test purchase; the app sends the purchase token to `verify-google-play-purchase`, which verifies with Google and activates the subscription (Immich + AI token for Premium).
+- Check Supabase table `subscriptions`: one row for the user with `plan_id` and `status = active`.
 
 ## Flow
 
@@ -109,6 +139,11 @@ Alternatively, set up [Universal Links](https://developer.apple.com/documentatio
 5. **Приложение**
    - Собрать/запуск с нужным Supabase (.env): `flutter run --dart-define-from-file=.env`.
 
+6. **Google Play (только для Android)**  
+   - В Play Console созданы подписки с product id `mykid_basic` и `mykid_premium`.  
+   - В Supabase заданы секреты `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` и `GOOGLE_PLAY_PACKAGE_NAME`, задеплоена функция `verify-google-play-purchase --no-verify-jwt`.  
+   - Тестовый аккаунт добавлен в License testing.
+
 ---
 
 ### Шаг 1 — Оформление триала
@@ -119,6 +154,8 @@ Alternatively, set up [Universal Links](https://developer.apple.com/documentatio
 4. Должен открыться Stripe Checkout в браузере.
 5. Заполнить тестовую карту: `4242 4242 4242 4242`, любую будущую дату, любой CVC.
 6. Подтвердить. После редиректа должен открыться экран «Триал активирован» (деплинк `mykid://subscription-success`).
+
+**На Android (Google Play):** На устройстве с добавленным в License testing аккаунтом: Настройки → Подписка → выбрать план → «7 дней бесплатно» → откроется нативный диалог Google Play. Оформить тестовую подписку; после успешной оплаты приложение отправит покупку на бэкенд, экран обновится и покажет активный план.
 
 ---
 
