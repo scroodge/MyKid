@@ -1690,6 +1690,12 @@ abstract class AppLocalizations {
   /// **'Basic'**
   String get planBasic;
 
+  /// No description provided for @planBasicDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'10 GB Immich, no AI'**
+  String get planBasicDescription;
+
   /// No description provided for @planBasicPrice.
   ///
   /// In en, this message translates to:
@@ -1702,6 +1708,12 @@ abstract class AppLocalizations {
   /// **'Premium'**
   String get planPremium;
 
+  /// No description provided for @planPremiumDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'20 GB Immich + AI'**
+  String get planPremiumDescription;
+
   /// No description provided for @planPremiumPrice.
   ///
   /// In en, this message translates to:
@@ -1713,6 +1725,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'7 days free'**
   String get startTrial7Days;
+
+  /// No description provided for @upgradeToPremium.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Premium'**
+  String get upgradeToPremium;
+
+  /// No description provided for @manageSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get manageSubscription;
+
+  /// No description provided for @manageSubscriptionDialogContent.
+  ///
+  /// In en, this message translates to:
+  /// **'To cancel or change your plan, use the Stripe Customer Portal. A direct link will be available in a future update.'**
+  String get manageSubscriptionDialogContent;
+
+  /// No description provided for @currentPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Current plan'**
+  String get currentPlan;
 
   /// No description provided for @subscriptionSuccess.
   ///

@@ -880,16 +880,35 @@ class AppLocalizationsBe extends AppLocalizations {
   String get planBasic => 'Базовы';
 
   @override
+  String get planBasicDescription => '10 GB Immich, без AI';
+
+  @override
   String get planBasicPrice => '\$6/мес';
 
   @override
   String get planPremium => 'Прэміум';
 
   @override
+  String get planPremiumDescription => '20 GB Immich + AI';
+
+  @override
   String get planPremiumPrice => '\$13/мес';
 
   @override
   String get startTrial7Days => '7 дзён бясплатна';
+
+  @override
+  String get upgradeToPremium => 'Перайсці на Прэміум';
+
+  @override
+  String get manageSubscription => 'Кіраванне';
+
+  @override
+  String get manageSubscriptionDialogContent =>
+      'Каб скасаваць або змяніць план, выкарыстоўвайце Stripe Customer Portal. Прамая спасылка будзе даступная ў наступных абнаўленнях.';
+
+  @override
+  String get currentPlan => 'Бягучы план';
 
   @override
   String get subscriptionSuccess => 'Трыял актываваны';

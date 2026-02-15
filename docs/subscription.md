@@ -2,6 +2,14 @@
 
 Optional paid plans: **Basic** (10 GB Immich, no AI) and **Premium** (20 GB Immich + AI). Implemented per plan in `~/.cursor/plans/` (do not edit the plan file).
 
+## Plan comparison
+
+| | No subscription (own hosting) | Basic | Premium |
+|---|-------------------------------|-------|---------|
+| **Immich storage** | Your own | 10 GB managed | 20 GB managed |
+| **AI descriptions** | Your keys (AI Providers / AI Gateway) | Your keys (AI Providers) | Built-in via ai-proxy |
+| **Settings shown** | Immich, AI Providers, AI Gateway Token, Change Supabase | AI Providers only | Subscription only |
+
 ## Supabase
 
 1. **Migrations**  
@@ -16,7 +24,7 @@ Optional paid plans: **Basic** (10 GB Immich, no AI) and **Premium** (20 GB Immi
    - `IMMICH_ADMIN_API_KEY` — Immich admin API key (for creating/deleting users)
    - **Gateway:** `GATEWAY_URL` and `GATEWAY_TOKEN` — `ai-proxy` forwards to your AI Gateway. Use **one shared token** (same as in Gateway .env) and/or **per-user tokens**: if a Premium user has a token in `ai_gateway_tokens` (created automatically by stripe-webhook when Premium is activated), ai-proxy sends that user’s token so the gateway can track usage per customer. Gateway must accept either the shared `GATEWAY_TOKEN` or validate per-user tokens (e.g. hash token and check `ai_gateway_tokens.token_hash` via an API).
    - **Or direct OpenAI:** `OPENAI_API_KEY` — `ai-proxy` calls OpenAI directly (no gateway).
-   - `APP_URL` — Stripe Checkout redirect. Use **`mykid://`** (deeplink) so success/cancel open the app; or `https://mykid.app` for a web page.
+   - `APP_URL` — Stripe Checkout redirect. Use **`mykid://`** (deeplink) so success/cancel open the app; or `https://mykid.life` for a web page.
 
 3. **Deploy functions**  
    Deploy all with **`--no-verify-jwt`** (project uses Publishable/Secret keys):
@@ -54,7 +62,7 @@ Optional paid plans: **Basic** (10 GB Immich, no AI) and **Premium** (20 GB Immi
    - Скопировать signing secret в секрет `STRIPE_WEBHOOK_SECRET`.
 
 3. **Immich**
-   - Убедиться, что доступен по `IMMICH_SERVER_URL` (у тебя https://mykid.ddns.net).
+   - Убедиться, что доступен по `IMMICH_SERVER_URL` (e.g. `https://immich.mykid.life`).
    - Создать первого админа, в настройках создать API key и прописать его в `IMMICH_ADMIN_API_KEY`.
 
 4. **AI Gateway**

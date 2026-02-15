@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/ai_provider_storage.dart';
 import '../../core/ai_vision_service.dart';
+import '../../data/subscription_repository.dart';
 import '../../l10n/app_localizations.dart';
 
 class AiProviderSettingsScreen extends StatefulWidget {
@@ -15,6 +16,7 @@ class AiProviderSettingsScreen extends StatefulWidget {
 class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
   final _storage = AiProviderStorage();
   final _service = AiVisionService();
+  final _subscriptionRepo = SubscriptionRepository();
   final _openAiController = TextEditingController();
   final _geminiController = TextEditingController();
   final _claudeController = TextEditingController();
@@ -22,6 +24,7 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
   final _customAiController = TextEditingController();
   final _customAiBaseUrlController = TextEditingController();
   String? _selectedProvider;
+  SubscriptionInfo? _subscription;
   bool _loading = false;
   String? _message;
   bool _obscureOpenAi = true;
@@ -52,17 +55,27 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
     final customAiKey = await _storage.getCustomAiKey();
     final customAiBaseUrl = await _storage.getCustomAiBaseUrl();
     final selected = await _storage.getSelectedProvider();
+    final sub = await _subscriptionRepo.getMySubscription();
     if (mounted) {
+      _subscription = sub;
       _openAiController.text = openAiKey ?? '';
       _geminiController.text = geminiKey ?? '';
       _claudeController.text = claudeKey ?? '';
       _deepSeekController.text = deepSeekKey ?? '';
       _customAiController.text = customAiKey ?? '';
       _customAiBaseUrlController.text = customAiBaseUrl ?? '';
-      _selectedProvider = selected ?? 'gemini'; // Default to Gemini (has free tier)
+      var provider = selected ?? 'gemini'; // Default to Gemini (has free tier)
+      // Basic plan: hide Custom AI, switch away if selected
+      final hideCustomAi = _subscription?.planId == 'basic';
+      if (hideCustomAi && provider == 'customai') {
+        provider = 'gemini';
+      }
+      _selectedProvider = provider;
       setState(() {});
     }
   }
+
+  bool get _showCustomAi => _subscription?.planId != 'basic';
 
   Future<void> _testConnection(String provider) async {
     String? apiKey;
@@ -234,13 +247,14 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
             groupValue: _selectedProvider,
             onChanged: (value) => setState(() => _selectedProvider = value),
           ),
-          RadioListTile<String>(
-            title: Text(l10n.customAi),
-            subtitle: Text(l10n.customAiDescription),
-            value: 'customai',
-            groupValue: _selectedProvider,
-            onChanged: (value) => setState(() => _selectedProvider = value),
-          ),
+          if (_showCustomAi)
+            RadioListTile<String>(
+              title: Text(l10n.customAi),
+              subtitle: Text(l10n.customAiDescription),
+              value: 'customai',
+              groupValue: _selectedProvider,
+              onChanged: (value) => setState(() => _selectedProvider = value),
+            ),
           const SizedBox(height: 24),
           Text(
             l10n.apiKeys,
@@ -388,45 +402,47 @@ class _AiProviderSettingsScreenState extends State<AiProviderSettingsScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 12),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    l10n.customAi,
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _customAiBaseUrlController,
-                    decoration: InputDecoration(
-                      labelText: l10n.customAiBaseUrl,
-                      hintText: l10n.customAiBaseUrlHint,
+          if (_showCustomAi) ...[
+            const SizedBox(height: 12),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      l10n.customAi,
+                      style: Theme.of(context).textTheme.titleSmall,
                     ),
-                    autocorrect: false,
-                    keyboardType: TextInputType.url,
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _customAiController,
-                    decoration: InputDecoration(
-                      labelText: l10n.apiKey,
-                      hintText: l10n.enterApiKey,
-                      suffixIcon: IconButton(
-                        icon: Icon(_obscureCustomAi ? Icons.visibility : Icons.visibility_off),
-                        onPressed: () => setState(() => _obscureCustomAi = !_obscureCustomAi),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _customAiBaseUrlController,
+                      decoration: InputDecoration(
+                        labelText: l10n.customAiBaseUrl,
+                        hintText: l10n.customAiBaseUrlHint,
                       ),
+                      autocorrect: false,
+                      keyboardType: TextInputType.url,
                     ),
-                    obscureText: _obscureCustomAi,
-                    autocorrect: false,
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _customAiController,
+                      decoration: InputDecoration(
+                        labelText: l10n.apiKey,
+                        hintText: l10n.enterApiKey,
+                        suffixIcon: IconButton(
+                          icon: Icon(_obscureCustomAi ? Icons.visibility : Icons.visibility_off),
+                          onPressed: () => setState(() => _obscureCustomAi = !_obscureCustomAi),
+                        ),
+                      ),
+                      obscureText: _obscureCustomAi,
+                      autocorrect: false,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
+          ],
           const SizedBox(height: 24),
           if (_message != null) ...[
             Text(

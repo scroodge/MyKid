@@ -882,16 +882,35 @@ class AppLocalizationsRu extends AppLocalizations {
   String get planBasic => 'Базовый';
 
   @override
+  String get planBasicDescription => '10 GB Immich, без AI';
+
+  @override
   String get planBasicPrice => '\$6/мес';
 
   @override
   String get planPremium => 'Премиум';
 
   @override
+  String get planPremiumDescription => '20 GB Immich + AI';
+
+  @override
   String get planPremiumPrice => '\$13/мес';
 
   @override
   String get startTrial7Days => '7 дней бесплатно';
+
+  @override
+  String get upgradeToPremium => 'Перейти на Премиум';
+
+  @override
+  String get manageSubscription => 'Управление';
+
+  @override
+  String get manageSubscriptionDialogContent =>
+      'Чтобы отменить или изменить план, используйте Stripe Customer Portal. Прямая ссылка будет доступна в следующих обновлениях.';
+
+  @override
+  String get currentPlan => 'Текущий план';
 
   @override
   String get subscriptionSuccess => 'Триал активирован';

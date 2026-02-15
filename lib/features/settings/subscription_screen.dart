@@ -16,7 +16,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   final _repo = SubscriptionRepository();
   SubscriptionInfo? _subscription;
   bool _loading = true;
-  bool _creatingCheckout = false;
+  String? _creatingCheckoutForPlan; // 'basic' | 'premium' — only this button shows loading
   String? _error;
 
   @override
@@ -48,9 +48,59 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     }
   }
 
+  Widget _buildPlanTrailing(String planId) {
+    final l10n = AppLocalizations.of(context)!;
+    final currentPlan = _subscription?.planId;
+    final isCurrentPlan = currentPlan == planId;
+
+    if (_creatingCheckoutForPlan == planId) {
+      return const SizedBox(
+        width: 24,
+        height: 24,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      );
+    }
+
+    if (isCurrentPlan) {
+      return OutlinedButton(
+        onPressed: () => _showManageSubscription(),
+        child: Text(l10n.manageSubscription),
+      );
+    }
+    if (currentPlan == 'basic' && planId == 'premium') {
+      return FilledButton(
+        onPressed: _creatingCheckoutForPlan != null ? null : () => _startTrial('premium'),
+        child: Text(l10n.upgradeToPremium),
+      );
+    }
+    if (_subscription == null || !_subscription!.isActive) {
+      return FilledButton(
+        onPressed: _creatingCheckoutForPlan != null ? null : () => _startTrial(planId),
+        child: Text(l10n.startTrial7Days),
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
+  void _showManageSubscription() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.manageSubscription),
+        content: Text(AppLocalizations.of(context)!.manageSubscriptionDialogContent),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _startTrial(String planId) async {
     setState(() {
-      _creatingCheckout = true;
+      _creatingCheckoutForPlan = planId;
       _error = null;
     });
     try {
@@ -64,10 +114,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       final session = Supabase.instance.client.auth.currentSession;
       if (session == null || session.accessToken.isEmpty) {
         if (mounted) {
-          setState(() {
-            _creatingCheckout = false;
-            _error = AppLocalizations.of(context)!.sessionExpiredSignInAgain;
-          });
+        setState(() {
+          _creatingCheckoutForPlan = null;
+          _error = AppLocalizations.of(context)!.sessionExpiredSignInAgain;
+        });
         }
         return;
       }
@@ -82,7 +132,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         final err = res.data?['error'] ?? res.data?.toString() ?? 'Checkout failed';
         final isUnauthorized = res.status == 401;
         setState(() {
-          _creatingCheckout = false;
+          _creatingCheckoutForPlan = null;
           _error = isUnauthorized
               ? AppLocalizations.of(context)!.sessionExpiredCheckProject
               : err.toString();
@@ -92,7 +142,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       final url = res.data?['url'] as String?;
       if (url == null || url.isEmpty) {
         setState(() {
-          _creatingCheckout = false;
+          _creatingCheckoutForPlan = null;
           _error = 'No checkout URL';
         });
         return;
@@ -100,20 +150,23 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       final uri = Uri.parse(url);
       final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
       if (mounted) {
-        setState(() => _creatingCheckout = false);
+        setState(() => _creatingCheckoutForPlan = null);
         if (launched) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(AppLocalizations.of(context)!.subscriptionSuccess)),
           );
           _load();
         } else {
-          setState(() => _error = 'Could not open browser');
+          setState(() {
+            _creatingCheckoutForPlan = null;
+            _error = 'Could not open browser';
+          });
         }
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _creatingCheckout = false;
+          _creatingCheckoutForPlan = null;
           _error = e.toString();
         });
       }
@@ -155,6 +208,15 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                             _subscription!.planId == 'premium' ? l10n.planPremium : l10n.planBasic,
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _subscription!.planId == 'premium'
+                                ? l10n.planPremiumDescription
+                                : l10n.planBasicDescription,
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
                           const SizedBox(height: 8),
                           Text(
                             _subscription!.status == 'trialing'
@@ -178,32 +240,14 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                     children: [
                       ListTile(
                         title: Text(l10n.planBasic),
-                        subtitle: const Text('10 GB Immich, no AI'),
-                        trailing: _creatingCheckout
-                            ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : FilledButton(
-                                onPressed: _creatingCheckout ? null : () => _startTrial('basic'),
-                                child: Text(l10n.startTrial7Days),
-                              ),
+                        subtitle: Text(l10n.planBasicDescription),
+                        trailing: _buildPlanTrailing('basic'),
                       ),
                       const Divider(height: 1),
                       ListTile(
                         title: Text(l10n.planPremium),
-                        subtitle: const Text('20 GB Immich + AI'),
-                        trailing: _creatingCheckout
-                            ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : FilledButton(
-                                onPressed: _creatingCheckout ? null : () => _startTrial('premium'),
-                                child: Text(l10n.startTrial7Days),
-                              ),
+                        subtitle: Text(l10n.planPremiumDescription),
+                        trailing: _buildPlanTrailing('premium'),
                       ),
                     ],
                   ),

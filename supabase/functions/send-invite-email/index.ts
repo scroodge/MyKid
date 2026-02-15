@@ -5,7 +5,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
-const APP_URL = Deno.env.get('APP_URL') || 'https://mykid.app' // Change to your app URL or deep link handler
+const APP_URL = Deno.env.get('APP_URL') || 'https://mykid.life' // Deeplink: mykid:// ; web: https://mykid.life
 
 interface InviteEmailRequest {
   email: string

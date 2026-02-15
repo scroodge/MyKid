@@ -40,7 +40,11 @@ serve(async (req) => {
     const stripeKey = Deno.env.get('STRIPE_SECRET_KEY')
     const priceBasic = Deno.env.get('STRIPE_PRICE_BASIC')
     const pricePremium = Deno.env.get('STRIPE_PRICE_PREMIUM')
-    const appUrl = Deno.env.get('APP_URL') || 'https://mykid.app'
+    let appUrl = (Deno.env.get('APP_URL') || 'https://mykid.life').trim()
+    // Stripe requires absolute URLs. If APP_URL has no scheme, use https.
+    if (appUrl && !/^[a-z][a-z0-9+.-]*:\/\//i.test(appUrl)) {
+      appUrl = appUrl.startsWith('//') ? `https:${appUrl}` : `https://${appUrl}`
+    }
 
     if (!stripeKey || !priceBasic || !pricePremium) {
       return new Response(
@@ -67,13 +71,20 @@ serve(async (req) => {
     }
     const priceId = planId === 'basic' ? priceBasic : pricePremium
 
-    // Support deeplink (APP_URL=mykid://) so Stripe redirect opens the app; else use https base
+    // Support deeplink (APP_URL=mykid://) so Stripe redirect opens the app; else use https base.
+    // Stripe requires absolute URLs (e.g. https:// or mykid://).
     const isDeeplink = /^[a-z][a-z0-9+.-]*:\/\//i.test(appUrl) && !appUrl.startsWith('http')
     const base = appUrl.replace(/\/$/, '')
-    const successUrl = isDeeplink
+    let successUrl = isDeeplink
       ? `${base}subscription-success?session_id={CHECKOUT_SESSION_ID}`
       : `${base}/subscription-success?session_id={CHECKOUT_SESSION_ID}`
-    const cancelUrl = isDeeplink ? `${base}subscription-cancel` : `${base}/subscription-cancel`
+    let cancelUrl = isDeeplink ? `${base}subscription-cancel` : `${base}/subscription-cancel`
+    const validUrlPattern = /^[a-z][a-z0-9+.-]*:\/\//i
+    if (!validUrlPattern.test(successUrl)) {
+      const fallback = 'https://mykid.life'
+      successUrl = `${fallback}/subscription-success?session_id={CHECKOUT_SESSION_ID}`
+      cancelUrl = `${fallback}/subscription-cancel`
+    }
 
     const params = new URLSearchParams({
       mode: 'subscription',

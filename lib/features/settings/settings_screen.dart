@@ -8,6 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/legal_urls.dart';
 import '../../core/supabase_storage.dart';
 import '../../data/household_repository.dart';
+import '../../data/subscription_repository.dart';
 import '../../l10n/app_localizations.dart';
 
 /// Opens URL: in-app WebView for http/https (Privacy, Terms), external for mailto etc.
@@ -56,17 +57,25 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final _householdRepo = HouseholdRepository();
+  final _subscriptionRepo = SubscriptionRepository();
   String? _householdId;
+  SubscriptionInfo? _subscription;
 
   @override
   void initState() {
     super.initState();
     _loadHousehold();
+    _loadSubscription();
   }
 
   Future<void> _loadHousehold() async {
     final id = await _householdRepo.getMyFirstHouseholdId();
     if (mounted) setState(() => _householdId = id);
+  }
+
+  Future<void> _loadSubscription() async {
+    final sub = await _subscriptionRepo.getMySubscription();
+    if (mounted) setState(() => _subscription = sub);
   }
 
   @override
@@ -226,72 +235,99 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           Card(
             margin: EdgeInsets.zero,
-            child: Column(
-              children: [
-                ListTile(
-                  leading: Icon(Icons.card_membership_outlined, color: Theme.of(context).colorScheme.secondary),
-                  title: Text(AppLocalizations.of(context)!.subscription),
-                  subtitle: Text(AppLocalizations.of(context)!.subscriptionSubtitle),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.of(context).pushNamed('/subscription'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: Icon(Icons.cloud_outlined, color: Theme.of(context).colorScheme.secondary),
-                  title: Text(AppLocalizations.of(context)!.immich),
-                  subtitle: Text(AppLocalizations.of(context)!.immichSubtitle),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.of(context).pushNamed('/settings-immich'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.secondary),
-                  title: Text(AppLocalizations.of(context)!.aiProviders),
-                  subtitle: Text(AppLocalizations.of(context)!.aiProvidersSubtitle),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.of(context).pushNamed('/settings-ai-providers'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: Icon(Icons.token, color: Theme.of(context).colorScheme.secondary),
-                  title: Text(AppLocalizations.of(context)!.aiGatewayToken),
-                  subtitle: Text(AppLocalizations.of(context)!.aiGatewayTokenSubtitle),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.of(context).pushNamed('/settings-ai-gateway-token'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: Icon(Icons.storage_outlined, color: Theme.of(context).colorScheme.secondary),
-                  title: Text(AppLocalizations.of(context)!.changeSupabase),
-                  subtitle: Text(AppLocalizations.of(context)!.changeSupabaseSubtitle),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () async {
-                    final ok = await showDialog<bool>(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        title: Text(AppLocalizations.of(context)!.changeSupabaseConfirm),
-                        content: Text(AppLocalizations.of(context)!.changeSupabaseConfirmMessage),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(ctx, false),
-                            child: Text(AppLocalizations.of(context)!.cancel),
+            child: Builder(
+              builder: (context) {
+                final showOwnHostingSettings = _subscription == null || !_subscription!.isActive;
+                final showImmich = showOwnHostingSettings;
+                final showAiProviders = showOwnHostingSettings || _subscription?.planId == 'basic';
+                final showAiGatewayToken = showOwnHostingSettings;
+                final showChangeSupabase = showOwnHostingSettings;
+                final items = <Widget>[
+                  ListTile(
+                    leading: Icon(Icons.card_membership_outlined, color: Theme.of(context).colorScheme.secondary),
+                    title: Text(AppLocalizations.of(context)!.subscription),
+                    subtitle: Text(AppLocalizations.of(context)!.subscriptionSubtitle),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () async {
+                      await Navigator.of(context).pushNamed('/subscription');
+                      if (mounted) _loadSubscription();
+                    },
+                  ),
+                ];
+                if (showImmich) {
+                  items.addAll([
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: Icon(Icons.cloud_outlined, color: Theme.of(context).colorScheme.secondary),
+                      title: Text(AppLocalizations.of(context)!.immich),
+                      subtitle: Text(AppLocalizations.of(context)!.immichSubtitle),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Navigator.of(context).pushNamed('/settings-immich'),
+                    ),
+                  ]);
+                }
+                if (showAiProviders) {
+                  if (items.length > 1) items.add(const Divider(height: 1));
+                  items.add(
+                    ListTile(
+                      leading: Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.secondary),
+                      title: Text(AppLocalizations.of(context)!.aiProviders),
+                      subtitle: Text(AppLocalizations.of(context)!.aiProvidersSubtitle),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Navigator.of(context).pushNamed('/settings-ai-providers'),
+                    ),
+                  );
+                }
+                if (showAiGatewayToken) {
+                  if (items.length > 1) items.add(const Divider(height: 1));
+                  items.add(
+                    ListTile(
+                      leading: Icon(Icons.token, color: Theme.of(context).colorScheme.secondary),
+                      title: Text(AppLocalizations.of(context)!.aiGatewayToken),
+                      subtitle: Text(AppLocalizations.of(context)!.aiGatewayTokenSubtitle),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Navigator.of(context).pushNamed('/settings-ai-gateway-token'),
+                    ),
+                  );
+                }
+                if (showChangeSupabase) {
+                  if (items.length > 1) items.add(const Divider(height: 1));
+                  items.add(
+                    ListTile(
+                      leading: Icon(Icons.storage_outlined, color: Theme.of(context).colorScheme.secondary),
+                      title: Text(AppLocalizations.of(context)!.changeSupabase),
+                      subtitle: Text(AppLocalizations.of(context)!.changeSupabaseSubtitle),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () async {
+                        final ok = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: Text(AppLocalizations.of(context)!.changeSupabaseConfirm),
+                            content: Text(AppLocalizations.of(context)!.changeSupabaseConfirmMessage),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: Text(AppLocalizations.of(context)!.cancel),
+                              ),
+                              FilledButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                child: Text(AppLocalizations.of(context)!.changeSupabase),
+                              ),
+                            ],
                           ),
-                          FilledButton(
-                            onPressed: () => Navigator.pop(ctx, true),
-                            child: Text(AppLocalizations.of(context)!.changeSupabase),
-                          ),
-                        ],
-                      ),
-                    );
-                    if (ok != true || !context.mounted) return;
-                    await SupabaseStorage().clearForCustomBackend();
-                    await Supabase.instance.client.auth.signOut();
-                    if (context.mounted) {
-                      SystemNavigator.pop();
-                    }
-                  },
-                ),
-              ],
+                        );
+                        if (ok != true || !context.mounted) return;
+                        await SupabaseStorage().clearForCustomBackend();
+                        await Supabase.instance.client.auth.signOut();
+                        if (context.mounted) {
+                          SystemNavigator.pop();
+                        }
+                      },
+                    ),
+                  );
+                }
+                return Column(children: items);
+              },
             ),
           ),
           const SizedBox(height: 24),

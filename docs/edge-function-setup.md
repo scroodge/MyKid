@@ -54,7 +54,7 @@ The `send-invite-email` Edge Function automatically sends email invitations when
 
 4. **Update Email From Address**:
    - Edit `supabase/functions/send-invite-email/index.ts`
-   - Change `'MyKid <invites@mykid.app>'` to your verified domain
+   - Change `'MyKid <invites@mykid.life>'` to your verified domain (must be verified in Resend)
    - Or use Resend's test domain: `'onboarding@resend.dev'` (for testing)
 
 5. **Deploy Function** (this project uses Publishable/Secret keys — always use `--no-verify-jwt`):
@@ -101,7 +101,7 @@ supabase functions deploy <function-name> --no-verify-jwt
 ## Environment Variables
 
 - `RESEND_API_KEY` - Required if using Resend
-- `APP_URL` - Optional, for web invite links (defaults to `https://mykid.app`)
+- `APP_URL` - Optional, for web invite links (defaults to `https://mykid.life`)
 - `SUPABASE_URL` - Automatically set by Supabase
 - `PUBLISHABLE_KEY` - Set in Edge Function secrets (publishable key; used for user verification in functions)
 - `SUPABASE_SERVICE_ROLE_KEY` - Secret key for privileged server-side access (DB, admin). Use only in Edge Functions/servers, never in the app.

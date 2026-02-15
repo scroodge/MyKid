@@ -881,16 +881,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planBasic => 'Basic';
 
   @override
+  String get planBasicDescription => '10 GB Immich, no AI';
+
+  @override
   String get planBasicPrice => '\$6/month';
 
   @override
   String get planPremium => 'Premium';
 
   @override
+  String get planPremiumDescription => '20 GB Immich + AI';
+
+  @override
   String get planPremiumPrice => '\$13/month';
 
   @override
   String get startTrial7Days => '7 days free';
+
+  @override
+  String get upgradeToPremium => 'Upgrade to Premium';
+
+  @override
+  String get manageSubscription => 'Manage';
+
+  @override
+  String get manageSubscriptionDialogContent =>
+      'To cancel or change your plan, use the Stripe Customer Portal. A direct link will be available in a future update.';
+
+  @override
+  String get currentPlan => 'Current plan';
 
   @override
   String get subscriptionSuccess => 'Trial started';
