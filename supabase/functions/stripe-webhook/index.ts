@@ -87,6 +87,28 @@ async function createImmichUserAndKey(
   return { userId: user.id, apiKey }
 }
 
+async function updateImmichUserQuota(
+  baseUrl: string,
+  adminApiKey: string,
+  immichUserId: string,
+  quotaBytes: number
+): Promise<boolean> {
+  const base = baseUrl.replace(/\/$/, '')
+  const res = await fetch(`${base}/api/admin/users/${immichUserId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': adminApiKey,
+    },
+    body: JSON.stringify({ quotaSizeInBytes: quotaBytes }),
+  })
+  if (!res.ok) {
+    console.error('Immich update quota failed:', res.status, await res.text())
+    return false
+  }
+  return true
+}
+
 async function deleteImmichUser(baseUrl: string, adminApiKey: string, immichUserId: string): Promise<void> {
   const base = baseUrl.replace(/\/$/, '')
   await fetch(`${base}/api/admin/users/${immichUserId}`, {
@@ -245,7 +267,14 @@ serve(async (req) => {
       if (planId === 'premium' && userId) {
         await ensureAiGatewayToken(supabase, userId)
       }
-      if (!alreadyHasImmich) {
+      if (alreadyHasImmich) {
+        const immichUrl = Deno.env.get('IMMICH_SERVER_URL')
+        const immichAdminKey = Deno.env.get('IMMICH_ADMIN_API_KEY')
+        if (immichUrl && immichAdminKey) {
+          const quotaBytes = storageGb * 1024 * 1024 * 1024
+          await updateImmichUserQuota(immichUrl, immichAdminKey, alreadyHasImmich, quotaBytes)
+        }
+      } else {
         const immichUrl = Deno.env.get('IMMICH_SERVER_URL')
         const immichAdminKey = Deno.env.get('IMMICH_ADMIN_API_KEY')
         if (immichUrl && immichAdminKey && userId) {
