@@ -498,6 +498,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     );
                     if (ok != true || !context.mounted) return;
+                    if (!context.mounted) return;
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (ctx) => PopScope(
+                        canPop: false,
+                        child: AlertDialog(
+                          content: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                              const SizedBox(width: 16),
+                              Flexible(child: Text(AppLocalizations.of(context)!.deleteAccount)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
                     try {
                       if (_mykidApi.isConfigured) {
                         await _mykidApi.deleteAccount();
@@ -506,6 +528,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         if (res.status != 200 || res.data?['success'] != true) {
                           final err = res.data?['error'] ?? res.data?['details'] ?? res.data?.toString() ?? '';
                           final status = res.status;
+                          if (context.mounted) Navigator.of(context).pop();
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
@@ -518,12 +541,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         }
                       }
                       if (!context.mounted) return;
+                      Navigator.of(context).pop();
+                      if (!context.mounted) return;
                       await Supabase.instance.client.auth.signOut();
                       if (context.mounted) {
                         Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
                       }
                     } catch (e, st) {
                       debugPrint('delete-account error: $e\n$st');
+                      if (context.mounted) Navigator.of(context).pop();
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
