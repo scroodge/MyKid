@@ -44,6 +44,7 @@ Optional paid plans: **Basic** (10 GB Immich, no AI) and **Premium** (20 GB Immi
 - After checkout, Stripe sends webhooks; `stripe-webhook` upserts `subscriptions`, provisions an Immich user (quota 10/20 GB), then writes Immich URL + API key into `household_settings` via `set_household_immich_config_for_managed`. On upgrade (Basic→Premium), it updates the existing Immich user's quota from 10 to 20 GB. For Premium plan, it also creates an AI Gateway token (`ai_gateway_tokens` + Vault) so ai-proxy can forward per-user token to the gateway.
 - On cancel/expire, webhook sets `subscriptions.status = 'expired'`, deletes user data (journal, children, household), and deletes the Immich user via Admin API.
 - “Generate description” in the journal uses own AI keys if configured; otherwise, if the user has an active Premium subscription, it calls the `ai-proxy` Edge Function (which checks subscription and forwards to OpenAI).
+- **Manage (cancel / change plan):** The “Manage” button on the subscription screen calls the `create-portal-session` Edge Function, which returns a Stripe Customer Portal URL. The app opens it in the browser; the user can cancel or change plan there. Configure the portal in [Stripe Dashboard → Billing → Customer portal](https://dashboard.stripe.com/settings/billing/portal).
 
 ---
 

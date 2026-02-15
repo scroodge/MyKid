@@ -17,6 +17,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   SubscriptionInfo? _subscription;
   bool _loading = true;
   String? _creatingCheckoutForPlan; // 'basic' | 'premium' — only this button shows loading
+  bool _openingPortal = false;
   String? _error;
 
   @override
@@ -63,8 +64,14 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
     if (isCurrentPlan) {
       return OutlinedButton(
-        onPressed: () => _showManageSubscription(),
-        child: Text(l10n.manageSubscription),
+        onPressed: _openingPortal ? null : () => _showManageSubscription(),
+        child: _openingPortal
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : Text(l10n.manageSubscription),
       );
     }
     if (currentPlan == 'basic' && planId == 'premium') {
@@ -82,20 +89,56 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     return const SizedBox.shrink();
   }
 
-  void _showManageSubscription() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.manageSubscription),
-        content: Text(AppLocalizations.of(context)!.manageSubscriptionDialogContent),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(AppLocalizations.of(context)!.cancel),
-          ),
-        ],
-      ),
-    );
+  Future<void> _showManageSubscription() async {
+    if (_openingPortal) return;
+    setState(() {
+      _openingPortal = true;
+      _error = null;
+    });
+    try {
+      await Supabase.instance.client.auth.refreshSession();
+      if (!mounted) return;
+      final session = Supabase.instance.client.auth.currentSession;
+      if (session == null || session.accessToken.isEmpty) {
+        if (mounted) {
+          setState(() {
+            _openingPortal = false;
+            _error = AppLocalizations.of(context)!.sessionExpiredSignInAgain;
+          });
+        }
+        return;
+      }
+      final res = await Supabase.instance.client.functions.invoke(
+        'create-portal-session',
+        headers: {'Authorization': 'Bearer ${session.accessToken}'},
+      );
+      if (!mounted) return;
+      setState(() => _openingPortal = false);
+      if (res.status != 200) {
+        final err = res.data?['error'] ?? res.data?.toString() ?? 'Failed to open';
+        setState(() => _error = err.toString());
+        return;
+      }
+      final url = res.data?['url'] as String?;
+      if (url == null || url.isEmpty) {
+        setState(() => _error = 'No portal URL');
+        return;
+      }
+      final uri = Uri.parse(url);
+      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (mounted && launched) {
+        _load();
+      } else if (mounted && !launched) {
+        setState(() => _error = 'Could not open browser');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _openingPortal = false;
+          _error = e.toString();
+        });
+      }
+    }
   }
 
   Future<void> _startTrial(String planId) async {
