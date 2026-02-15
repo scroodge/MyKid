@@ -140,10 +140,11 @@ class _ImmichSettingsScreenState extends State<ImmichSettingsScreen> {
         });
         return;
       }
-      await _storage.setServerUrl(config.serverUrl);
+      final serverUrl = ImmichStorage.normalizeServerUrl(config.serverUrl) ?? config.serverUrl ?? '';
+      await _storage.setServerUrl(serverUrl);
       await _storage.setApiKey(config.apiKey);
       if (mounted) {
-        _urlController.text = config.serverUrl ?? '';
+        _urlController.text = serverUrl;
         _apiKeyController.text = config.apiKey ?? '';
         setState(() {
           _loading = false;

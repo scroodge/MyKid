@@ -91,7 +91,7 @@ serve(async (req) => {
       )
     }
 
-    let gatewayUrl = Deno.env.get('GATEWAY_URL') ?? ''
+    let gatewayUrl = (Deno.env.get('GATEWAY_URL') ?? '').trim()
     if (gatewayUrl && !/^https?:\/\//i.test(gatewayUrl)) {
       gatewayUrl = `https://${gatewayUrl.replace(/^\/*/, '')}`
     }
@@ -127,7 +127,7 @@ serve(async (req) => {
     }
 
     const url = useGateway
-      ? `${gatewayUrl.replace(/\/$/, '')}/v1/chat/completions`
+      ? `${gatewayUrl.replace(/\/$/, '').trim()}/v1/chat/completions`
       : 'https://api.openai.com/v1/chat/completions'
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',

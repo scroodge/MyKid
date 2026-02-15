@@ -4,6 +4,20 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+/** Normalize Immich URL: always store without explicit port (use 443/80 default) so a wrong port in env never gets stored. */
+function normalizeImmichUrl(url: string | undefined): string | undefined {
+  if (!url || typeof url !== 'string') return undefined
+  const trimmed = url.trim()
+  if (!trimmed) return undefined
+  try {
+    const u = new URL(trimmed.startsWith('http') ? trimmed : `https://${trimmed}`)
+    const scheme = u.protocol === 'http:' ? 'http' : 'https'
+    return `${scheme}://${u.hostname}`
+  } catch {
+    return trimmed
+  }
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, stripe-signature',
@@ -268,14 +282,14 @@ serve(async (req) => {
         await ensureAiGatewayToken(supabase, userId)
       }
       if (alreadyHasImmich) {
-        const immichUrl = Deno.env.get('IMMICH_SERVER_URL')
+        const immichUrl = normalizeImmichUrl(Deno.env.get('IMMICH_SERVER_URL'))
         const immichAdminKey = Deno.env.get('IMMICH_ADMIN_API_KEY')
         if (immichUrl && immichAdminKey) {
           const quotaBytes = storageGb * 1024 * 1024 * 1024
           await updateImmichUserQuota(immichUrl, immichAdminKey, alreadyHasImmich, quotaBytes)
         }
       } else {
-        const immichUrl = Deno.env.get('IMMICH_SERVER_URL')
+        const immichUrl = normalizeImmichUrl(Deno.env.get('IMMICH_SERVER_URL'))
         const immichAdminKey = Deno.env.get('IMMICH_ADMIN_API_KEY')
         if (immichUrl && immichAdminKey && userId) {
           const { data: u } = await supabase.auth.admin.getUserById(userId)
@@ -307,7 +321,7 @@ serve(async (req) => {
       const immichUserId = (row as { immich_user_id?: string } | null)?.immich_user_id
       await supabase.from('subscriptions').update({ status: 'expired', updated_at: new Date().toISOString() }).eq('user_id', uid)
       await deleteUserData(supabase, uid)
-      const baseUrl = Deno.env.get('IMMICH_SERVER_URL')
+      const baseUrl = normalizeImmichUrl(Deno.env.get('IMMICH_SERVER_URL'))
       const adminKey = Deno.env.get('IMMICH_ADMIN_API_KEY')
       if (baseUrl && adminKey && immichUserId) {
         await deleteImmichUser(baseUrl, adminKey, immichUserId)
