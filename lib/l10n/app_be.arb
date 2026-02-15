@@ -297,6 +297,7 @@
   "exportLinkSent": "Спасылка на спампаванне адпраўлена на вашу пошту",
   "deleteAccountHintExport": "Усе даныя будуць выдалены беззваротна. Рэкамендуем спачатку спампаваць свае даныя.",
   "deleteAccountDataLostWarning": "Пасля выдалення даныя аднавіць немагчыма.",
+  "deleteAccountRetrieveFilesInfo": "Акаўнт выдалены. Фота захоўваліся ў Immich. Каб іх атрымаць: пры managed Immich (immich.mykid.life) напішыце ў падтрымку; пры сваім Immich — увайдзіце на ваш сервер і спампавайце фота.",
   "aiProviders": "AI Правайдэры",
   "aiProvidersSubtitle": "Наладзіць AI для аналізу фота",
   "subscription": "Падпіска",

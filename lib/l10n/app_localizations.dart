@@ -1696,6 +1696,12 @@ abstract class AppLocalizations {
   /// **'Data cannot be recovered after deletion.'**
   String get deleteAccountDataLostWarning;
 
+  /// No description provided for @deleteAccountRetrieveFilesInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deleted. Your photos were stored in Immich. To retrieve them: if you used managed Immich (immich.mykid.life), contact support. If you use your own Immich server, log in at your server URL to download your photos.'**
+  String get deleteAccountRetrieveFilesInfo;
+
   /// No description provided for @aiProviders.
   ///
   /// In en, this message translates to:

@@ -886,6 +886,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Data cannot be recovered after deletion.';
 
   @override
+  String get deleteAccountRetrieveFilesInfo =>
+      'Account deleted. Your photos were stored in Immich. To retrieve them: if you used managed Immich (immich.mykid.life), contact support. If you use your own Immich server, log in at your server URL to download your photos.';
+
+  @override
   String get aiProviders => 'AI Providers';
 
   @override

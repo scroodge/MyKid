@@ -886,6 +886,10 @@ class AppLocalizationsBe extends AppLocalizations {
       'Пасля выдалення даныя аднавіць немагчыма.';
 
   @override
+  String get deleteAccountRetrieveFilesInfo =>
+      'Акаўнт выдалены. Фота захоўваліся ў Immich. Каб іх атрымаць: пры managed Immich (immich.mykid.life) напішыце ў падтрымку; пры сваім Immich — увайдзіце на ваш сервер і спампавайце фота.';
+
+  @override
   String get aiProviders => 'AI Правайдэры';
 
   @override

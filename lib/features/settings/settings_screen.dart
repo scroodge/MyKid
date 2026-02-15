@@ -543,6 +543,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       if (!context.mounted) return;
                       Navigator.of(context).pop();
                       if (!context.mounted) return;
+                      await showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: Text(AppLocalizations.of(context)!.deleteAccount),
+                          content: Text(
+                            AppLocalizations.of(context)!.deleteAccountRetrieveFilesInfo,
+                          ),
+                          actions: [
+                            FilledButton(
+                              onPressed: () => Navigator.pop(ctx),
+                              child: Text(MaterialLocalizations.of(ctx).okButtonLabel),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (!context.mounted) return;
                       await Supabase.instance.client.auth.signOut();
                       if (context.mounted) {
                         Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);

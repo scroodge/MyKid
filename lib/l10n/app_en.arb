@@ -381,6 +381,7 @@
   "exportLinkSent": "Download link has been sent to your email",
   "deleteAccountHintExport": "All data will be permanently deleted. We recommend downloading your data first.",
   "deleteAccountDataLostWarning": "Data cannot be recovered after deletion.",
+  "deleteAccountRetrieveFilesInfo": "Account deleted. Your photos were stored in Immich. To retrieve them: if you used managed Immich (immich.mykid.life), contact support. If you use your own Immich server, log in at your server URL to download your photos.",
   "aiProviders": "AI Providers",
   "aiProvidersSubtitle": "Configure AI for photo analysis",
   "subscription": "Subscription",

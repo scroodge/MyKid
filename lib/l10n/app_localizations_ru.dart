@@ -887,6 +887,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'После удаления данные восстановить нельзя.';
 
   @override
+  String get deleteAccountRetrieveFilesInfo =>
+      'Аккаунт удалён. Фото хранились в Immich. Чтобы их получить: при managed Immich (immich.mykid.life) напишите в поддержку; при своём Immich — войдите на ваш сервер и скачайте фото.';
+
+  @override
   String get aiProviders => 'AI Провайдеры';
 
   @override

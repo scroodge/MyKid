@@ -297,6 +297,7 @@
   "exportLinkSent": "Ссылка на скачивание отправлена на вашу почту",
   "deleteAccountHintExport": "Все данные будут удалены безвозвратно. Рекомендуем сначала скачать свои данные.",
   "deleteAccountDataLostWarning": "После удаления данные восстановить нельзя.",
+  "deleteAccountRetrieveFilesInfo": "Аккаунт удалён. Фото хранились в Immich. Чтобы их получить: при managed Immich (immich.mykid.life) напишите в поддержку; при своём Immich — войдите на ваш сервер и скачайте фото.",
   "aiProviders": "AI Провайдеры",
   "aiProvidersSubtitle": "Настроить AI для анализа фото",
   "subscription": "Подписка",
