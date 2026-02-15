@@ -1,4 +1,4 @@
-// Edge Function: AI proxy for Premium subscribers. Verifies JWT and plan_id=premium, then forwards to your AI Gateway.
+// Edge Function: AI proxy for Premium subscribers. Verifies JWT and plan_id=premium (own or household), then forwards to your AI Gateway.
 // Requires: PUBLISHABLE_KEY (user verification), SUPABASE_SERVICE_ROLE_KEY (subscription/DB), and either GATEWAY_URL+GATEWAY_TOKEN or OPENAI_API_KEY.
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
@@ -50,7 +50,39 @@ serve(async (req) => {
 
     const planId = (sub as { plan_id?: string } | null)?.plan_id
     const status = (sub as { status?: string } | null)?.status
-    const allowed = planId === 'premium' && (status === 'trialing' || status === 'active')
+    let allowed = planId === 'premium' && (status === 'trialing' || status === 'active')
+    let tokenUserId = user.id // user whose token to use (self or premium household member)
+
+    if (!allowed) {
+      // Check if any household member has premium (family sharing)
+      const { data: members } = await supabaseAdmin
+        .from('household_members')
+        .select('household_id')
+        .eq('user_id', user.id)
+        .limit(1)
+      const householdId = (members as { household_id: string }[] | null)?.[0]?.household_id
+      if (householdId) {
+        const { data: householdMemberIds } = await supabaseAdmin
+          .from('household_members')
+          .select('user_id')
+          .eq('household_id', householdId)
+        const userIds = ((householdMemberIds as { user_id: string }[] | null) ?? []).map((r) => r.user_id)
+        if (userIds.length > 0) {
+          const { data: householdSubs } = await supabaseAdmin
+            .from('subscriptions')
+            .select('user_id')
+            .in('user_id', userIds)
+            .eq('plan_id', 'premium')
+            .in('status', ['trialing', 'active'])
+            .limit(1)
+          const premiumMember = (householdSubs as { user_id: string }[] | null)?.[0]
+          if (premiumMember) {
+            allowed = true
+            tokenUserId = premiumMember.user_id
+          }
+        }
+      }
+    }
 
     if (!allowed) {
       return new Response(
@@ -65,7 +97,7 @@ serve(async (req) => {
 
     let gatewayToken = sharedGatewayToken
     if (gatewayUrl) {
-      const { data: perUserToken } = await supabaseAdmin.rpc('get_ai_gateway_plain_token_for_user', { p_user_id: user.id })
+      const { data: perUserToken } = await supabaseAdmin.rpc('get_ai_gateway_plain_token_for_user', { p_user_id: tokenUserId })
       if (perUserToken && typeof perUserToken === 'string' && perUserToken.trim().length > 0) {
         gatewayToken = perUserToken.trim()
       }

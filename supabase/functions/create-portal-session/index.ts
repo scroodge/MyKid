@@ -43,7 +43,8 @@ serve(async (req) => {
       returnUrl = returnUrl.startsWith('//') ? `https:${returnUrl}` : `https://${returnUrl}`
     }
     if (returnUrl.endsWith('/')) returnUrl = returnUrl.slice(0, -1)
-    // Stripe portal requires https return_url; use web URL for non-https (e.g. mykid://)
+    // Stripe Customer Portal requires https for return_url. If APP_URL is a deeplink (mykid://),
+    // we use https://mykid.life/subscription — that page should redirect to mykid:// so the app opens.
     if (!/^https:\/\//i.test(returnUrl)) {
       returnUrl = 'https://mykid.life'
     }

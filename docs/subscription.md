@@ -46,6 +46,23 @@ Optional paid plans: **Basic** (10 GB Immich, no AI) and **Premium** (20 GB Immi
 - “Generate description” in the journal uses own AI keys if configured; otherwise, if the user has an active Premium subscription, it calls the `ai-proxy` Edge Function (which checks subscription and forwards to OpenAI).
 - **Manage (cancel / change plan):** The “Manage” button on the subscription screen calls the `create-portal-session` Edge Function, which returns a Stripe Customer Portal URL. The app opens it in the browser; the user can cancel or change plan there. Configure the portal in [Stripe Dashboard → Billing → Customer portal](https://dashboard.stripe.com/settings/billing/portal).
 
+**Portal return to app:** Stripe Customer Portal requires an **https** `return_url`. If `APP_URL` is a deeplink (`mykid://`), the function uses `https://mykid.life/subscription` as return URL. So after upgrade/cancel in the portal the user lands on that page in the browser. To send them back to the app, host a page at `https://mykid.life/subscription` that redirects to the app, e.g.:
+
+```html
+<!DOCTYPE html>
+<html><head>
+  <meta charset="utf-8">
+  <meta http-equiv="refresh" content="0;url=mykid://subscription-success">
+  <title>Return to MyKid</title>
+</head><body>
+  <p>Opening the app…</p>
+  <script>window.location.href = 'mykid://subscription-success';</script>
+  <p><a href="mykid://subscription-success">Tap here if the app did not open</a>.</p>
+</body></html>
+```
+
+Alternatively, set up [Universal Links](https://developer.apple.com/documentation/xcode/supporting-universal-links-in-your-app) for `mykid.life` so that opening `https://mykid.life/subscription` opens the app.
+
 ---
 
 ## Пошаговое тестирование
