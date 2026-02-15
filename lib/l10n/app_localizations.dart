@@ -1810,6 +1810,30 @@ abstract class AppLocalizations {
   /// **'Premium subscription required for AI'**
   String get premiumRequiredForAi;
 
+  /// No description provided for @setupRequiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup needed'**
+  String get setupRequiredTitle;
+
+  /// No description provided for @setupRequiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'To add entries with photos, activate a subscription (trial) or set up your own Immich server in Settings.'**
+  String get setupRequiredMessage;
+
+  /// No description provided for @activateSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate subscription'**
+  String get activateSubscription;
+
+  /// No description provided for @setupOwnServers.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up my servers'**
+  String get setupOwnServers;
+
   /// No description provided for @sessionExpiredSignInAgain.
   ///
   /// In en, this message translates to:

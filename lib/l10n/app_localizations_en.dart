@@ -945,6 +945,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get premiumRequiredForAi => 'Premium subscription required for AI';
 
   @override
+  String get setupRequiredTitle => 'Setup needed';
+
+  @override
+  String get setupRequiredMessage =>
+      'To add entries with photos, activate a subscription (trial) or set up your own Immich server in Settings.';
+
+  @override
+  String get activateSubscription => 'Activate subscription';
+
+  @override
+  String get setupOwnServers => 'Set up my servers';
+
+  @override
   String get sessionExpiredSignInAgain =>
       'Session expired. Please sign out and sign in again.';
 

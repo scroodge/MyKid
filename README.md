@@ -218,7 +218,7 @@ flutter pub get
 ./run_with_env.sh
 ```
 
-The script reads `SUPABASE_URL` and `PUBLISHABLE_KEY` from `.env` and passes them to `flutter run`. You can add device flags: `./run_with_env.sh -d macos`.
+The script reads `SUPABASE_URL` and `PUBLISHABLE_KEY` from `.env` and passes them to `flutter run`. You can add device flags: `./run_with_env.sh -d macos`. To build a release APK with the same `.env`, run `./build_apk_with_env.sh`; output: `build/app/outputs/flutter-apk/app-release.apk`.
 
 Or pass defines explicitly:
 

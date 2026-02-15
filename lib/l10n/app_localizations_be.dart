@@ -945,6 +945,19 @@ class AppLocalizationsBe extends AppLocalizations {
   String get premiumRequiredForAi => 'Для AI патрэбна падпіска Прэміум';
 
   @override
+  String get setupRequiredTitle => 'Патрэбна налада';
+
+  @override
+  String get setupRequiredMessage =>
+      'Каб дадаваць запісы з фота, актывуйце падпіску (трыял) або наладзьце свой сервер Immich у Наладах.';
+
+  @override
+  String get activateSubscription => 'Актываваць падпіску';
+
+  @override
+  String get setupOwnServers => 'Наладзіць свае серверы';
+
+  @override
   String get sessionExpiredSignInAgain =>
       'Сесія скончылася. Выйдзіце і увайдзіце зноў.';
 

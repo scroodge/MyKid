@@ -946,6 +946,19 @@ class AppLocalizationsRu extends AppLocalizations {
   String get premiumRequiredForAi => 'Для AI нужна подписка Премиум';
 
   @override
+  String get setupRequiredTitle => 'Нужна настройка';
+
+  @override
+  String get setupRequiredMessage =>
+      'Чтобы добавлять записи с фото, активируйте подписку (триал) или настройте свой сервер Immich в Настройках.';
+
+  @override
+  String get activateSubscription => 'Активировать подписку';
+
+  @override
+  String get setupOwnServers => 'Настроить свои серверы';
+
+  @override
   String get sessionExpiredSignInAgain =>
       'Сессия истекла. Выйдите и войдите снова.';
 
