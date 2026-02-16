@@ -10,6 +10,7 @@ import '../../core/immich_client.dart';
 import '../../core/immich_service.dart';
 import '../../data/child.dart';
 import '../../data/children_repository.dart';
+import '../../data/subscription_repository.dart';
 import '../../l10n/app_localizations.dart';
 
 const String _avatarsBucket = 'avatars';
@@ -26,6 +27,7 @@ class ChildEditScreen extends StatefulWidget {
 class _ChildEditScreenState extends State<ChildEditScreen> {
   final _repo = ChildrenRepository();
   final _immich = ImmichService();
+  final _subscriptionRepo = SubscriptionRepository();
   final _nameController = TextEditingController();
   DateTime? _dateOfBirth;
   bool _saving = false;
@@ -35,6 +37,7 @@ class _ChildEditScreenState extends State<ChildEditScreen> {
   String? _immichPersonId;
   String? _immichPersonName;
   Uint8List? _pendingAvatarBytes;
+  bool _isPremium = false;
 
   @override
   void initState() {
@@ -46,6 +49,12 @@ class _ChildEditScreenState extends State<ChildEditScreen> {
       _immichPersonId = widget.child!.immichPersonId;
       if (_immichPersonId != null) _loadImmichPersonName();
     }
+    _loadSubscription();
+  }
+
+  Future<void> _loadSubscription() async {
+    final sub = await _subscriptionRepo.getMySubscription();
+    if (mounted) setState(() => _isPremium = sub != null && sub.isActive && sub.isPremium);
   }
 
   Future<void> _loadImmichPersonName() async {
@@ -61,7 +70,18 @@ class _ChildEditScreenState extends State<ChildEditScreen> {
     }
   }
 
+  void _showPremiumUpsell() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppLocalizations.of(context)!.premiumRequiredForAi)),
+    );
+    Navigator.of(context).pushNamed('/subscription');
+  }
+
   Future<void> _pickImmichPerson() async {
+    if (!_isPremium && _immichPersonId == null) {
+      _showPremiumUpsell();
+      return;
+    }
     final client = await _immich.getClient();
     if (client == null) {
       if (mounted) {
@@ -430,13 +450,26 @@ class _ChildEditScreenState extends State<ChildEditScreen> {
           if (widget.child != null) ...[
             const SizedBox(height: 8),
             ListTile(
-              leading: const Icon(Icons.face),
-              title: Text(AppLocalizations.of(context)!.linkToImmichPerson),
+              leading: Icon(
+                Icons.face,
+                color: (!_isPremium && _immichPersonId == null)
+                    ? Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5)
+                    : null,
+              ),
+              title: Text(
+                AppLocalizations.of(context)!.linkToImmichPerson,
+                style: (!_isPremium && _immichPersonId == null)
+                    ? TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7))
+                    : null,
+              ),
               subtitle: Text(
                 _immichPersonId != null
                     ? AppLocalizations.of(context)!.immichPersonLinked(
                         _immichPersonName ?? '?')
                     : AppLocalizations.of(context)!.linkToImmichPersonSubtitle,
+                style: (!_isPremium && _immichPersonId == null)
+                    ? TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7))
+                    : null,
               ),
               trailing: _immichPersonId != null
                   ? TextButton(
@@ -446,7 +479,12 @@ class _ChildEditScreenState extends State<ChildEditScreen> {
                       }),
                       child: Text(AppLocalizations.of(context)!.unlinkImmichPerson),
                     )
-                  : const Icon(Icons.chevron_right),
+                  : Icon(
+                      Icons.chevron_right,
+                      color: (!_isPremium && _immichPersonId == null)
+                          ? Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5)
+                          : null,
+                    ),
               onTap: _pickImmichPerson,
             ),
           ],
