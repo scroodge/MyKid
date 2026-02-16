@@ -337,6 +337,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       final config = await AppConfig.load();
       final redirectUrl = '${config.supabaseUrl}/functions/v1/auth-confirm';
       
+      // Debug: log the redirect URL
+      debugPrint('Onboarding emailRedirectTo: $redirectUrl');
+      
       await Supabase.instance.client.auth.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text,

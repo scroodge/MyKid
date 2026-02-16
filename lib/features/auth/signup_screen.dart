@@ -42,6 +42,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
         redirectUrl += '?invite_token=$inviteToken';
       }
       
+      // Debug: log the redirect URL
+      debugPrint('SignUp emailRedirectTo: $redirectUrl');
+      
       await Supabase.instance.client.auth.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text,

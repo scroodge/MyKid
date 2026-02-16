@@ -18,6 +18,18 @@ supabase functions deploy auth-confirm --no-verify-jwt
 ```
 (This project uses Publishable/Secret keys; see [Supabase API keys](https://supabase.com/docs/guides/api/api-keys).)
 
+## Supabase Dashboard Configuration
+
+**IMPORTANT:** You must add the Edge Function URL to the allowed Redirect URLs in Supabase Dashboard:
+
+1. Go to **Supabase Dashboard** → **Authentication** → **URL Configuration**
+2. Add to **Redirect URLs**:
+   - `https://YOUR_PROJECT.supabase.co/functions/v1/auth-confirm`
+   - `https://mykid.life/email-confirm`
+   - `mykid://auth/confirm` (for deep link support)
+
+Without these URLs in the allowed list, Supabase will ignore `emailRedirectTo` parameter and use Site URL instead, which may cause incorrect redirects.
+
 ## Usage
 
 The function is automatically called when users click the email confirmation link. The redirect URL is set in:
