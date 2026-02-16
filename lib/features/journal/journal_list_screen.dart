@@ -156,8 +156,8 @@ class _JournalListScreenState extends State<JournalListScreen> {
     }
     final meta = await readPhotoMetadataFromBytes(bytes);
     final date = meta.date ?? DateTime.now();
-    String? location = meta.location;
-    if (location == null || location.isEmpty) location = await getCurrentPlaceName();
+    // Location only from photo EXIF; do not fall back to phone GPS for gallery
+    final String? location = meta.location;
     final filename = picked.name.isEmpty ? 'image.jpg' : picked.name;
     if (!mounted) {
       setState(() => _creating = false);
