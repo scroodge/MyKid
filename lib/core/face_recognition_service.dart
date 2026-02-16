@@ -172,11 +172,40 @@ class FaceRecognitionService {
     final detected = await detectFaces(bytes);
     if (detected.isEmpty) return null;
     final best = detected.first;
+    
+    // Create thumbnail for display (max 200x200)
+    Uint8List? thumbnailBytes;
+    try {
+      final image = img.decodeImage(bytes);
+      if (image != null) {
+        // Calculate size maintaining aspect ratio
+        final maxSize = 200;
+        int thumbWidth = image.width;
+        int thumbHeight = image.height;
+        if (thumbWidth > thumbHeight) {
+          if (thumbWidth > maxSize) {
+            thumbHeight = (thumbHeight * maxSize / thumbWidth).round();
+            thumbWidth = maxSize;
+          }
+        } else {
+          if (thumbHeight > maxSize) {
+            thumbWidth = (thumbWidth * maxSize / thumbHeight).round();
+            thumbHeight = maxSize;
+          }
+        }
+        final thumbnail = img.copyResize(image, width: thumbWidth, height: thumbHeight);
+        thumbnailBytes = Uint8List.fromList(img.encodeJpg(thumbnail, quality: 85));
+      }
+    } catch (_) {
+      // If thumbnail creation fails, continue without it
+    }
+    
     final fe = FaceEmbedding(
       id: _uuid.v4(),
       embedding: best.embedding,
       photoId: photoId,
       createdAt: DateTime.now(),
+      thumbnailBytes: thumbnailBytes,
     );
     await FaceEmbeddingsCache.addForChild(childId, fe);
     return fe;

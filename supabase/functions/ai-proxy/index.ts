@@ -166,10 +166,19 @@ serve(async (req) => {
     const openaiKey = Deno.env.get('OPENAI_API_KEY')
 
     let gatewayToken = sharedGatewayToken
+    let tokenId: string | null = null
     if (gatewayUrl) {
       const { data: perUserToken } = await supabaseAdmin.rpc('get_ai_gateway_plain_token_for_user', { p_user_id: tokenUserId })
       if (perUserToken && typeof perUserToken === 'string' && perUserToken.trim().length > 0) {
         gatewayToken = perUserToken.trim()
+        // Get token_id for usage logging
+        const { data: tokenRow } = await supabaseAdmin
+          .from('ai_gateway_tokens')
+          .select('id')
+          .eq('user_id', tokenUserId)
+          .eq('name', 'default')
+          .maybeSingle()
+        tokenId = (tokenRow as { id?: string } | null)?.id ?? null
       }
     }
 
@@ -213,6 +222,40 @@ serve(async (req) => {
     })
 
     const text = await res.text()
+    
+    // Log usage if request was successful (200) and we have usage data
+    // Only log if we have a token_id (per-user token exists)
+    if (res.status === 200 && text && tokenId) {
+      try {
+        const responseData = JSON.parse(text)
+        const usage = responseData.usage as { prompt_tokens?: number; completion_tokens?: number } | undefined
+        const model = (body.model as string) || (responseData.model as string) || 'unknown'
+        
+        if (usage && (usage.prompt_tokens || usage.completion_tokens)) {
+          // Log usage (ignore errors - don't fail the request if logging fails)
+          await supabaseAdmin
+            .from('ai_gateway_usage')
+            .insert({
+              token_id: tokenId,
+              user_id: tokenUserId,
+              input_tokens: usage.prompt_tokens ?? 0,
+              output_tokens: usage.completion_tokens ?? 0,
+              model: model,
+            })
+            .then(() => {
+              // Success - usage logged
+            })
+            .catch((err) => {
+              console.error('Failed to log usage:', err)
+              // Continue - don't fail the request
+            })
+        }
+      } catch (parseErr) {
+        // If response is not JSON or parsing fails, skip logging
+        console.error('Failed to parse response for usage logging:', parseErr)
+      }
+    }
+    
     return new Response(text, {
       status: res.status,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

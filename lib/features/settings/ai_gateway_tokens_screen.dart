@@ -78,6 +78,13 @@ class _AiGatewayTokensScreenState extends State<AiGatewayTokensScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.aiGatewayToken),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _usageLoading ? null : () => _loadUsage(breakdown: _showBreakdown),
+            tooltip: 'Обновить статистику',
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),

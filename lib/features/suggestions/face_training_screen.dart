@@ -28,6 +28,7 @@ class _FaceTrainingScreenState extends State<FaceTrainingScreen> {
   bool _adding = false;
   String? _error;
   int _refCount = 0;
+  List<FaceEmbedding> _referencePhotos = [];
 
   @override
   void initState() {
@@ -55,9 +56,13 @@ class _FaceTrainingScreenState extends State<FaceTrainingScreen> {
         setState(() {
           _children = list;
           _selectedChild = selected;
-          _refCount = selected != null
-              ? FaceEmbeddingsCache.getForChild(selected.id).length
-              : 0;
+          if (selected != null) {
+            _referencePhotos = FaceEmbeddingsCache.getForChild(selected.id);
+            _refCount = _referencePhotos.length;
+          } else {
+            _referencePhotos = [];
+            _refCount = 0;
+          }
           _loading = false;
         });
       }
@@ -95,7 +100,10 @@ class _FaceTrainingScreenState extends State<FaceTrainingScreen> {
     if (confirmed != true || !mounted) return;
     await FaceEmbeddingsCache.removeForChild(child.id);
     if (mounted) {
-      setState(() => _refCount = 0);
+      setState(() {
+        _referencePhotos = [];
+        _refCount = 0;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.replaceReferencePhotosDone)),
       );
@@ -143,10 +151,11 @@ class _FaceTrainingScreenState extends State<FaceTrainingScreen> {
           skipped++;
         }
         
-        // Update count after each photo for better UX
+        // Update count and photos list after each photo for better UX
         if (mounted) {
           setState(() {
-            _refCount = FaceEmbeddingsCache.getForChild(child.id).length;
+            _referencePhotos = FaceEmbeddingsCache.getForChild(child.id);
+            _refCount = _referencePhotos.length;
           });
         }
       }
@@ -238,7 +247,8 @@ class _FaceTrainingScreenState extends State<FaceTrainingScreen> {
                         if (s.isNotEmpty) {
                           setState(() {
                             _selectedChild = s.first;
-                            _refCount = FaceEmbeddingsCache.getForChild(s.first.id).length;
+                            _referencePhotos = FaceEmbeddingsCache.getForChild(s.first.id);
+                            _refCount = _referencePhotos.length;
                           });
                         }
                       },
@@ -255,6 +265,58 @@ class _FaceTrainingScreenState extends State<FaceTrainingScreen> {
                             color: Theme.of(context).colorScheme.primary,
                           ),
                     ),
+                    if (_referencePhotos.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      Text(
+                        'Добавленные фото:',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 120,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: _referencePhotos.length,
+                          itemBuilder: (context, index) {
+                            final photo = _referencePhotos[index];
+                            return Container(
+                              width: 100,
+                              margin: const EdgeInsets.only(right: 8),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                                ),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: photo.thumbnailBytes != null
+                                    ? Image.memory(
+                                        photo.thumbnailBytes!,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return Container(
+                                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                            child: Icon(
+                                              Icons.image_not_supported,
+                                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                            ),
+                                          );
+                                        },
+                                      )
+                                    : Container(
+                                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                        child: Icon(
+                                          Icons.photo,
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                        ),
+                                      ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     Row(
                       children: [

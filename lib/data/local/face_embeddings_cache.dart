@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -11,18 +12,21 @@ class FaceEmbedding {
     required this.embedding,
     required this.photoId,
     required this.createdAt,
+    this.thumbnailBytes,
   });
 
   final String id;
   final List<double> embedding;
   final String photoId;
   final DateTime createdAt;
+  final Uint8List? thumbnailBytes;
 
   Map<String, dynamic> toJson() => {
         'id': id,
         'embedding': embedding,
         'photoId': photoId,
         'createdAt': createdAt.toIso8601String(),
+        'thumbnailBytes': thumbnailBytes != null ? base64Encode(thumbnailBytes!) : null,
       };
 
   static FaceEmbedding fromJson(Map<String, dynamic> json) {
@@ -35,12 +39,21 @@ class FaceEmbedding {
         }
       }
     }
+    Uint8List? thumbnail;
+    if (json['thumbnailBytes'] != null) {
+      try {
+        thumbnail = base64Decode(json['thumbnailBytes'] as String);
+      } catch (_) {
+        thumbnail = null;
+      }
+    }
     return FaceEmbedding(
       id: json['id'] as String? ?? '',
       embedding: list,
       photoId: json['photoId'] as String? ?? '',
       createdAt:
           DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
+      thumbnailBytes: thumbnail,
     );
   }
 }
