@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -64,12 +66,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _mykidApi = MyKidApiService();
   String? _householdId;
   SubscriptionInfo? _subscription;
+  int _debugTapCount = 0;
+  Timer? _debugTapResetTimer;
 
   @override
   void initState() {
     super.initState();
     _loadHousehold();
     _loadSubscription();
+  }
+
+  @override
+  void dispose() {
+    _debugTapResetTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadHousehold() async {
@@ -480,14 +490,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const Divider(height: 1),
                 ListTile(
-                  leading: Icon(Icons.bug_report_outlined, color: Theme.of(context).colorScheme.primary),
-                  title: Text(AppLocalizations.of(context)!.debugInfo),
-                  subtitle: Text(AppLocalizations.of(context)!.debugInfoSubtitle),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.of(context).pushNamed('/debug'),
-                ),
-                const Divider(height: 1),
-                ListTile(
                   leading: Icon(Icons.info_outline, color: Theme.of(context).colorScheme.primary),
                   title: Text(AppLocalizations.of(context)!.requestAccountDeletionInstructions),
                   subtitle: Text(AppLocalizations.of(context)!.requestAccountDeletionInstructionsSubtitle),
@@ -638,41 +640,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
 
-          // Footer: app name + version
+          // Footer: app name + version (7 taps opens Debug)
           const SizedBox(height: 32),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Image.asset(
-                    Theme.of(context).brightness == Brightness.dark
-                        ? 'assets/brand/logo/mykid_logo_horizontal_dark.png'
-                        : 'assets/brand/logo/mykid_logo_text_only.png',
-                    height: 40,
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => Icon(
-                      Icons.child_care,
-                      size: 40,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+          GestureDetector(
+            onTap: () {
+              _debugTapResetTimer?.cancel();
+              _debugTapCount++;
+              if (_debugTapCount >= 7) {
+                _debugTapCount = 0;
+                Navigator.of(context).pushNamed('/debug');
+              } else {
+                _debugTapResetTimer = Timer(const Duration(seconds: 2), () {
+                  if (mounted) setState(() => _debugTapCount = 0);
+                });
+              }
+            },
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset(
+                      Theme.of(context).brightness == Brightness.dark
+                          ? 'assets/brand/logo/mykid_logo_horizontal_dark.png'
+                          : 'assets/brand/logo/mykid_logo_text_only.png',
+                      height: 40,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => Icon(
+                        Icons.child_care,
+                        size: 40,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    AppLocalizations.of(context)!.appTitle,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    AppLocalizations.of(context)!.version(SettingsScreen.appVersion),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Text(
+                      AppLocalizations.of(context)!.appTitle,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      AppLocalizations.of(context)!.version(SettingsScreen.appVersion),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
