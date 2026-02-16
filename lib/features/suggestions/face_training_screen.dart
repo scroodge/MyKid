@@ -121,6 +121,9 @@ class _FaceTrainingScreenState extends State<FaceTrainingScreen> {
 
       var added = 0;
       var skipped = 0;
+      final total = files.length;
+      
+      // Process all photos sequentially with progress feedback
       for (var i = 0; i < files.length && mounted; i++) {
         final x = files[i];
         Uint8List? bytes;
@@ -139,18 +142,26 @@ class _FaceTrainingScreenState extends State<FaceTrainingScreen> {
         } else {
           skipped++;
         }
+        
+        // Update count after each photo for better UX
+        if (mounted) {
+          setState(() {
+            _refCount = FaceEmbeddingsCache.getForChild(child.id).length;
+          });
+        }
       }
 
       if (mounted) {
         setState(() {
-          _refCount = FaceEmbeddingsCache.getForChild(child.id).length;
           _adding = false;
         });
         String message;
         if (added > 0 && skipped > 0) {
-          message = 'Добавлено $added из ${files.length}. По $skipped фото лицо не распознано — выберите фото, где лицо чётко видно в фас.';
+          message = 'Добавлено $added из $total фото. По $skipped фото лицо не распознано — выберите фото, где лицо чётко видно в фас.';
         } else if (added > 0) {
-          message = 'Добавлено $added фото для распознавания';
+          message = added == 1 
+              ? 'Добавлено $added фото для распознавания'
+              : 'Добавлено $added фото для распознавания';
         } else {
           message = 'Лицо не распознано. Выберите фото, где лицо чётко видно в фас и хорошо освещено.';
         }
@@ -257,7 +268,7 @@ class _FaceTrainingScreenState extends State<FaceTrainingScreen> {
                                     child: CircularProgressIndicator(strokeWidth: 2),
                                   )
                                 : const Icon(Icons.add_photo_alternate),
-                            label: Text(_adding ? 'Обработка…' : 'Выбрать фото'),
+                            label: Text(_adding ? 'Обработка…' : 'Выбрать фото (до 5)'),
                           ),
                         ),
                         if (_refCount > 0) ...[
@@ -269,6 +280,15 @@ class _FaceTrainingScreenState extends State<FaceTrainingScreen> {
                         ],
                       ],
                     ),
+                    if (_adding) ...[
+                      const SizedBox(height: 16),
+                      Text(
+                        'Обработка фото… Используются локальные ресурсы, при необходимости — сервер.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                      ),
+                    ],
                   ],
                 ),
     );
