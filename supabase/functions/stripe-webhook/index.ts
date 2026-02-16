@@ -53,6 +53,8 @@ async function createImmichUserAndKey(
   quotaBytes: number
 ): Promise<{ userId: string; apiKey: string } | null> {
   const base = baseUrl.replace(/\/$/, '')
+  console.log(`Creating Immich user: email=${email}, name=${name}, quota=${quotaBytes} bytes`)
+  
   const createRes = await fetch(`${base}/api/admin/users`, {
     method: 'POST',
     headers: {
@@ -67,22 +69,31 @@ async function createImmichUserAndKey(
     }),
   })
   if (!createRes.ok) {
-    console.error('Immich create user failed:', createRes.status, await createRes.text())
+    const errorText = await createRes.text()
+    console.error(`Immich create user failed: ${createRes.status} ${createRes.statusText}`, errorText)
     return null
   }
   const user = await createRes.json() as { id: string }
+  console.log(`Immich user created: id=${user.id}`)
+  
   const loginRes = await fetch(`${base}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   })
   if (!loginRes.ok) {
-    console.error('Immich login failed:', loginRes.status, await loginRes.text())
+    const errorText = await loginRes.text()
+    console.error(`Immich login failed: ${loginRes.status} ${loginRes.statusText}`, errorText)
     return null
   }
   const login = await loginRes.json() as { accessToken?: string }
   const token = login.accessToken
-  if (!token) return null
+  if (!token) {
+    console.error('Immich login response missing accessToken')
+    return null
+  }
+  console.log('Immich login successful, creating API key...')
+  
   const keyRes = await fetch(`${base}/api/api-keys`, {
     method: 'POST',
     headers: {
@@ -92,12 +103,17 @@ async function createImmichUserAndKey(
     body: JSON.stringify({ name: 'MyKid managed', permissions: ['all'] }),
   })
   if (!keyRes.ok) {
-    console.error('Immich create api key failed:', keyRes.status, await keyRes.text())
+    const errorText = await keyRes.text()
+    console.error(`Immich create api key failed: ${keyRes.status} ${keyRes.statusText}`, errorText)
     return null
   }
   const keyData = await keyRes.json() as { secret?: string }
   const apiKey = keyData.secret
-  if (!apiKey) return null
+  if (!apiKey) {
+    console.error('Immich API key response missing secret')
+    return null
+  }
+  console.log('Immich API key created successfully')
   return { userId: user.id, apiKey }
 }
 
@@ -260,7 +276,14 @@ serve(async (req) => {
     const storageGb = planId === 'basic' ? 10 : 20
     const monthlyTokenLimit = planId === 'premium' ? 100000 : 0
 
-    await supabase.from('subscriptions').upsert(
+    console.log(`Webhook event: ${event.type}, userId: ${userId || 'missing'}, planId: ${planId}, status: ${status}`)
+
+    if (!userId) {
+      console.error('Webhook: userId missing in metadata, cannot process')
+      return new Response(JSON.stringify({ error: 'Missing user_id in metadata' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
+    const { error: upsertError } = await supabase.from('subscriptions').upsert(
       {
         user_id: userId,
         stripe_customer_id: customerId,
@@ -275,41 +298,88 @@ serve(async (req) => {
       },
       { onConflict: 'user_id' }
     )
+    if (upsertError) {
+      console.error(`Failed to upsert subscription for user ${userId}:`, upsertError)
+    } else {
+      console.log(`Updated subscription for user ${userId}: status=${status}, plan=${planId}`)
+    }
 
-    const { data: subRow } = await supabase.from('subscriptions').select('immich_user_id').eq('user_id', userId).single()
+    const { data: subRow, error: subRowError } = await supabase.from('subscriptions').select('immich_user_id').eq('user_id', userId).maybeSingle()
+    if (subRowError) {
+      console.error(`Failed to get subscription row for user ${userId}:`, subRowError)
+    }
     const alreadyHasImmich = (subRow as { immich_user_id?: string } | null)?.immich_user_id
 
-    if (status === 'trialing' || status === 'active') {
+    if (status === 'trialing' || status === 'active' || status === 'past_due') {
+      // Always ensure household exists for Premium subscriptions (needed for family sharing and Immich config)
       if (planId === 'premium' && userId) {
         await ensureAiGatewayToken(supabase, userId)
+        // Ensure household exists even if Immich is not configured
+        const householdId = await ensureHousehold(supabase, userId)
+        if (!householdId) {
+          console.error(`Failed to ensure household for user ${userId} with Premium subscription`)
+        } else {
+          console.log(`Ensured household ${householdId} exists for user ${userId}`)
+        }
       }
+      
       if (alreadyHasImmich) {
         const immichUrl = normalizeImmichUrl(Deno.env.get('IMMICH_SERVER_URL'))
         const immichAdminKey = Deno.env.get('IMMICH_ADMIN_API_KEY')
         if (immichUrl && immichAdminKey) {
           const quotaBytes = storageGb * 1024 * 1024 * 1024
-          await updateImmichUserQuota(immichUrl, immichAdminKey, alreadyHasImmich, quotaBytes)
+          const updated = await updateImmichUserQuota(immichUrl, immichAdminKey, alreadyHasImmich, quotaBytes)
+          if (!updated) {
+            console.error(`Failed to update Immich quota for user ${userId} (immich_user_id: ${alreadyHasImmich})`)
+          } else {
+            console.log(`Updated Immich quota for user ${userId} (immich_user_id: ${alreadyHasImmich})`)
+          }
+        } else {
+          console.warn(`Cannot update Immich quota: IMMICH_SERVER_URL or IMMICH_ADMIN_API_KEY not set`)
         }
       } else {
         const immichUrl = normalizeImmichUrl(Deno.env.get('IMMICH_SERVER_URL'))
         const immichAdminKey = Deno.env.get('IMMICH_ADMIN_API_KEY')
-        if (immichUrl && immichAdminKey && userId) {
-          const { data: u } = await supabase.auth.admin.getUserById(userId)
+        if (!immichUrl || !immichAdminKey) {
+          console.warn(`Cannot create Immich user: IMMICH_SERVER_URL or IMMICH_ADMIN_API_KEY not set for user ${userId}`)
+        } else if (userId) {
+          const { data: u, error: userError } = await supabase.auth.admin.getUserById(userId)
+          if (userError) {
+            console.error(`Failed to get user ${userId} from auth:`, userError)
+          }
           const email = (u?.user?.email ?? meta.email) as string
           const name = (u?.user?.user_metadata?.full_name ?? u?.user?.email ?? 'User') as string
           const password = crypto.randomUUID().replace(/-/g, '') + 'A1!'
           const quotaBytes = storageGb * 1024 * 1024 * 1024
+          console.log(`Creating Immich user for ${email} (userId: ${userId})...`)
           const result = await createImmichUserAndKey(immichUrl, immichAdminKey, email, name, password, quotaBytes)
           if (result) {
+            console.log(`Successfully created Immich user ${result.userId} for ${email}`)
+            // Ensure household exists (should already exist for Premium, but double-check)
             const householdId = await ensureHousehold(supabase, userId)
             if (householdId) {
-              await supabase.rpc('set_household_immich_config_for_managed', {
+              console.log(`Setting Immich config for household ${householdId}...`)
+              const { error: configError } = await supabase.rpc('set_household_immich_config_for_managed', {
                 p_household_id: householdId,
                 p_server_url: immichUrl,
                 p_api_key: result.apiKey,
               })
-              await supabase.from('subscriptions').update({ immich_user_id: result.userId, updated_at: new Date().toISOString() }).eq('user_id', userId)
+              if (configError) {
+                console.error(`Failed to set household Immich config for household ${householdId}:`, configError)
+              } else {
+                console.log(`Set Immich config for household ${householdId} and user ${userId}`)
+              }
+              const { error: updateError } = await supabase.from('subscriptions').update({ immich_user_id: result.userId, updated_at: new Date().toISOString() }).eq('user_id', userId)
+              if (updateError) {
+                console.error(`Failed to update subscription with immich_user_id for user ${userId}:`, updateError)
+              } else {
+                console.log(`Updated subscription with immich_user_id ${result.userId} for user ${userId}`)
+              }
+            } else {
+              console.error(`Cannot set Immich config: household not found for user ${userId}`)
             }
+          } else {
+            console.error(`Failed to create Immich user for ${email} (userId: ${userId})`)
           }
         }
       }

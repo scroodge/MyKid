@@ -50,33 +50,65 @@ class _SyncHouseholdImmichOnLoginState extends State<SyncHouseholdImmichOnLogin>
       final storage = ImmichStorage();
       final url = await storage.getServerUrl();
       final key = await storage.getApiKey();
+      if (kDebugMode) {
+        debugPrint('[SyncHouseholdImmich] Checking sync: localUrl=${url?.isNotEmpty ?? false}, localKey=${key?.isNotEmpty ?? false}');
+      }
       // Only sync if local storage is empty (user hasn't configured their own Immich)
       if ((url ?? '').trim().isNotEmpty && (key ?? '').trim().isNotEmpty) {
+        if (kDebugMode) {
+          debugPrint('[SyncHouseholdImmich] Skipping sync: local storage already has config');
+        }
         return;
       }
       final householdRepo = HouseholdRepository();
       final householdId = await householdRepo.getMyFirstHouseholdId();
-      if (householdId == null) return;
+      if (householdId == null) {
+        if (kDebugMode) {
+          debugPrint('[SyncHouseholdImmich] Skipping sync: no household found');
+        }
+        return;
+      }
+      if (kDebugMode) {
+        debugPrint('[SyncHouseholdImmich] Found household: $householdId');
+      }
       final hasConfig =
           await householdRepo.householdHasImmichConfig(householdId);
-      if (!hasConfig) return;
+      if (!hasConfig) {
+        if (kDebugMode) {
+          debugPrint('[SyncHouseholdImmich] Skipping sync: household has no Immich config');
+        }
+        return;
+      }
+      if (kDebugMode) {
+        debugPrint('[SyncHouseholdImmich] Household has Immich config, fetching...');
+      }
       final householdImmich = HouseholdImmichService();
       final config =
           await householdImmich.getHouseholdImmichConfig(householdId);
+      if (kDebugMode) {
+        debugPrint('[SyncHouseholdImmich] Config fetched: serverUrl=${config.serverUrl?.isNotEmpty ?? false}, apiKey=${config.apiKey?.isNotEmpty ?? false}');
+      }
       if (config.isConfigured && config.serverUrl != null && config.serverUrl!.trim().isNotEmpty && config.apiKey != null && config.apiKey!.trim().isNotEmpty) {
         final serverUrl = ImmichStorage.normalizeServerUrl(config.serverUrl) ?? config.serverUrl;
         if (serverUrl != null && serverUrl.isNotEmpty) {
           await storage.setServerUrl(serverUrl);
           await storage.setApiKey(config.apiKey);
           if (kDebugMode) {
-            debugPrint('[SyncHouseholdImmich] Successfully synced Immich config from household');
+            debugPrint('[SyncHouseholdImmich] Successfully synced Immich config from household: $serverUrl');
           }
         }
+      } else {
+        if (kDebugMode) {
+          debugPrint('[SyncHouseholdImmich] Config not fully configured: serverUrl=${config.serverUrl}, apiKey=${config.apiKey?.isNotEmpty ?? false}');
+        }
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       // Silent fail — user can configure Immich manually in settings
       // Log error for debugging but don't show to user
       debugPrint('[SyncHouseholdImmich] Failed to sync: $e');
+      if (kDebugMode) {
+        debugPrint('[SyncHouseholdImmich] Stack trace: $stackTrace');
+      }
     } finally {
       _isSyncing = false;
     }
