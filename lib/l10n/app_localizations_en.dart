@@ -880,6 +880,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clearLocalDataDone => 'Local data cleared';
 
   @override
+  String get debugInfo => 'Debug info';
+
+  @override
+  String get debugInfoSubtitle => 'View settings and masked keys';
+
+  @override
+  String get debugInfoCopied => 'Copied to clipboard';
+
+  @override
+  String get debugInfoSupabase => 'Supabase';
+
+  @override
+  String get debugInfoImmich => 'Immich';
+
+  @override
+  String get debugInfoAi => 'AI providers';
+
+  @override
+  String get debugInfoApp => 'App';
+
+  @override
+  String get debugInfoManagedAi => 'Managed AI (gateway)';
+
+  @override
+  String get debugInfoManagedAiUsed => 'Yes (no local keys)';
+
+  @override
+  String get debugInfoManagedAiNotUsed => 'No (local keys)';
+
+  @override
   String get exportPreparing => 'Preparing export...';
 
   @override

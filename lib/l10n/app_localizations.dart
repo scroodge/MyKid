@@ -1684,6 +1684,66 @@ abstract class AppLocalizations {
   /// **'Local data cleared'**
   String get clearLocalDataDone;
 
+  /// No description provided for @debugInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Debug info'**
+  String get debugInfo;
+
+  /// No description provided for @debugInfoSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View settings and masked keys'**
+  String get debugInfoSubtitle;
+
+  /// No description provided for @debugInfoCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get debugInfoCopied;
+
+  /// No description provided for @debugInfoSupabase.
+  ///
+  /// In en, this message translates to:
+  /// **'Supabase'**
+  String get debugInfoSupabase;
+
+  /// No description provided for @debugInfoImmich.
+  ///
+  /// In en, this message translates to:
+  /// **'Immich'**
+  String get debugInfoImmich;
+
+  /// No description provided for @debugInfoAi.
+  ///
+  /// In en, this message translates to:
+  /// **'AI providers'**
+  String get debugInfoAi;
+
+  /// No description provided for @debugInfoApp.
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get debugInfoApp;
+
+  /// No description provided for @debugInfoManagedAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Managed AI (gateway)'**
+  String get debugInfoManagedAi;
+
+  /// No description provided for @debugInfoManagedAiUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes (no local keys)'**
+  String get debugInfoManagedAiUsed;
+
+  /// No description provided for @debugInfoManagedAiNotUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'No (local keys)'**
+  String get debugInfoManagedAiNotUsed;
+
   /// No description provided for @exportPreparing.
   ///
   /// In en, this message translates to:

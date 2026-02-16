@@ -882,6 +882,36 @@ class AppLocalizationsRu extends AppLocalizations {
   String get clearLocalDataDone => 'Локальные данные очищены';
 
   @override
+  String get debugInfo => 'Отладка';
+
+  @override
+  String get debugInfoSubtitle => 'Настройки и ключи (маскированы)';
+
+  @override
+  String get debugInfoCopied => 'Скопировано';
+
+  @override
+  String get debugInfoSupabase => 'Supabase';
+
+  @override
+  String get debugInfoImmich => 'Immich';
+
+  @override
+  String get debugInfoAi => 'AI провайдеры';
+
+  @override
+  String get debugInfoApp => 'Приложение';
+
+  @override
+  String get debugInfoManagedAi => 'Managed AI (шлюз)';
+
+  @override
+  String get debugInfoManagedAiUsed => 'Да (нет своих ключей)';
+
+  @override
+  String get debugInfoManagedAiNotUsed => 'Нет (свои ключи)';
+
+  @override
   String get exportPreparing => 'Подготовка экспорта...';
 
   @override

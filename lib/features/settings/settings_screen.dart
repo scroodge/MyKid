@@ -480,6 +480,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  leading: Icon(Icons.bug_report_outlined, color: Theme.of(context).colorScheme.primary),
+                  title: Text(AppLocalizations.of(context)!.debugInfo),
+                  subtitle: Text(AppLocalizations.of(context)!.debugInfoSubtitle),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).pushNamed('/debug'),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   leading: Icon(Icons.info_outline, color: Theme.of(context).colorScheme.primary),
                   title: Text(AppLocalizations.of(context)!.requestAccountDeletionInstructions),
                   subtitle: Text(AppLocalizations.of(context)!.requestAccountDeletionInstructionsSubtitle),

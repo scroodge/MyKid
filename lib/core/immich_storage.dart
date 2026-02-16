@@ -32,6 +32,9 @@ class ImmichStorage {
     return normalizeServerUrl(raw);
   }
 
+  /// Raw value in storage (for debug). May contain wrong port; use getServerUrl() for actual URL.
+  Future<String?> getServerUrlRaw() => _storage.read(key: _kImmichUrlKey);
+
   /// If stored URL has a port or extra chars, overwrite with normalized (scheme + host only).
   Future<void> ensureServerUrlNormalized() async {
     final raw = await _storage.read(key: _kImmichUrlKey);

@@ -879,6 +879,36 @@ class AppLocalizationsBe extends AppLocalizations {
   String get clearLocalDataDone => 'Лакальныя даныя ачышчаны';
 
   @override
+  String get debugInfo => 'Адладка';
+
+  @override
+  String get debugInfoSubtitle => 'Налады і ключы (замаскаваны)';
+
+  @override
+  String get debugInfoCopied => 'Скапіявана';
+
+  @override
+  String get debugInfoSupabase => 'Supabase';
+
+  @override
+  String get debugInfoImmich => 'Immich';
+
+  @override
+  String get debugInfoAi => 'AI правайдэры';
+
+  @override
+  String get debugInfoApp => 'Дадатак';
+
+  @override
+  String get debugInfoManagedAi => 'Managed AI (шлюз)';
+
+  @override
+  String get debugInfoManagedAiUsed => 'Так (няма сваіх ключоў)';
+
+  @override
+  String get debugInfoManagedAiNotUsed => 'Не (свае ключы)';
+
+  @override
   String get exportPreparing => 'Падрыхтоўка экспарту...';
 
   @override
