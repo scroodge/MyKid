@@ -272,7 +272,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scanNowHint => 'Press the button above to search for photos';
 
   @override
-  String get scanLimitHint => 'Scans up to 500 most recent photos';
+  String get scanLimitHint =>
+      'Scans up to 500 most recent photos (from child\'s birth date)';
+
+  @override
+  String get clearCacheAndRescan => 'Clear cache and rescan';
 
   @override
   String get addReferencePhotosPrompt =>

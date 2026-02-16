@@ -12,6 +12,7 @@ import '../../data/child.dart';
 import '../../data/children_repository.dart';
 import '../../data/journal_entry.dart';
 import '../../data/local/face_embeddings_cache.dart';
+import '../../data/local/scanned_photos_cache.dart';
 import '../../l10n/app_localizations.dart';
 import 'face_training_screen.dart';
 import 'suggestion_item.dart';
@@ -99,8 +100,11 @@ class _SuggestionsScreenState extends State<SuggestionsScreen> {
   bool get _hasAnySource =>
       _childIdsWithEmbeddings.isNotEmpty || _childIdsWithImmichPerson.isNotEmpty;
 
-  Future<void> _runScan() async {
+  Future<void> _runScan({bool clearCacheFirst = false}) async {
     if (!_hasAnySource) return;
+    if (clearCacheFirst) {
+      await ScannedPhotosCache.clear();
+    }
     setState(() {
       _scanning = true;
       _error = null;
@@ -314,7 +318,7 @@ class _SuggestionsScreenState extends State<SuggestionsScreen> {
               children: [
                 Expanded(
                   child: FilledButton.icon(
-                    onPressed: _scanning ? null : _runScan,
+                    onPressed: _scanning ? null : () => _runScan(),
                     icon: const Icon(Icons.search),
                     label: Text(AppLocalizations.of(context)!.scanNow),
                   ),
@@ -325,12 +329,27 @@ class _SuggestionsScreenState extends State<SuggestionsScreen> {
                     onPressed: _stopScan,
                     child: Text(AppLocalizations.of(context)!.stopScan),
                   )
-                else
+                else ...[
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert),
+                    onSelected: (value) async {
+                      if (value == 'clear_cache') {
+                        await _runScan(clearCacheFirst: true);
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'clear_cache',
+                        child: Text(AppLocalizations.of(context)!.clearCacheAndRescan),
+                      ),
+                    ],
+                  ),
                   IconButton(
                     onPressed: _openFaceTraining,
                     icon: const Icon(Icons.add_photo_alternate),
                     tooltip: AppLocalizations.of(context)!.addReferencePhotosButton,
                   ),
+                ],
               ],
             ),
           ),

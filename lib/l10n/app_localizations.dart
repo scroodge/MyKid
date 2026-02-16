@@ -601,8 +601,14 @@ abstract class AppLocalizations {
   /// No description provided for @scanLimitHint.
   ///
   /// In en, this message translates to:
-  /// **'Scans up to 500 most recent photos'**
+  /// **'Scans up to 500 most recent photos (from child\'s birth date)'**
   String get scanLimitHint;
+
+  /// No description provided for @clearCacheAndRescan.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear cache and rescan'**
+  String get clearCacheAndRescan;
 
   /// No description provided for @addReferencePhotosPrompt.
   ///

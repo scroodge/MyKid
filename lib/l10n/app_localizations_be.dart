@@ -272,7 +272,10 @@ class AppLocalizationsBe extends AppLocalizations {
   String get scanNowHint => 'Націсніце кнопку вышэй для пошуку фота';
 
   @override
-  String get scanLimitHint => 'Сканаванне да 500 апошніх фота';
+  String get scanLimitHint => 'Да 500 апошніх фота (з даты нараджэння дзіцяці)';
+
+  @override
+  String get clearCacheAndRescan => 'Ачысціць кэш і сканаваць нанова';
 
   @override
   String get addReferencePhotosPrompt =>
