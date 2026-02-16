@@ -225,7 +225,7 @@ class AiVisionService {
         return (text: null, error: err ?? 'Managed AI failed');
       }
       if (res.data is! Map<String, dynamic>) {
-        return (text: null, error: 'Managed AI returned an invalid response. Try again.');
+        return (text: null, error: 'Managed AI returned an invalid response (server error or timeout). Try again in a moment.');
       }
       final data = res.data as Map<String, dynamic>;
       final choices = data['choices'] as List?;
@@ -239,7 +239,7 @@ class AiVisionService {
       }
       return (text: null, error: 'Empty response from AI');
     } on FormatException catch (_) {
-      return (text: null, error: 'Managed AI returned an invalid response. Try again.');
+      return (text: null, error: 'Managed AI returned an invalid response (server error or timeout). Try again in a moment.');
     } catch (e) {
       return (text: null, error: 'Managed AI: $e');
     }
