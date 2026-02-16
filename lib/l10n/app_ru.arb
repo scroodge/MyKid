@@ -327,6 +327,8 @@
   "debugInfoManagedAi": "Managed AI (шлюз)",
   "debugInfoManagedAiUsed": "Да (нет своих ключей)",
   "debugInfoManagedAiNotUsed": "Нет (свои ключи)",
+  "debugInfoManagedAiHint": "Запросы идут через шлюз; провайдер ниже — только выбранный в Настройках.",
+  "debugInfoProviderSelected": "Провайдер (выбран в Настройках)",
   "exportPreparing": "Подготовка экспорта...",
   "exportSuccess": "Экспорт готов",
   "exportError": "Ошибка экспорта",

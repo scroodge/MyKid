@@ -910,6 +910,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get debugInfoManagedAiNotUsed => 'No (local keys)';
 
   @override
+  String get debugInfoManagedAiHint =>
+      'Requests use gateway; provider below is only the one selected in Settings.';
+
+  @override
+  String get debugInfoProviderSelected => 'Provider (selected in Settings)';
+
+  @override
   String get exportPreparing => 'Preparing export...';
 
   @override

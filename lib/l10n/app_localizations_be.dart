@@ -909,6 +909,13 @@ class AppLocalizationsBe extends AppLocalizations {
   String get debugInfoManagedAiNotUsed => 'Не (свае ключы)';
 
   @override
+  String get debugInfoManagedAiHint =>
+      'Запыты ідуць праз шлюз; правайдэр ніжэй — толькі выбраны ў Наладах.';
+
+  @override
+  String get debugInfoProviderSelected => 'Правайдэр (выбраны ў Наладах)';
+
+  @override
   String get exportPreparing => 'Падрыхтоўка экспарту...';
 
   @override

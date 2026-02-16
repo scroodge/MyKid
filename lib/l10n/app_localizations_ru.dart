@@ -912,6 +912,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get debugInfoManagedAiNotUsed => 'Нет (свои ключи)';
 
   @override
+  String get debugInfoManagedAiHint =>
+      'Запросы идут через шлюз; провайдер ниже — только выбранный в Настройках.';
+
+  @override
+  String get debugInfoProviderSelected => 'Провайдер (выбран в Настройках)';
+
+  @override
   String get exportPreparing => 'Подготовка экспорта...';
 
   @override

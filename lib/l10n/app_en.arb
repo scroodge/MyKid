@@ -389,6 +389,8 @@
   "debugInfoManagedAi": "Managed AI (gateway)",
   "debugInfoManagedAiUsed": "Yes (no local keys)",
   "debugInfoManagedAiNotUsed": "No (local keys)",
+  "debugInfoManagedAiHint": "Requests use gateway; provider below is only the one selected in Settings.",
+  "debugInfoProviderSelected": "Provider (selected in Settings)",
   "exportPreparing": "Preparing export...",
   "exportSuccess": "Export ready",
   "exportError": "Export failed",

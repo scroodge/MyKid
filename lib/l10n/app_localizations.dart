@@ -1744,6 +1744,18 @@ abstract class AppLocalizations {
   /// **'No (local keys)'**
   String get debugInfoManagedAiNotUsed;
 
+  /// No description provided for @debugInfoManagedAiHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests use gateway; provider below is only the one selected in Settings.'**
+  String get debugInfoManagedAiHint;
+
+  /// No description provided for @debugInfoProviderSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider (selected in Settings)'**
+  String get debugInfoProviderSelected;
+
   /// No description provided for @exportPreparing.
   ///
   /// In en, this message translates to:

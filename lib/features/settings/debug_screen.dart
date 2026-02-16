@@ -14,6 +14,18 @@ String _maskKey(String? value) {
   return '••••${t.substring(t.length - 4)}';
 }
 
+String _providerDisplayName(String? id) {
+  if (id == null || id.isEmpty) return '—';
+  switch (id) {
+    case 'openai': return 'OpenAI';
+    case 'gemini': return 'Gemini';
+    case 'claude': return 'Claude';
+    case 'deepseek': return 'DeepSeek';
+    case 'customai': return 'Custom AI';
+    default: return id;
+  }
+}
+
 class DebugScreen extends StatefulWidget {
   const DebugScreen({super.key});
 
@@ -52,7 +64,7 @@ class _DebugScreenState extends State<DebugScreen> {
       _immichKeyMasked = _maskKey(immichKey);
 
       final selectedProvider = await _aiStorage.getSelectedProvider();
-      _aiProvider = selectedProvider ?? '—';
+      _aiProvider = _providerDisplayName(selectedProvider);
       _customAiBaseUrl = await _aiStorage.getCustomAiBaseUrl();
       final openai = await _aiStorage.getOpenAiKey();
       final gemini = await _aiStorage.getGeminiKey();
@@ -85,7 +97,8 @@ class _DebugScreenState extends State<DebugScreen> {
     buf.writeln('Immich URL (normalized): $_immichUrlNormalized');
     buf.writeln('Immich API key: $_immichKeyMasked');
     buf.writeln('Managed AI (gateway): ${_managedAiUsed ? 'Yes' : 'No (local keys)'}');
-    buf.writeln('AI provider: $_aiProvider');
+    if (_managedAiUsed) buf.writeln('  → Requests use gateway; provider below is only the one selected in Settings.');
+    buf.writeln('AI provider (selected): $_aiProvider');
     buf.writeln('Custom AI base URL: $_customAiBaseUrl');
     buf.writeln('AI keys: $_aiKeysSummary');
     buf.writeln('App version: ${SettingsScreen.appVersion}');
@@ -129,7 +142,8 @@ class _DebugScreenState extends State<DebugScreen> {
                 const SizedBox(height: 24),
                 _section(l10n.debugInfoAi, [
                   _row(l10n.debugInfoManagedAi, _managedAiUsed ? l10n.debugInfoManagedAiUsed : l10n.debugInfoManagedAiNotUsed),
-                  _row('Provider', _aiProvider ?? '—'),
+                  if (_managedAiUsed) _row('', l10n.debugInfoManagedAiHint),
+                  _row(l10n.debugInfoProviderSelected, _aiProvider ?? '—'),
                   _row('Custom AI base URL', _customAiBaseUrl ?? '—'),
                   _row('Keys', _aiKeysSummary ?? '—'),
                 ]),

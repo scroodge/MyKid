@@ -327,6 +327,8 @@
   "debugInfoManagedAi": "Managed AI (шлюз)",
   "debugInfoManagedAiUsed": "Так (няма сваіх ключоў)",
   "debugInfoManagedAiNotUsed": "Не (свае ключы)",
+  "debugInfoManagedAiHint": "Запыты ідуць праз шлюз; правайдэр ніжэй — толькі выбраны ў Наладах.",
+  "debugInfoProviderSelected": "Правайдэр (выбраны ў Наладах)",
   "exportPreparing": "Падрыхтоўка экспарту...",
   "exportSuccess": "Экспарт гатовы",
   "exportError": "Памылка экспарту",
