@@ -15,11 +15,20 @@ serve(async (req) => {
   }
 
   const url = new URL(req.url)
+  // After Supabase processes the token from /auth/v1/verify, it redirects here
   // Supabase passes token/type in query params after processing
-  // Hash params are handled client-side on the redirect page
+  // Note: Hash params (#) are not available server-side, only query params (?)
   const token = url.searchParams.get('token')
   const type = url.searchParams.get('type')
   const inviteToken = url.searchParams.get('invite_token')
+  
+  // Log for debugging (remove in production)
+  console.log('Auth confirm request:', {
+    url: req.url,
+    token: token ? 'present' : 'missing',
+    type,
+    inviteToken: inviteToken ? 'present' : 'missing',
+  })
   
   // Get user agent to detect mobile device
   const userAgent = req.headers.get('user-agent') || ''
