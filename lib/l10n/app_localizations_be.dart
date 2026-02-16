@@ -703,47 +703,47 @@ class AppLocalizationsBe extends AppLocalizations {
 
   @override
   String get inviteOpenLinkHint =>
-      'Open the invite link you received in your email or message.';
+      'Адкрыйце спасылку запрашэння з ліста ці паведамлення.';
 
   @override
-  String get orEnterCodeManually => 'Or enter code manually';
+  String get orEnterCodeManually => 'Або ўвядзіце код уручную';
 
   @override
-  String get enterInviteCodeHint => 'Enter 8-character code';
+  String get enterInviteCodeHint => 'Увядзіце код з 8 сімвалаў';
 
   @override
-  String get searchByCode => 'Search by code';
+  String get searchByCode => 'Пошук па коде';
 
   @override
-  String get invitedBy => 'Invited by:';
+  String get invitedBy => 'Запрасіў(ла):';
 
   @override
   String get signInToAcceptInvite =>
-      'You need to sign in or create an account to accept this invitation.';
+      'Увайдзіце або стварыце акаўнт, каб прыняць запрашэнне.';
 
   @override
-  String get signUpToAccept => 'Sign up to accept';
+  String get signUpToAccept => 'Зарэгістравацца для прыняцця';
 
   @override
-  String get cancelInviteFailed => 'Failed to cancel invite';
+  String get cancelInviteFailed => 'Не ўдалося скасаваць запрашэнне';
 
   @override
-  String get expired => 'Expired';
+  String get expired => 'Скончылася';
 
   @override
-  String get searching => 'Searching...';
+  String get searching => 'Пошук…';
 
   @override
   String get inviteAcceptedDataNotRefreshed =>
-      'Invite accepted, but data didn\'t refresh. Try restarting the app.';
+      'Запрашэнне прынята, але даныя не абнавіліся. Паспрабуйце перазапустиць дадатак.';
 
   @override
   String get inviteAcceptErrorRetry =>
-      'Error accepting invite. Please try again or restart the app.';
+      'Памылка пры прыняцці запрашэння. Паспрабуйце зноў або перазапусціце дадатак.';
 
   @override
   String get inviteAcceptErrorRestart =>
-      'Error accepting invite. Please restart the app.';
+      'Памылка пры прыняцці запрашэння. Перазапусціце дадатак.';
 
   @override
   String createHouseholdFailedWithReason(String message, String reason) {
@@ -751,10 +751,10 @@ class AppLocalizationsBe extends AppLocalizations {
   }
 
   @override
-  String get supportEmailCopied => 'Email copied to clipboard';
+  String get supportEmailCopied => 'Email скапіяваны ў буфер';
 
   @override
-  String get noHouseholdIdReturned => 'No household ID returned';
+  String get noHouseholdIdReturned => 'Сервер не вярнуў ID сям\'і';
 
   @override
   String get inviteAccepted => 'Вы далучыліся да сям\'і';
@@ -837,11 +837,11 @@ class AppLocalizationsBe extends AppLocalizations {
   String get licenses => 'Ліцэнзіі адкрытага ПЗ';
 
   @override
-  String get requestAccountDeletionInstructions => 'Request account deletion';
+  String get requestAccountDeletionInstructions => 'Запытаць выдаленне акаўнта';
 
   @override
   String get requestAccountDeletionInstructionsSubtitle =>
-      'Instructions and data deletion details';
+      'Інструкцыя і звесткі аб выдаленні даных';
 
   @override
   String get deleteAccount => 'Выдаліць акаўнт';
@@ -863,6 +863,82 @@ class AppLocalizationsBe extends AppLocalizations {
 
   @override
   String get exportMyDataSubtitle => 'Запытаць копію даных (GDPR)';
+
+  @override
+  String get clearLocalData => 'Ачисціць лакальныя даныя';
+
+  @override
+  String get clearLocalDataSubtitle =>
+      'Выдаліць налады Immich і AI з гэтай прылады';
+
+  @override
+  String get clearLocalDataConfirm =>
+      'Будуць выдалены URL і ключ Immich, а таксама ўсе ключы AI-правайдэраў з гэтай прылады. Вы застаецеся ў акаўнце. Каб зноў дадаваць запісы з фота ці выкарыстоўваць AI, наладзьце Immich і AI у Наладах або актывуйце падпіску.';
+
+  @override
+  String get clearLocalDataDone => 'Лакальныя даныя ачышчаны';
+
+  @override
+  String get debugInfo => 'Адладка';
+
+  @override
+  String get debugInfoSubtitle => 'Налады і ключы (замаскаваны)';
+
+  @override
+  String get debugInfoCopied => 'Скапіявана';
+
+  @override
+  String get debugInfoSupabase => 'Supabase';
+
+  @override
+  String get debugInfoImmich => 'Immich';
+
+  @override
+  String get debugInfoAi => 'AI правайдэры';
+
+  @override
+  String get debugInfoApp => 'Дадатак';
+
+  @override
+  String get debugInfoManagedAi => 'Managed AI (шлюз)';
+
+  @override
+  String get debugInfoManagedAiUsed => 'Так (няма сваіх ключоў)';
+
+  @override
+  String get debugInfoManagedAiNotUsed => 'Не (свае ключы)';
+
+  @override
+  String get debugInfoManagedAiHint =>
+      'Запыты ідуць праз шлюз; правайдэр ніжэй — толькі выбраны ў Наладах.';
+
+  @override
+  String get debugInfoProviderSelected => 'Правайдэр (выбраны ў Наладах)';
+
+  @override
+  String get exportPreparing => 'Падрыхтоўка экспарту...';
+
+  @override
+  String get exportSuccess => 'Экспарт гатовы';
+
+  @override
+  String get exportError => 'Памылка экспарту';
+
+  @override
+  String get exportLinkSent =>
+      'Спасылка на спампаванне адпраўлена на вашу пошту';
+
+  @override
+  String get deleteAccountHintExport =>
+      'Усе даныя будуць выдалены беззваротна. Рэкамендуем спачатку спампаваць свае даныя.';
+
+  @override
+  String get deleteAccountDataLostWarning =>
+      'Пасля выдалення даныя аднавіць немагчыма.';
+
+  @override
+  String get deleteAccountRetrieveFilesInfo =>
+      'Акаўнт выдалены. Фота захоўваліся ў Immich. Каб іх атрымаць: пры managed Immich (immich.mykid.life) напішыце ў падтрымку; пры сваім Immich — увайдзіце на ваш сервер і спампавайце фота.';
 
   @override
   String get aiProviders => 'AI Правайдэры';
@@ -918,6 +994,19 @@ class AppLocalizationsBe extends AppLocalizations {
 
   @override
   String get premiumRequiredForAi => 'Для AI патрэбна падпіска Прэміум';
+
+  @override
+  String get setupRequiredTitle => 'Патрэбна налада';
+
+  @override
+  String get setupRequiredMessage =>
+      'Каб дадаваць запісы з фота, актывуйце падпіску (трыял) або наладзьце свой сервер Immich у Наладах. Калі падпіска ўжо актыўная, зайдзіце ў Налады → Immich і націсніце «Выкарыстоўваць Immich сям\'і» — managed Immich падключыцца на гэтай прыладзе.';
+
+  @override
+  String get activateSubscription => 'Актываваць падпіску';
+
+  @override
+  String get setupOwnServers => 'Наладзіць свае серверы';
 
   @override
   String get sessionExpiredSignInAgain =>

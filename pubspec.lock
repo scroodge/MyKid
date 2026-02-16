@@ -589,6 +589,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  heic_to_png_jpg:
+    dependency: "direct main"
+    description:
+      name: heic_to_png_jpg
+      sha256: "8c442c5be05fcc772db60293a7ca04b78fe5143f738cdb13487b633b9773c745"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.6"
+  heif_converter:
+    dependency: transitive
+    description:
+      name: heif_converter
+      sha256: a2fbbf3f795b19753d84a52223c60d3bcf3cf2261d6c0d41857f0ec198e6eef3
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   hive:
     dependency: "direct main"
     description:
@@ -646,7 +662,7 @@ packages:
     source: hosted
     version: "4.1.2"
   image:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: image
       sha256: "492bd52f6c4fbb6ee41f781ff27765ce5f627910e1e0cbecfa3d9add5562604c"

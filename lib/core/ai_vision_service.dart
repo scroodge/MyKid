@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:heic_to_png_jpg/heic_to_png_jpg.dart';
 import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as img;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'ai_provider_storage.dart';
@@ -10,6 +12,14 @@ class AiVisionService {
   AiVisionService([AiProviderStorage? storage]) : _storage = storage ?? AiProviderStorage();
 
   final AiProviderStorage _storage;
+
+  /// Ensures base URL has http(s) scheme so Uri.parse does not fail.
+  static String _ensureUrlScheme(String url) {
+    final t = url.trim().replaceAll(RegExp(r'/$'), '');
+    if (t.isEmpty) return t;
+    if (RegExp(r'^https?://', caseSensitive: false).hasMatch(t)) return t;
+    return 'https://$t';
+  }
 
   /// Check if any AI provider is configured
   Future<bool> isConfigured() async {
@@ -39,12 +49,83 @@ class AiVisionService {
     }
   }
 
+  static const int _maxSizeForAi = 1536;
+
+  /// Normalize image bytes to JPEG so that gallery/camera photos (HEIC on iOS, WebP on Android, etc.)
+  /// are sent as valid JPEG to AI APIs. Downsizes very large images to avoid timeouts.
+  static Future<Uint8List> _normalizeToJpeg(Uint8List bytes) async {
+    if (bytes.length < 3) return bytes;
+    // JPEG magic
+    if (bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF) {
+      return _maybeResizeJpeg(bytes);
+    }
+    img.Image? decoded;
+    try {
+      decoded = img.decodeImage(bytes);
+    } catch (_) {}
+    // Explicit WebP (Android often uses WebP)
+    if (decoded == null &&
+        bytes.length >= 12 &&
+        bytes[0] == 0x52 &&
+        bytes[1] == 0x49 &&
+        bytes[2] == 0x46 &&
+        bytes[3] == 0x46 &&
+        bytes[8] == 0x57 &&
+        bytes[9] == 0x45 &&
+        bytes[10] == 0x42 &&
+        bytes[11] == 0x50) {
+      try {
+        decoded = img.decodeWebP(bytes);
+      } catch (_) {}
+    }
+    if (decoded != null) {
+      final resized = _maybeResizeDecoded(decoded);
+      final jpeg = img.encodeJpg(resized, quality: 92);
+      if (jpeg.isNotEmpty) return jpeg;
+    }
+    // HEIC (e.g. iOS gallery): ftyp at offset 4
+    if (bytes.length >= 8 &&
+        bytes[4] == 0x66 &&
+        bytes[5] == 0x74 &&
+        bytes[6] == 0x79 &&
+        bytes[7] == 0x70) {
+      try {
+        final jpeg = await HeicConverter.convertToJPG(heicData: bytes, quality: 92);
+        if (jpeg.isNotEmpty) return _maybeResizeJpeg(jpeg);
+      } catch (_) {}
+    }
+    return bytes;
+  }
+
+  static Uint8List _maybeResizeJpeg(Uint8List jpegBytes) {
+    try {
+      final decoded = img.decodeJpg(jpegBytes);
+      if (decoded == null) return jpegBytes;
+      final resized = _maybeResizeDecoded(decoded);
+      final out = img.encodeJpg(resized, quality: 92);
+      return out.isNotEmpty ? out : jpegBytes;
+    } catch (_) {
+      return jpegBytes;
+    }
+  }
+
+  static img.Image _maybeResizeDecoded(img.Image image) {
+    final w = image.width;
+    final h = image.height;
+    if (w <= _maxSizeForAi && h <= _maxSizeForAi) return image;
+    final scale = _maxSizeForAi / (w > h ? w : h);
+    return img.copyResize(image, width: (w * scale).round(), height: (h * scale).round());
+  }
+
   /// Analyze image and generate description. Returns generated text or error message.
   /// If no provider/key is configured, tries Premium managed AI (ai-proxy Edge Function).
   Future<({String? text, String? error})> analyzeImage(
     Uint8List imageBytes, {
     String? provider,
   }) async {
+    // Normalize to JPEG so photos from gallery/camera (e.g. HEIC) work with AI
+    final normalizedBytes = await _normalizeToJpeg(imageBytes);
+
     // Determine which provider to use
     final selectedProvider = provider ?? await _storage.getSelectedProvider();
 
@@ -74,7 +155,7 @@ class AiVisionService {
 
     final hasOwnKey = apiKey != null && apiKey.trim().isNotEmpty;
     if (!hasOwnKey) {
-      final managed = await _callManagedAiProxy(imageBytes);
+      final managed = await _callManagedAiProxy(normalizedBytes);
       if (managed.text != null) return managed;
       if (managed.error != null && !managed.error!.contains('Premium')) return managed;
     }
@@ -87,7 +168,7 @@ class AiVisionService {
     }
 
     // Convert image to base64
-    final base64Image = base64Encode(imageBytes);
+    final base64Image = base64Encode(normalizedBytes);
 
     // Call appropriate provider
     switch (selectedProvider) {
@@ -98,13 +179,13 @@ class AiVisionService {
       case 'claude':
         return await _callClaudeVision(apiKey, base64Image);
       case 'deepseek':
-        return await _analyzeImageWithDeepSeek(apiKey, imageBytes);
+        return await _analyzeImageWithDeepSeek(apiKey, normalizedBytes);
       case 'customai':
         final baseUrl = await _storage.getCustomAiBaseUrl();
         if (baseUrl == null || baseUrl.trim().isEmpty) {
           return (text: null, error: 'Custom AI base URL not configured');
         }
-        return await _analyzeImageWithCustomAi(apiKey, baseUrl.trim(), imageBytes);
+        return await _analyzeImageWithCustomAi(apiKey, baseUrl.trim(), normalizedBytes);
       default:
         return (text: null, error: 'Unknown provider: $selectedProvider');
     }
@@ -213,11 +294,14 @@ class AiVisionService {
         body: body,
       );
       if (res.status != 200) {
-        final err = res.data?['error'] as String? ?? 'Managed AI failed';
-        return (text: null, error: err);
+        final err = res.data is Map ? (res.data as Map)['error'] as String? : null;
+        return (text: null, error: err ?? 'Managed AI failed');
       }
-      final data = res.data as Map<String, dynamic>?;
-      final choices = data?['choices'] as List?;
+      if (res.data is! Map<String, dynamic>) {
+        return (text: null, error: 'Managed AI returned an invalid response (server error or timeout). Try again in a moment.');
+      }
+      final data = res.data as Map<String, dynamic>;
+      final choices = data['choices'] as List?;
       if (choices != null && choices.isNotEmpty) {
         final choice = choices[0] as Map<String, dynamic>?;
         final message = choice?['message'] as Map<String, dynamic>?;
@@ -227,6 +311,8 @@ class AiVisionService {
         }
       }
       return (text: null, error: 'Empty response from AI');
+    } on FormatException catch (_) {
+      return (text: null, error: 'Managed AI returned an invalid response (server error or timeout). Try again in a moment.');
     } catch (e) {
       return (text: null, error: 'Managed AI: $e');
     }
@@ -412,7 +498,8 @@ class AiVisionService {
 
   Future<({String? text, String? error})> _callCustomAiText(String apiKey, String baseUrl, String labelsText) async {
     try {
-      final url = Uri.parse('${baseUrl.replaceAll(RegExp(r'/$'), '')}/v1/chat');
+      final base = _ensureUrlScheme(baseUrl);
+      final url = Uri.parse('${base.replaceAll(RegExp(r'/$'), '')}/v1/chat');
       final userMessage = 'По фото из дневника ребёнка определили такие объекты и сцены: $labelsText. '
           'Напиши тёплое, короткое описание этого момента для детского дневника: 2–3 предложения на русском.';
       final response = await http.post(
@@ -581,7 +668,8 @@ class AiVisionService {
         return (success: false, error: 'Base URL not configured');
       }
       try {
-        final url = Uri.parse('${baseUrl.replaceAll(RegExp(r'/$'), '')}/v1/chat');
+        final base = _ensureUrlScheme(baseUrl);
+        final url = Uri.parse('${base.replaceAll(RegExp(r'/$'), '')}/v1/chat');
         final response = await http.post(
           url,
           headers: {

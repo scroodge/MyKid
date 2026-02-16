@@ -1660,6 +1660,144 @@ abstract class AppLocalizations {
   /// **'Request a copy of your data (GDPR)'**
   String get exportMyDataSubtitle;
 
+  /// No description provided for @clearLocalData.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear local data'**
+  String get clearLocalData;
+
+  /// No description provided for @clearLocalDataSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Immich and AI provider settings from this device'**
+  String get clearLocalDataSubtitle;
+
+  /// No description provided for @clearLocalDataConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'This will clear Immich server URL, API key, and all AI provider keys stored on this device. You stay signed in. To add entries with photos or use AI again, you will need to configure Immich and AI in Settings or activate a subscription.'**
+  String get clearLocalDataConfirm;
+
+  /// No description provided for @clearLocalDataDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Local data cleared'**
+  String get clearLocalDataDone;
+
+  /// No description provided for @debugInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Debug info'**
+  String get debugInfo;
+
+  /// No description provided for @debugInfoSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View settings and masked keys'**
+  String get debugInfoSubtitle;
+
+  /// No description provided for @debugInfoCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get debugInfoCopied;
+
+  /// No description provided for @debugInfoSupabase.
+  ///
+  /// In en, this message translates to:
+  /// **'Supabase'**
+  String get debugInfoSupabase;
+
+  /// No description provided for @debugInfoImmich.
+  ///
+  /// In en, this message translates to:
+  /// **'Immich'**
+  String get debugInfoImmich;
+
+  /// No description provided for @debugInfoAi.
+  ///
+  /// In en, this message translates to:
+  /// **'AI providers'**
+  String get debugInfoAi;
+
+  /// No description provided for @debugInfoApp.
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get debugInfoApp;
+
+  /// No description provided for @debugInfoManagedAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Managed AI (gateway)'**
+  String get debugInfoManagedAi;
+
+  /// No description provided for @debugInfoManagedAiUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes (no local keys)'**
+  String get debugInfoManagedAiUsed;
+
+  /// No description provided for @debugInfoManagedAiNotUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'No (local keys)'**
+  String get debugInfoManagedAiNotUsed;
+
+  /// No description provided for @debugInfoManagedAiHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests use gateway; provider below is only the one selected in Settings.'**
+  String get debugInfoManagedAiHint;
+
+  /// No description provided for @debugInfoProviderSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider (selected in Settings)'**
+  String get debugInfoProviderSelected;
+
+  /// No description provided for @exportPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing export...'**
+  String get exportPreparing;
+
+  /// No description provided for @exportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Export ready'**
+  String get exportSuccess;
+
+  /// No description provided for @exportError.
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed'**
+  String get exportError;
+
+  /// No description provided for @exportLinkSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Download link has been sent to your email'**
+  String get exportLinkSent;
+
+  /// No description provided for @deleteAccountHintExport.
+  ///
+  /// In en, this message translates to:
+  /// **'All data will be permanently deleted. We recommend downloading your data first.'**
+  String get deleteAccountHintExport;
+
+  /// No description provided for @deleteAccountDataLostWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Data cannot be recovered after deletion.'**
+  String get deleteAccountDataLostWarning;
+
+  /// No description provided for @deleteAccountRetrieveFilesInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deleted. Your photos were stored in Immich. To retrieve them: if you used managed Immich (immich.mykid.life), contact support. If you use your own Immich server, log in at your server URL to download your photos.'**
+  String get deleteAccountRetrieveFilesInfo;
+
   /// No description provided for @aiProviders.
   ///
   /// In en, this message translates to:
@@ -1767,6 +1905,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Premium subscription required for AI'**
   String get premiumRequiredForAi;
+
+  /// No description provided for @setupRequiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup needed'**
+  String get setupRequiredTitle;
+
+  /// No description provided for @setupRequiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'To add entries with photos, activate a subscription (trial) or set up your own Immich server in Settings. If you already have a subscription, go to Settings → Immich and tap «Use family\'s Immich» to connect managed Immich on this device.'**
+  String get setupRequiredMessage;
+
+  /// No description provided for @activateSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate subscription'**
+  String get activateSubscription;
+
+  /// No description provided for @setupOwnServers.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up my servers'**
+  String get setupOwnServers;
 
   /// No description provided for @sessionExpiredSignInAgain.
   ///

@@ -137,7 +137,7 @@ RLS: users can access only their own rows.
    - Immich: server URL and API key; Test connection (saves on success).
    - Link to Manage children, Family invites.
    - Legal: Privacy Policy, Terms of Use, Support, Open Source Licenses (App Store / Google Play compliance).
-   - Account: Export my data (GDPR), Delete account, Sign out.
+   - Account: Export my data (GDPR; via AI Gateway when `MYKID_API_URL` is set, else mailto), Delete account (via AI Gateway or Edge Function), Sign out.
 
 ### Key modules
 
@@ -162,6 +162,7 @@ RLS: users can access only their own rows.
 ### Environment
 
 - `SUPABASE_URL`, `PUBLISHABLE_KEY` — from `.env` or `--dart-define-from-file=.env`.
+- `MYKID_API_URL` (optional) — AI Gateway base URL; when set, export and delete account use Gateway instead of mailto/Edge Function.
 
 ---
 
@@ -217,7 +218,7 @@ flutter pub get
 ./run_with_env.sh
 ```
 
-The script reads `SUPABASE_URL` and `PUBLISHABLE_KEY` from `.env` and passes them to `flutter run`. You can add device flags: `./run_with_env.sh -d macos`.
+The script reads `SUPABASE_URL` and `PUBLISHABLE_KEY` from `.env` and passes them to `flutter run`. You can add device flags: `./run_with_env.sh -d macos`. To build a release APK with the same `.env`, run `./build_apk_with_env.sh`; output: `build/app/outputs/flutter-apk/app-release.apk`.
 
 Or pass defines explicitly:
 
@@ -242,6 +243,21 @@ When the app cannot reach Supabase, the journal list falls back to the last cach
   - `features/` — auth, journal list/detail, settings, AI provider settings, batch import
 - `docs/` — [full_schema.sql](docs/full_schema.sql) (apply once in SQL Editor), [backend.md](docs/backend.md) (schema, API), [ai-providers.md](docs/ai-providers.md), [immich-api.md](docs/immich-api.md), [edge-function-setup.md](docs/edge-function-setup.md)
 
+### Export and delete via AI Gateway (optional)
+
+When `MYKID_API_URL` is set (e.g. `https://api.mykid.life`), the app uses AI Gateway for:
+
+- **Export my data** — `POST /mykid/export`; returns a download link; user can copy or open in browser.
+- **Delete account** — `POST /mykid/delete-account`; cancels Stripe, deletes Immich user, deletes Supabase user.
+
+Add to `.env`:
+
+```
+MYKID_API_URL=https://api.mykid.life
+```
+
+The app sends `Authorization: Bearer <supabase_session.access_token>`. If `MYKID_API_URL` is not set, export opens a mailto link and delete uses the `delete-account` Edge Function.
+
 ### Legal URLs (App Store / Google Play)
 
 For store compliance, the app includes links to Privacy Policy, Terms of Use, Support, Account Deletion, and Data Export. Configure in `.env`:
@@ -260,7 +276,7 @@ Or use `--dart-define=PRIVACY_POLICY_URL=...` etc. when building.
 
 ### Self-service account deletion
 
-The app calls the `delete-account` Edge Function, which removes the user and cascades to children, journal entries, household data. Deploy (this project uses Publishable/Secret keys — use `--no-verify-jwt`):
+When `MYKID_API_URL` is not set, the app calls the `delete-account` Edge Function, which removes the user and cascades to children, journal entries, household data. Deploy (this project uses Publishable/Secret keys — use `--no-verify-jwt`):
 
 ```bash
 supabase functions deploy delete-account --no-verify-jwt

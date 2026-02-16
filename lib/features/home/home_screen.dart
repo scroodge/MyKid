@@ -19,6 +19,8 @@ import '../../l10n/app_localizations.dart';
 import '../journal/journal_entry_screen.dart';
 import '../suggestions/suggestions_screen.dart';
 
+enum _SetupRequiredChoice { subscription, ownServers }
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -131,6 +133,31 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     _loadEntries();
   }
 
+  Future<_SetupRequiredChoice?> _showSetupRequiredDialog() async {
+    final l10n = AppLocalizations.of(context)!;
+    return showDialog<_SetupRequiredChoice>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.setupRequiredTitle),
+        content: Text(l10n.setupRequiredMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, _SetupRequiredChoice.ownServers),
+            child: Text(l10n.setupOwnServers),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, _SetupRequiredChoice.subscription),
+            child: Text(l10n.activateSubscription),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showChildPicker() {
     if (_children.isEmpty) {
       Navigator.of(context).pushNamed('/children').then((_) => _loadChildrenAndSelection());
@@ -211,6 +238,20 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   Future<void> _createEntry() async {
+    final client = await _immich.getClient();
+    if (client == null && mounted) {
+      final choice = await _showSetupRequiredDialog();
+      if (choice == null || !mounted) return;
+      if (choice == _SetupRequiredChoice.subscription) {
+        await Navigator.of(context).pushNamed('/subscription');
+        if (mounted) _loadImmichClient();
+      } else {
+        await Navigator.of(context).pushNamed('/settings-immich');
+        if (mounted) _loadImmichClient();
+      }
+      return;
+    }
+
     final source = await showModalBottomSheet<CreateEntrySource>(
       context: context,
       builder: (c) => SafeArea(

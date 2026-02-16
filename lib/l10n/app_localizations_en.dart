@@ -866,6 +866,81 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exportMyDataSubtitle => 'Request a copy of your data (GDPR)';
 
   @override
+  String get clearLocalData => 'Clear local data';
+
+  @override
+  String get clearLocalDataSubtitle =>
+      'Remove Immich and AI provider settings from this device';
+
+  @override
+  String get clearLocalDataConfirm =>
+      'This will clear Immich server URL, API key, and all AI provider keys stored on this device. You stay signed in. To add entries with photos or use AI again, you will need to configure Immich and AI in Settings or activate a subscription.';
+
+  @override
+  String get clearLocalDataDone => 'Local data cleared';
+
+  @override
+  String get debugInfo => 'Debug info';
+
+  @override
+  String get debugInfoSubtitle => 'View settings and masked keys';
+
+  @override
+  String get debugInfoCopied => 'Copied to clipboard';
+
+  @override
+  String get debugInfoSupabase => 'Supabase';
+
+  @override
+  String get debugInfoImmich => 'Immich';
+
+  @override
+  String get debugInfoAi => 'AI providers';
+
+  @override
+  String get debugInfoApp => 'App';
+
+  @override
+  String get debugInfoManagedAi => 'Managed AI (gateway)';
+
+  @override
+  String get debugInfoManagedAiUsed => 'Yes (no local keys)';
+
+  @override
+  String get debugInfoManagedAiNotUsed => 'No (local keys)';
+
+  @override
+  String get debugInfoManagedAiHint =>
+      'Requests use gateway; provider below is only the one selected in Settings.';
+
+  @override
+  String get debugInfoProviderSelected => 'Provider (selected in Settings)';
+
+  @override
+  String get exportPreparing => 'Preparing export...';
+
+  @override
+  String get exportSuccess => 'Export ready';
+
+  @override
+  String get exportError => 'Export failed';
+
+  @override
+  String get exportLinkSent => 'Download link has been sent to your email';
+
+  @override
+  String get deleteAccountHintExport =>
+      'All data will be permanently deleted. We recommend downloading your data first.';
+
+  @override
+  String get deleteAccountDataLostWarning =>
+      'Data cannot be recovered after deletion.';
+
+  @override
+  String get deleteAccountRetrieveFilesInfo =>
+      'Account deleted. Your photos were stored in Immich. To retrieve them: if you used managed Immich (immich.mykid.life), contact support. If you use your own Immich server, log in at your server URL to download your photos.';
+
+  @override
   String get aiProviders => 'AI Providers';
 
   @override
@@ -919,6 +994,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get premiumRequiredForAi => 'Premium subscription required for AI';
+
+  @override
+  String get setupRequiredTitle => 'Setup needed';
+
+  @override
+  String get setupRequiredMessage =>
+      'To add entries with photos, activate a subscription (trial) or set up your own Immich server in Settings. If you already have a subscription, go to Settings → Immich and tap «Use family\'s Immich» to connect managed Immich on this device.';
+
+  @override
+  String get activateSubscription => 'Activate subscription';
+
+  @override
+  String get setupOwnServers => 'Set up my servers';
 
   @override
   String get sessionExpiredSignInAgain =>

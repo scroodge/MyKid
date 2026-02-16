@@ -13,13 +13,16 @@ class ImmichService {
   final ImmichStorage _storage;
 
   Future<ImmichClient?> getClient() async {
+    await _storage.ensureServerUrlNormalized();
     final url = await _storage.getServerUrl();
     final key = await _storage.getApiKey();
     if (url == null || url.trim().isEmpty || key == null || key.trim().isEmpty) {
       return null;
     }
-    final baseUrl = url.endsWith('/') ? url.trim().substring(0, url.trim().length - 1) : url.trim();
-    return ImmichClient(baseUrl: baseUrl, apiKey: key);
+    // Normalize again at use site so any URL with wrong port (e.g. :58339) never reaches the client.
+    final baseUrl = ImmichStorage.normalizeServerUrl(url) ?? url.trim();
+    final withoutTrailingSlash = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
+    return ImmichClient(baseUrl: withoutTrailingSlash, apiKey: key);
   }
 
   static const _deviceId = 'mykid-app';

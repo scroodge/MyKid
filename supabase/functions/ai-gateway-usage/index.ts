@@ -49,6 +49,23 @@ serve(async (req) => {
       }
     }
 
+    // Get subscription info for limit
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+    const { data: sub } = await supabaseAdmin
+      .from('subscriptions')
+      .select('monthly_token_limit, current_period_end, created_at')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    const monthlyLimit = (sub as { monthly_token_limit?: number } | null)?.monthly_token_limit ?? 0
+    const periodEnd = (sub as { current_period_end?: string } | null)?.current_period_end
+    const periodStart = periodEnd
+      ? new Date(new Date(periodEnd).getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
+      : (sub as { created_at?: string } | null)?.created_at ?? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+
     const { data: rows, error } = await supabase
       .from('ai_gateway_usage')
       .select('input_tokens, output_tokens, created_at')
@@ -71,11 +88,30 @@ serve(async (req) => {
       { input_tokens: 0, output_tokens: 0 }
     )
 
+    // Count tokens used in current period
+    let periodUsedTokens = 0
+    if (rows && periodEnd) {
+      const periodStartTime = new Date(periodStart).getTime()
+      const periodEndTime = new Date(periodEnd).getTime()
+      for (const row of rows) {
+        const usageTime = new Date(row.created_at).getTime()
+        if (usageTime >= periodStartTime && usageTime <= periodEndTime) {
+          periodUsedTokens += (row.input_tokens ?? 0) + (row.output_tokens ?? 0)
+        }
+      }
+    } else {
+      periodUsedTokens = total.input_tokens + total.output_tokens
+    }
+
     const response: Record<string, unknown> = {
       input_tokens: total.input_tokens,
       output_tokens: total.output_tokens,
       total_tokens: total.input_tokens + total.output_tokens,
       request_count: rows?.length ?? 0,
+      monthly_limit: monthlyLimit,
+      period_used_tokens: periodUsedTokens,
+      period_start: periodStart,
+      period_end: periodEnd,
     }
 
     if (breakdown && rows?.length) {

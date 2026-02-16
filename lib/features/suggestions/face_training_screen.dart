@@ -28,6 +28,7 @@ class _FaceTrainingScreenState extends State<FaceTrainingScreen> {
   bool _adding = false;
   String? _error;
   int _refCount = 0;
+  List<FaceEmbedding> _referencePhotos = [];
 
   @override
   void initState() {
@@ -55,9 +56,13 @@ class _FaceTrainingScreenState extends State<FaceTrainingScreen> {
         setState(() {
           _children = list;
           _selectedChild = selected;
-          _refCount = selected != null
-              ? FaceEmbeddingsCache.getForChild(selected.id).length
-              : 0;
+          if (selected != null) {
+            _referencePhotos = FaceEmbeddingsCache.getForChild(selected.id);
+            _refCount = _referencePhotos.length;
+          } else {
+            _referencePhotos = [];
+            _refCount = 0;
+          }
           _loading = false;
         });
       }
@@ -95,7 +100,10 @@ class _FaceTrainingScreenState extends State<FaceTrainingScreen> {
     if (confirmed != true || !mounted) return;
     await FaceEmbeddingsCache.removeForChild(child.id);
     if (mounted) {
-      setState(() => _refCount = 0);
+      setState(() {
+        _referencePhotos = [];
+        _refCount = 0;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.replaceReferencePhotosDone)),
       );
@@ -121,6 +129,9 @@ class _FaceTrainingScreenState extends State<FaceTrainingScreen> {
 
       var added = 0;
       var skipped = 0;
+      final total = files.length;
+      
+      // Process all photos sequentially with progress feedback
       for (var i = 0; i < files.length && mounted; i++) {
         final x = files[i];
         Uint8List? bytes;
@@ -139,18 +150,27 @@ class _FaceTrainingScreenState extends State<FaceTrainingScreen> {
         } else {
           skipped++;
         }
+        
+        // Update count and photos list after each photo for better UX
+        if (mounted) {
+          setState(() {
+            _referencePhotos = FaceEmbeddingsCache.getForChild(child.id);
+            _refCount = _referencePhotos.length;
+          });
+        }
       }
 
       if (mounted) {
         setState(() {
-          _refCount = FaceEmbeddingsCache.getForChild(child.id).length;
           _adding = false;
         });
         String message;
         if (added > 0 && skipped > 0) {
-          message = 'Добавлено $added из ${files.length}. По $skipped фото лицо не распознано — выберите фото, где лицо чётко видно в фас.';
+          message = 'Добавлено $added из $total фото. По $skipped фото лицо не распознано — выберите фото, где лицо чётко видно в фас.';
         } else if (added > 0) {
-          message = 'Добавлено $added фото для распознавания';
+          message = added == 1 
+              ? 'Добавлено $added фото для распознавания'
+              : 'Добавлено $added фото для распознавания';
         } else {
           message = 'Лицо не распознано. Выберите фото, где лицо чётко видно в фас и хорошо освещено.';
         }
@@ -227,7 +247,8 @@ class _FaceTrainingScreenState extends State<FaceTrainingScreen> {
                         if (s.isNotEmpty) {
                           setState(() {
                             _selectedChild = s.first;
-                            _refCount = FaceEmbeddingsCache.getForChild(s.first.id).length;
+                            _referencePhotos = FaceEmbeddingsCache.getForChild(s.first.id);
+                            _refCount = _referencePhotos.length;
                           });
                         }
                       },
@@ -244,6 +265,58 @@ class _FaceTrainingScreenState extends State<FaceTrainingScreen> {
                             color: Theme.of(context).colorScheme.primary,
                           ),
                     ),
+                    if (_referencePhotos.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      Text(
+                        'Добавленные фото:',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 120,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: _referencePhotos.length,
+                          itemBuilder: (context, index) {
+                            final photo = _referencePhotos[index];
+                            return Container(
+                              width: 100,
+                              margin: const EdgeInsets.only(right: 8),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                                ),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: photo.thumbnailBytes != null
+                                    ? Image.memory(
+                                        photo.thumbnailBytes!,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return Container(
+                                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                            child: Icon(
+                                              Icons.image_not_supported,
+                                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                            ),
+                                          );
+                                        },
+                                      )
+                                    : Container(
+                                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                        child: Icon(
+                                          Icons.photo,
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                        ),
+                                      ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     Row(
                       children: [
@@ -257,7 +330,7 @@ class _FaceTrainingScreenState extends State<FaceTrainingScreen> {
                                     child: CircularProgressIndicator(strokeWidth: 2),
                                   )
                                 : const Icon(Icons.add_photo_alternate),
-                            label: Text(_adding ? 'Обработка…' : 'Выбрать фото'),
+                            label: Text(_adding ? 'Обработка…' : 'Выбрать фото (до 5)'),
                           ),
                         ),
                         if (_refCount > 0) ...[
@@ -269,6 +342,15 @@ class _FaceTrainingScreenState extends State<FaceTrainingScreen> {
                         ],
                       ],
                     ),
+                    if (_adding) ...[
+                      const SizedBox(height: 16),
+                      Text(
+                        'Обработка фото… Используются локальные ресурсы, при необходимости — сервер.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                      ),
+                    ],
                   ],
                 ),
     );

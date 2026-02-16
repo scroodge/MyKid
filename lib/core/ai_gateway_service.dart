@@ -36,14 +36,36 @@ class AiGatewayService {
   }
 
   /// Get usage stats for the current user.
-  Future<({int? inputTokens, int? outputTokens, int? totalTokens, int? requestCount, Map<String, dynamic>? byDay, String? error})> getUsage({bool breakdown = false}) async {
+  Future<({
+    int? inputTokens,
+    int? outputTokens,
+    int? totalTokens,
+    int? requestCount,
+    int? monthlyLimit,
+    int? periodUsedTokens,
+    String? periodStart,
+    String? periodEnd,
+    Map<String, dynamic>? byDay,
+    String? error,
+  })> getUsage({bool breakdown = false}) async {
     try {
       await _client.auth.refreshSession();
     } catch (_) {}
 
     final session = _client.auth.currentSession;
     if (session == null || session.accessToken.isEmpty) {
-      return (inputTokens: null, outputTokens: null, totalTokens: null, requestCount: null, byDay: null, error: 'Session expired. Sign in again.');
+      return (
+        inputTokens: null,
+        outputTokens: null,
+        totalTokens: null,
+        requestCount: null,
+        monthlyLimit: null,
+        periodUsedTokens: null,
+        periodStart: null,
+        periodEnd: null,
+        byDay: null,
+        error: 'Session expired. Sign in again.',
+      );
     }
 
     final res = await _client.functions.invoke(
@@ -54,18 +76,44 @@ class AiGatewayService {
 
     if (res.status != 200) {
       final err = res.data?['error'] as String? ?? res.data?.toString() ?? 'Failed to fetch usage';
-      return (inputTokens: null, outputTokens: null, totalTokens: null, requestCount: null, byDay: null, error: err);
+      return (
+        inputTokens: null,
+        outputTokens: null,
+        totalTokens: null,
+        requestCount: null,
+        monthlyLimit: null,
+        periodUsedTokens: null,
+        periodStart: null,
+        periodEnd: null,
+        byDay: null,
+        error: err,
+      );
     }
 
     final data = res.data as Map<String, dynamic>?;
     if (data == null) {
-      return (inputTokens: null, outputTokens: null, totalTokens: null, requestCount: null, byDay: null, error: 'Empty response');
+      return (
+        inputTokens: null,
+        outputTokens: null,
+        totalTokens: null,
+        requestCount: null,
+        monthlyLimit: null,
+        periodUsedTokens: null,
+        periodStart: null,
+        periodEnd: null,
+        byDay: null,
+        error: 'Empty response',
+      );
     }
 
     final inputTokens = data['input_tokens'] as int? ?? 0;
     final outputTokens = data['output_tokens'] as int? ?? 0;
     final totalTokens = data['total_tokens'] as int? ?? inputTokens + outputTokens;
     final requestCount = data['request_count'] as int? ?? 0;
+    final monthlyLimit = data['monthly_limit'] as int?;
+    final periodUsedTokens = data['period_used_tokens'] as int?;
+    final periodStart = data['period_start'] as String?;
+    final periodEnd = data['period_end'] as String?;
     final byDay = data['by_day'] as Map<String, dynamic>?;
 
     return (
@@ -73,6 +121,10 @@ class AiGatewayService {
       outputTokens: outputTokens,
       totalTokens: totalTokens,
       requestCount: requestCount,
+      monthlyLimit: monthlyLimit,
+      periodUsedTokens: periodUsedTokens,
+      periodStart: periodStart,
+      periodEnd: periodEnd,
       byDay: byDay,
       error: null,
     );

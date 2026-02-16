@@ -41,8 +41,11 @@ class _SyncHouseholdImmichOnLoginState extends State<SyncHouseholdImmichOnLogin>
       final config =
           await householdImmich.getHouseholdImmichConfig(householdId);
       if (config.isConfigured) {
-        await storage.setServerUrl(config.serverUrl);
-        await storage.setApiKey(config.apiKey);
+        final serverUrl = ImmichStorage.normalizeServerUrl(config.serverUrl) ?? config.serverUrl;
+        if (serverUrl != null && serverUrl.isNotEmpty) {
+          await storage.setServerUrl(serverUrl);
+          await storage.setApiKey(config.apiKey);
+        }
       }
     } catch (_) {
       // Silent fail — user can configure Immich manually in settings

@@ -75,14 +75,15 @@ serve(async (req) => {
     // Stripe requires absolute URLs (e.g. https:// or mykid://).
     const isDeeplink = /^[a-z][a-z0-9+.-]*:\/\//i.test(appUrl) && !appUrl.startsWith('http')
     const base = appUrl.replace(/\/$/, '')
+    // After checkout success, land on /subscription (same as Portal return); page redirects to app.
     let successUrl = isDeeplink
-      ? `${base}subscription-success?session_id={CHECKOUT_SESSION_ID}`
-      : `${base}/subscription-success?session_id={CHECKOUT_SESSION_ID}`
+      ? `${base}subscription?session_id={CHECKOUT_SESSION_ID}`
+      : `${base}/subscription?session_id={CHECKOUT_SESSION_ID}`
     let cancelUrl = isDeeplink ? `${base}subscription-cancel` : `${base}/subscription-cancel`
     const validUrlPattern = /^[a-z][a-z0-9+.-]*:\/\//i
     if (!validUrlPattern.test(successUrl)) {
       const fallback = 'https://mykid.life'
-      successUrl = `${fallback}/subscription-success?session_id={CHECKOUT_SESSION_ID}`
+      successUrl = `${fallback}/subscription?session_id={CHECKOUT_SESSION_ID}`
       cancelUrl = `${fallback}/subscription-cancel`
     }
 

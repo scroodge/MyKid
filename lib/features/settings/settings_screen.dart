@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -5,7 +7,10 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 
+import '../../core/ai_provider_storage.dart';
+import '../../core/immich_storage.dart';
 import '../../core/legal_urls.dart';
+import '../../core/mykid_api_service.dart';
 import '../../core/supabase_storage.dart';
 import '../../data/household_repository.dart';
 import '../../data/subscription_repository.dart';
@@ -58,14 +63,23 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final _householdRepo = HouseholdRepository();
   final _subscriptionRepo = SubscriptionRepository();
+  final _mykidApi = MyKidApiService();
   String? _householdId;
   SubscriptionInfo? _subscription;
+  int _debugTapCount = 0;
+  Timer? _debugTapResetTimer;
 
   @override
   void initState() {
     super.initState();
     _loadHousehold();
     _loadSubscription();
+  }
+
+  @override
+  void dispose() {
+    _debugTapResetTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadHousehold() async {
@@ -240,7 +254,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 final showOwnHostingSettings = _subscription == null || !_subscription!.isActive;
                 final showImmich = showOwnHostingSettings;
                 final showAiProviders = showOwnHostingSettings || _subscription?.planId == 'basic';
-                final showAiGatewayToken = showOwnHostingSettings;
+                // Show AI Gateway Token for own hosting (to create token) OR Premium (to view usage/limits)
+                final showAiGatewayToken = showOwnHostingSettings || _subscription?.planId == 'premium';
                 final showChangeSupabase = showOwnHostingSettings;
                 final items = <Widget>[
                   ListTile(
@@ -422,16 +437,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   leading: Icon(Icons.download_outlined, color: Theme.of(context).colorScheme.secondary),
                   title: Text(AppLocalizations.of(context)!.exportMyData),
                   subtitle: Text(AppLocalizations.of(context)!.exportMyDataSubtitle),
-                  trailing: const Icon(Icons.open_in_new),
+                  trailing: const Icon(Icons.chevron_right),
                   onTap: () async {
-                    final opened = await _openUrl(LegalUrls.dataExport);
-                    if (!opened && context.mounted) {
-                      await Clipboard.setData(ClipboardData(text: LegalUrls.supportEmail));
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(AppLocalizations.of(context)!.supportEmailCopied)),
-                        );
+                    if (_mykidApi.isConfigured) {
+                      await Navigator.of(context).pushNamed('/export-data');
+                    } else {
+                      final opened = await _openUrl(LegalUrls.dataExport);
+                      if (!opened && context.mounted) {
+                        await Clipboard.setData(const ClipboardData(text: LegalUrls.supportEmail));
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(AppLocalizations.of(context)!.supportEmailCopied)),
+                          );
+                        }
                       }
+                    }
+                  },
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: Icon(Icons.delete_sweep_outlined, color: Theme.of(context).colorScheme.secondary),
+                  title: Text(AppLocalizations.of(context)!.clearLocalData),
+                  subtitle: Text(AppLocalizations.of(context)!.clearLocalDataSubtitle),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () async {
+                    final l10n = AppLocalizations.of(context)!;
+                    final ok = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text(l10n.clearLocalData),
+                        content: Text(l10n.clearLocalDataConfirm),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: Text(l10n.cancel),
+                          ),
+                          FilledButton(
+                            onPressed: () => Navigator.pop(ctx, true),
+                            child: Text(l10n.clearLocalData),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (ok != true || !context.mounted) return;
+                    await ImmichStorage().clear();
+                    await AiProviderStorage().clear();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.clearLocalDataDone)),
+                      );
                     }
                   },
                 ),
@@ -461,9 +515,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             Text(AppLocalizations.of(context)!.deleteAccountConfirm),
                             const SizedBox(height: 8),
                             Text(
-                              AppLocalizations.of(context)!.deleteAccountConfirmSubtitle,
+                              AppLocalizations.of(context)!.deleteAccountHintExport,
                               style: Theme.of(ctx).textTheme.bodySmall,
                             ),
+                            const SizedBox(height: 12),
+                            if (_mykidApi.isConfigured)
+                              TextButton.icon(
+                                onPressed: () {
+                                  Navigator.pop(ctx, false);
+                                  Navigator.of(ctx).pushNamed('/export-data');
+                                },
+                                icon: const Icon(Icons.download_outlined, size: 18),
+                                label: Text(AppLocalizations.of(context)!.exportMyData),
+                              ),
                           ],
                         ),
                         actions: [
@@ -482,32 +546,78 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     );
                     if (ok != true || !context.mounted) return;
+                    if (!context.mounted) return;
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (ctx) => PopScope(
+                        canPop: false,
+                        child: AlertDialog(
+                          content: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                              const SizedBox(width: 16),
+                              Flexible(child: Text(AppLocalizations.of(context)!.deleteAccount)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
                     try {
-                      final res = await Supabase.instance.client.functions.invoke('delete-account');
-                      if (!context.mounted) return;
-                      if (res.status == 200 && res.data?['success'] == true) {
-                        await Supabase.instance.client.auth.signOut();
-                        if (context.mounted) {
-                          Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
-                        }
+                      if (_mykidApi.isConfigured) {
+                        await _mykidApi.deleteAccount();
                       } else {
-                        final err = res.data?['error'] ?? res.data?['details'] ?? res.data?.toString() ?? '';
-                        final status = res.status;
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('${AppLocalizations.of(context)!.deleteAccountFailed} [$status] $err'),
-                              duration: const Duration(seconds: 5),
-                            ),
-                          );
+                        final res = await Supabase.instance.client.functions.invoke('delete-account');
+                        if (res.status != 200 || res.data?['success'] != true) {
+                          final err = res.data?['error'] ?? res.data?['details'] ?? res.data?.toString() ?? '';
+                          final status = res.status;
+                          if (context.mounted) Navigator.of(context).pop();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${AppLocalizations.of(context)!.deleteAccountFailed} [$status] $err'),
+                                duration: const Duration(seconds: 5),
+                              ),
+                            );
+                          }
+                          return;
                         }
+                      }
+                      if (!context.mounted) return;
+                      Navigator.of(context).pop();
+                      if (!context.mounted) return;
+                      await showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: Text(AppLocalizations.of(context)!.deleteAccount),
+                          content: Text(
+                            AppLocalizations.of(context)!.deleteAccountRetrieveFilesInfo,
+                          ),
+                          actions: [
+                            FilledButton(
+                              onPressed: () => Navigator.pop(ctx),
+                              child: Text(MaterialLocalizations.of(ctx).okButtonLabel),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (!context.mounted) return;
+                      await Supabase.instance.client.auth.signOut();
+                      if (context.mounted) {
+                        Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
                       }
                     } catch (e, st) {
                       debugPrint('delete-account error: $e\n$st');
+                      if (context.mounted) Navigator.of(context).pop();
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('${AppLocalizations.of(context)!.deleteAccountFailed} $e'),
+                            content: Text('${AppLocalizations.of(context)!.deleteAccountFailed} ${e is MyKidApiException ? e.message : e}'),
                             duration: const Duration(seconds: 5),
                           ),
                         );
@@ -531,41 +641,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
 
-          // Footer: app name + version
+          // Footer: app name + version (7 taps opens Debug)
           const SizedBox(height: 32),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Image.asset(
-                    Theme.of(context).brightness == Brightness.dark
-                        ? 'assets/brand/logo/mykid_logo_horizontal_dark.png'
-                        : 'assets/brand/logo/mykid_logo_text_only.png',
-                    height: 40,
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => Icon(
-                      Icons.child_care,
-                      size: 40,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+          GestureDetector(
+            onTap: () {
+              _debugTapResetTimer?.cancel();
+              _debugTapCount++;
+              if (_debugTapCount >= 7) {
+                _debugTapCount = 0;
+                Navigator.of(context).pushNamed('/debug');
+              } else {
+                _debugTapResetTimer = Timer(const Duration(seconds: 2), () {
+                  if (mounted) setState(() => _debugTapCount = 0);
+                });
+              }
+            },
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset(
+                      Theme.of(context).brightness == Brightness.dark
+                          ? 'assets/brand/logo/mykid_logo_horizontal_dark.png'
+                          : 'assets/brand/logo/mykid_logo_text_only.png',
+                      height: 40,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => Icon(
+                        Icons.child_care,
+                        size: 40,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    AppLocalizations.of(context)!.appTitle,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    AppLocalizations.of(context)!.version(SettingsScreen.appVersion),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Text(
+                      AppLocalizations.of(context)!.appTitle,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      AppLocalizations.of(context)!.version(SettingsScreen.appVersion),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

@@ -268,6 +268,7 @@ serve(async (req) => {
   )
 
   const storageGb = planId === 'basic' ? 10 : 20
+  const monthlyTokenLimit = planId === 'premium' ? 100000 : 0
   const trialEndsAt = new Date(expiryMs).toISOString()
   const currentPeriodEnd = trialEndsAt
 
@@ -281,6 +282,7 @@ serve(async (req) => {
       current_period_end: currentPeriodEnd,
       plan_id: planId,
       storage_limit_gb: storageGb,
+      monthly_token_limit: monthlyTokenLimit,
       updated_at: new Date().toISOString(),
     },
     { onConflict: 'user_id' }
