@@ -8,6 +8,7 @@ Optional paid plans: **Basic** (10 GB Immich, no AI) and **Premium** (20 GB Immi
 |---|-------------------------------|-------|---------|
 | **Immich storage** | Your own | 10 GB managed | 20 GB managed |
 | **AI descriptions** | Your keys (AI Providers / AI Gateway) | Your keys (AI Providers) | Built-in via ai-proxy |
+| **AI token limit** | Unlimited (your keys) | Unlimited (your keys) | 100,000 tokens/month |
 | **Settings shown** | Immich, AI Providers, AI Gateway Token, Change Supabase | AI Providers only | Subscription only |
 
 ## Supabase
@@ -43,7 +44,7 @@ Optional paid plans: **Basic** (10 GB Immich, no AI) and **Premium** (20 GB Immi
 - User taps “Subscription” in Settings → chooses Basic or Premium → “7 days free” → Stripe Checkout (trial 7 days).
 - After checkout, Stripe sends webhooks; `stripe-webhook` upserts `subscriptions`, provisions an Immich user (quota 10/20 GB), then writes Immich URL + API key into `household_settings` via `set_household_immich_config_for_managed`. On upgrade (Basic→Premium), it updates the existing Immich user's quota from 10 to 20 GB. For Premium plan, it also creates an AI Gateway token (`ai_gateway_tokens` + Vault) so ai-proxy can forward per-user token to the gateway.
 - On cancel/expire, webhook sets `subscriptions.status = 'expired'`, deletes user data (journal, children, household), and deletes the Immich user via Admin API.
-- “Generate description” in the journal uses own AI keys if configured; otherwise, if the user has an active Premium subscription, it calls the `ai-proxy` Edge Function. `ai-proxy` allows access if the user has an active Premium subscription **or** any household member has Premium (family sharing).
+- “Generate description” in the journal uses own AI keys if configured; otherwise, if the user has an active Premium subscription, it calls the `ai-proxy` Edge Function. `ai-proxy` allows access if the user has an active Premium subscription **or** any household member has Premium (family sharing). **Token limits:** Premium plan includes 100,000 tokens/month (resets at `current_period_end`). When the limit is exceeded, `ai-proxy` returns 429 Too Many Requests with `Retry-After` header. Users can view usage and progress in **Settings → AI Gateway Token** (shows monthly limit, used tokens, progress bar, and daily breakdown).
 - **Manage (cancel / change plan):** The “Manage” button on the subscription screen calls the `create-portal-session` Edge Function, which returns a Stripe Customer Portal URL. The app opens it in the browser; the user can cancel or change plan there. Configure the portal in [Stripe Dashboard → Billing → Customer portal](https://dashboard.stripe.com/settings/billing/portal).
 
 **Portal return to app:** Stripe Customer Portal requires an **https** `return_url`. If `APP_URL` is a deeplink (`mykid://`), the function uses `https://mykid.life/subscription` as return URL. So after upgrade/cancel in the portal the user lands on that page in the browser. To send them back to the app, host a page at `https://mykid.life/subscription` that redirects to the app, e.g.:

@@ -44,7 +44,7 @@ serve(async (req) => {
 
     const { data: sub } = await supabaseAdmin
       .from('subscriptions')
-      .select('plan_id, status')
+      .select('plan_id, status, monthly_token_limit, current_period_end, created_at')
       .eq('user_id', user.id)
       .maybeSingle()
 
@@ -52,6 +52,8 @@ serve(async (req) => {
     const status = (sub as { status?: string } | null)?.status
     let allowed = planId === 'premium' && (status === 'trialing' || status === 'active')
     let tokenUserId = user.id // user whose token to use (self or premium household member)
+    let subscriptionPeriodEnd = (sub as { current_period_end?: string } | null)?.current_period_end
+    let subscriptionCreatedAt = (sub as { created_at?: string } | null)?.created_at
 
     if (!allowed) {
       // Check if any household member has premium (family sharing)
@@ -79,6 +81,14 @@ serve(async (req) => {
           if (premiumMember) {
             allowed = true
             tokenUserId = premiumMember.user_id
+            // Get subscription period for the premium member
+            const { data: premiumSub } = await supabaseAdmin
+              .from('subscriptions')
+              .select('current_period_end, created_at')
+              .eq('user_id', premiumMember.user_id)
+              .maybeSingle()
+            subscriptionPeriodEnd = (premiumSub as { current_period_end?: string } | null)?.current_period_end
+            subscriptionCreatedAt = (premiumSub as { created_at?: string } | null)?.created_at
           }
         }
       }
@@ -89,6 +99,63 @@ serve(async (req) => {
         JSON.stringify({ error: 'Premium subscription required for AI features' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
+    }
+
+    // Check token limit for the user whose token we're using
+    const { data: tokenUserSub } = await supabaseAdmin
+      .from('subscriptions')
+      .select('monthly_token_limit, current_period_end, created_at')
+      .eq('user_id', tokenUserId)
+      .maybeSingle()
+
+    const monthlyLimit = (tokenUserSub as { monthly_token_limit?: number } | null)?.monthly_token_limit ?? 0
+    if (monthlyLimit > 0) {
+      const periodEnd = (tokenUserSub as { current_period_end?: string } | null)?.current_period_end
+      const periodStart = periodEnd
+        ? new Date(periodEnd).getTime() - 30 * 24 * 60 * 60 * 1000 // 30 days before period_end
+        : (tokenUserSub as { created_at?: string } | null)?.created_at
+        ? new Date((tokenUserSub as { created_at?: string }).created_at!).getTime()
+        : Date.now() - 30 * 24 * 60 * 60 * 1000
+
+      const periodEndTime = periodEnd ? new Date(periodEnd).getTime() : Date.now() + 30 * 24 * 60 * 60 * 1000
+      const now = Date.now()
+
+      // Count tokens used in current period
+      const { data: usageRows } = await supabaseAdmin
+        .from('ai_gateway_usage')
+        .select('input_tokens, output_tokens, created_at')
+        .eq('user_id', tokenUserId)
+        .gte('created_at', new Date(Math.max(periodStart, now - 90 * 24 * 60 * 60 * 1000)).toISOString()) // Last 90 days max
+
+      let usedTokens = 0
+      if (usageRows) {
+        for (const row of usageRows) {
+          const usageTime = new Date(row.created_at).getTime()
+          if (usageTime >= periodStart && usageTime <= periodEndTime) {
+            usedTokens += (row.input_tokens ?? 0) + (row.output_tokens ?? 0)
+          }
+        }
+      }
+
+      if (usedTokens >= monthlyLimit) {
+        const resetDate = periodEnd ? new Date(periodEnd).toISOString() : null
+        return new Response(
+          JSON.stringify({
+            error: 'Monthly token limit exceeded',
+            limit: monthlyLimit,
+            used: usedTokens,
+            reset_at: resetDate,
+          }),
+          {
+            status: 429,
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/json',
+              'Retry-After': resetDate ? Math.ceil((new Date(resetDate).getTime() - now) / 1000).toString() : '3600',
+            },
+          }
+        )
+      }
     }
 
     let gatewayUrl = (Deno.env.get('GATEWAY_URL') ?? '').replace(/\s/g, '').trim()

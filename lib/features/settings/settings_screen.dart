@@ -254,7 +254,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 final showOwnHostingSettings = _subscription == null || !_subscription!.isActive;
                 final showImmich = showOwnHostingSettings;
                 final showAiProviders = showOwnHostingSettings || _subscription?.planId == 'basic';
-                final showAiGatewayToken = showOwnHostingSettings;
+                // Show AI Gateway Token for own hosting (to create token) OR Premium (to view usage/limits)
+                final showAiGatewayToken = showOwnHostingSettings || _subscription?.planId == 'premium';
                 final showChangeSupabase = showOwnHostingSettings;
                 final items = <Widget>[
                   ListTile(

@@ -258,6 +258,7 @@ serve(async (req) => {
     const trialEndAt = trialEnd ? new Date(trialEnd * 1000).toISOString() : null
     const periodEndAt = periodEnd ? new Date(periodEnd * 1000).toISOString() : null
     const storageGb = planId === 'basic' ? 10 : 20
+    const monthlyTokenLimit = planId === 'premium' ? 100000 : 0
 
     await supabase.from('subscriptions').upsert(
       {
@@ -269,6 +270,7 @@ serve(async (req) => {
         current_period_end: periodEndAt,
         plan_id: planId,
         storage_limit_gb: storageGb,
+        monthly_token_limit: monthlyTokenLimit,
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'user_id' }
