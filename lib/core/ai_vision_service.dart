@@ -221,11 +221,14 @@ class AiVisionService {
         body: body,
       );
       if (res.status != 200) {
-        final err = res.data?['error'] as String? ?? 'Managed AI failed';
-        return (text: null, error: err);
+        final err = res.data is Map ? (res.data as Map)['error'] as String? : null;
+        return (text: null, error: err ?? 'Managed AI failed');
       }
-      final data = res.data as Map<String, dynamic>?;
-      final choices = data?['choices'] as List?;
+      if (res.data is! Map<String, dynamic>) {
+        return (text: null, error: 'Managed AI returned an invalid response. Try again.');
+      }
+      final data = res.data as Map<String, dynamic>;
+      final choices = data['choices'] as List?;
       if (choices != null && choices.isNotEmpty) {
         final choice = choices[0] as Map<String, dynamic>?;
         final message = choice?['message'] as Map<String, dynamic>?;
@@ -235,6 +238,8 @@ class AiVisionService {
         }
       }
       return (text: null, error: 'Empty response from AI');
+    } on FormatException catch (_) {
+      return (text: null, error: 'Managed AI returned an invalid response. Try again.');
     } catch (e) {
       return (text: null, error: 'Managed AI: $e');
     }
