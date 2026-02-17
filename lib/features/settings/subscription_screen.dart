@@ -35,7 +35,14 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     if (Platform.isAndroid) {
       _playService = GooglePlaySubscriptionService();
       _playService!.initialize().then((ok) {
-        if (mounted) setState(() => _useGooglePlay = ok);
+        if (mounted) {
+          setState(() => _useGooglePlay = ok);
+          if (!ok) {
+            print('[SubscriptionScreen] Google Play Billing not available, will use Stripe Checkout');
+          } else {
+            print('[SubscriptionScreen] Using Google Play Billing');
+          }
+        }
       });
       _playService!.listenToPurchases(_onPurchaseUpdate);
     }
@@ -167,6 +174,22 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       _error = null;
     });
     try {
+      // On Android with Google Play, open Play subscription management (cancel, pause, resubscribe).
+      if (Platform.isAndroid && _useGooglePlay && _playService != null && _subscription != null) {
+        final productId = _playService!.productIdForPlan(_subscription!.planId);
+        final url = GooglePlaySubscriptionService.subscriptionManagementUrl(productId);
+        final launched = await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+        if (mounted) {
+          setState(() => _openingPortal = false);
+          if (launched) {
+            _load();
+          } else {
+            setState(() => _error = 'Could not open Play Store');
+          }
+        }
+        return;
+      }
+
       await Supabase.instance.client.auth.refreshSession();
       if (!mounted) return;
       final session = Supabase.instance.client.auth.currentSession;

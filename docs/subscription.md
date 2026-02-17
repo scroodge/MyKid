@@ -62,12 +62,118 @@ For publishing on Google Play, subscriptions are sold via Google Play Billing. T
 3. **Deploy**  
    `supabase functions deploy verify-google-play-purchase --no-verify-jwt`
 
+4. **License (RSA public key, optional)**  
+   If Play Console shows **License** and asks to “include this Base64-encoded RSA public key in your app’s executable” (e.g. under Monetize → Monetization setup):
+   - **Do not put it in `.env`** — Google requires the key inside the built app (APK).
+   - In the project, set it in code: `lib/data/google_play_subscription_service.dart` → constant **`kGooglePlayLicensePublicKeyBase64`**.
+   - Copy the key from Play Console, **remove all spaces**, and assign:  
+     `const String kGooglePlayLicensePublicKeyBase64 = 'MIIBIjAN...';`
+   - For subscriptions-only (no app license check) you can leave it as `''`.
+
 ### Testing (Android)
 
-- Add your test Google account under Play Console → **Setup** → **License testing**.
-- Build the app and open **Settings → Subscription**. On Android, the app uses Google Play Billing when available; tap **7 days free** (or the plan) to start the native purchase flow.
-- Complete the test purchase; the app sends the purchase token to `verify-google-play-purchase`, which verifies with Google and activates the subscription (Immich + AI token for Premium).
-- Check Supabase table `subscriptions`: one row for the user with `plan_id` and `status = active`.
+**Важно:** Google Play Billing работает только если приложение загружено в Play Console (хотя бы в **Internal testing**). Если вы просто собрали APK локально и установили на устройство, Google Play Billing будет недоступен, и приложение будет использовать Stripe Checkout.
+
+**Шаги для тестирования Google Play Billing:**
+
+1. **Загрузите приложение в Play Console:**
+   - Соберите App Bundle: `flutter build appbundle`
+   - В Play Console → **Release** → **Testing** → **Internal testing** → **Create new release**
+   - Загрузите `build/app/outputs/bundle/release/app-release.aab`
+   - Добавьте тестовых пользователей (или сделайте трек открытым)
+
+2. **Создайте подписки:**
+   - Play Console → ваше приложение → **Monetize** → **Subscriptions**
+   - Создайте `mykid_basic` и `mykid_premium` (если ещё не созданы)
+   - Убедитесь, что они **активны** (статус "Active")
+
+3. **Настройте License testing:**
+   - Play Console → **Setup** → **License testing**
+   - Добавьте Gmail-адреса тестировщиков
+
+4. **Установите приложение из Play Console:**
+   - На устройстве войдите под тестовым Google-аккаунтом
+   - Откройте ссылку на Internal testing трек или найдите приложение в Play Store (если трек открытый)
+   - Установите приложение **через Play Store** (не через `adb install`)
+
+5. **Проверьте в приложении:**
+   - Откройте **Settings → Subscription**
+   - Если Google Play Billing доступен, при нажатии "7 дней бесплатно" откроется нативный диалог Google Play (не браузер со Stripe)
+   - В логах (`adb logcat | grep GooglePlay`) должно быть: `[GooglePlay] Initialized successfully with 2 products`
+
+**Если видите только Stripe (диагностика):**
+
+1. **Проверьте логи на устройстве:**
+   ```bash
+   adb logcat | grep -E "GooglePlay|SubscriptionScreen"
+   ```
+   Должны увидеть либо:
+   - `[GooglePlay] Initialized successfully with 2 products: mykid_basic, mykid_premium` ✅
+   - `[GooglePlay] ❌ Products NOT FOUND in Play Console: mykid_basic, mykid_premium` ❌
+   - `[GooglePlay] Billing not available (isAvailable=false)` ❌
+
+2. **Проверьте в Play Console:**
+   - **Monetize → Subscriptions** → должны быть созданы подписки:
+     - Product ID: **`mykid_basic`** (статус: **Active**, не Draft)
+     - Product ID: **`mykid_premium`** (статус: **Active**, не Draft)
+   - Если подписки в статусе **Draft** → нажмите "Activate" на каждой
+   - Если подписок нет → создайте их с **точными** Product ID: `mykid_basic` и `mykid_premium`
+
+3. **Проверьте package name:**
+   - В Play Console → **Setup → App integrity** → должно быть: `com.mykidapp.mykid_app`
+   - В коде (`android/app/build.gradle`): `applicationId = "com.mykidapp.mykid_app"` (должны совпадать)
+
+4. **Проверьте, что приложение загружено:**
+   - Play Console → **Release → Testing** → должен быть хотя бы один релиз (Internal testing)
+   - Приложение должно быть установлено **из Play Store**, а не через `adb install`
+
+5. **Проверьте License testing:**
+   - Play Console → **Setup → License testing** → добавлен ли ваш Gmail-аккаунт
+   - На устройстве должен быть войден **тот же** Google-аккаунт
+
+6. **Если продукты не найдены:**
+   - Подождите 2-3 часа после создания/активации подписок (Google может кэшировать)
+   - Или попробуйте переустановить приложение из Play Store
+
+### Manage subscription on Android (cancel, pause, resubscribe)
+
+On Android, when the user has an active subscription and Google Play Billing is available, the **Manage** button opens the Google Play subscription management page for the current plan. There the user can cancel, **pause**, resubscribe, or update payment methods. The app uses the [recommended deep link](https://developer.android.com/google/play/billing/subscriptions#pause):  
+`https://play.google.com/store/account/subscriptions?sku=<product_id>&package=<applicationId>`  
+with `product_id` = `mykid_basic` or `mykid_premium` and `applicationId` from `android/app/build.gradle` (e.g. `com.mykidapp.mykid_app`).
+
+## Тестовые платежи
+
+### Stripe (iOS, веб, Android без Google Play)
+
+1. **Режим Test**  
+   В [Stripe Dashboard](https://dashboard.stripe.com/) переключитесь на **Test mode** (переключатель вверху). Все ключи должны быть тестовыми: `sk_test_...`, `pk_test_...`.
+
+2. **Секреты в Supabase**  
+   В Edge Functions → Secrets укажите:
+   - `STRIPE_SECRET_KEY` = `sk_test_...` (из Stripe → Developers → API keys).
+   - `STRIPE_WEBHOOK_SECRET` = signing secret от **тестового** webhook (Developers → Webhooks → добавить endpoint с URL вашего `stripe-webhook`, события `customer.subscription.*` → скопировать **Signing secret**).
+
+3. **Тестовая карта**  
+   При оплате в Checkout используйте:
+   - Номер: **`4242 4242 4242 4242`**
+   - Срок: любая будущая дата (например 12/34)
+   - CVC: любые 3 цифры  
+   Деньги с карты не списываются. [Другие тестовые карты](https://docs.stripe.com/testing#cards) (отказ, 3D Secure и т.д.) — в документации Stripe.
+
+### Google Play (Android)
+
+1. **License testing**  
+   В [Play Console](https://play.google.com/console) → ваше приложение → **Setup** → **License testing** (или **Monetize** → **Monetization setup** → тестовые аккаунты):
+   - Добавьте Gmail-адреса тестировщиков в список **License testers**.
+   - Эти аккаунты смогут делать тестовые покупки подписок **без списания реальных денег**; подписка будет активна короткий период (например 5 минут для быстрых тестов) или по настройкам базового плана.
+
+2. **Как тестировать**  
+   На устройстве должен быть войден тот же Google-аккаунт, что добавлен в License testing. Откройте приложение → Настройки → Подписка → выберите план → «7 дней бесплатно». Откроется нативный диалог Google Play; завершите тестовую покупку. Приложение отправит purchase token в `verify-google-play-purchase`, подписка появится в Supabase.
+
+3. **Внутреннее тестирование**  
+   Если приложение ещё не в продакшене, загрузите сборку в **Internal testing** (Release → Testing → Internal testing). Тестовые покупки работают и там при добавленных License testers.
+
+Полный пошаговый сценарий — в разделе [Пошаговое тестирование](#пошаговое-тестирование).
 
 ## Flow
 
@@ -75,7 +181,7 @@ For publishing on Google Play, subscriptions are sold via Google Play Billing. T
 - After checkout, Stripe sends webhooks; `stripe-webhook` upserts `subscriptions`, provisions an Immich user (quota 10/20 GB), then writes Immich URL + API key into `household_settings` via `set_household_immich_config_for_managed`. On upgrade (Basic→Premium), it updates the existing Immich user's quota from 10 to 20 GB. For Premium plan, it also creates an AI Gateway token (`ai_gateway_tokens` + Vault) so ai-proxy can forward per-user token to the gateway.
 - On cancel/expire, webhook sets `subscriptions.status = 'expired'`, deletes user data (journal, children, household), and deletes the Immich user via Admin API.
 - “Generate description” in the journal uses own AI keys if configured; otherwise, if the user has an active Premium subscription, it calls the `ai-proxy` Edge Function. `ai-proxy` allows access if the user has an active Premium subscription **or** any household member has Premium (family sharing). **Token limits:** Premium plan includes 100,000 tokens/month (resets at `current_period_end`). When the limit is exceeded, `ai-proxy` returns 429 Too Many Requests with `Retry-After` header. Users can view usage and progress in **Settings → AI Gateway Token** (shows monthly limit, used tokens, progress bar, and daily breakdown).
-- **Manage (cancel / change plan):** The “Manage” button on the subscription screen calls the `create-portal-session` Edge Function, which returns a Stripe Customer Portal URL. The app opens it in the browser; the user can cancel or change plan there. Configure the portal in [Stripe Dashboard → Billing → Customer portal](https://dashboard.stripe.com/settings/billing/portal).
+- **Manage (cancel / change plan):** On **Android** with Google Play Billing, the “Manage” button opens the Google Play subscription management page (cancel, pause, resubscribe). On **iOS / web** or when Stripe was used, it calls the `create-portal-session` Edge Function and opens the Stripe Customer Portal in the browser. Configure the portal in [Stripe Dashboard → Billing → Customer portal](https://dashboard.stripe.com/settings/billing/portal).
 
 **Portal return to app:** Stripe Customer Portal requires an **https** `return_url`. If `APP_URL` is a deeplink (`mykid://`), the function uses `https://mykid.life/subscription` as return URL. So after upgrade/cancel in the portal the user lands on that page in the browser. To send them back to the app, host a page at `https://mykid.life/subscription` that redirects to the app, e.g.:
 
